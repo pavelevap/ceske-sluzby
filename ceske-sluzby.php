@@ -170,9 +170,8 @@ function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
 }
 
 function ceske_sluzby_ulozenka_overit_pobocku() {
-	global $woocommerce;
 	if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-		$woocommerce->add_error( 'Pokud chcete platit prostřednictvím Uloženky, zvolte prosím pobočku.' );
+		wc_add_notice( 'Pokud chcete platit prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
   }
 }
 
