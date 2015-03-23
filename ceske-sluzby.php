@@ -69,6 +69,37 @@ function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
   <?php
   }
 }
+
+function ceske_sluzby_srovname_mereni_konverzi( $order_id ) {
+  $klic = get_option( 'wc_ceske_sluzby_srovname_konverze-objednavky' );
+  if ( ! empty( $klic ) ) {
+  
+    $order = new WC_Order( $order_id );
+    $products = $order->get_items(); ?>
+
+<script type="text/javascript">
+var _srt = _srt || [];
+    _srt.push(['_setShop', '<?php echo $klic; ?>']);
+    _srt.push(['_setTransId', '<?php echo $order_id; ?>']);
+    <?php foreach ( $products as $product ) {
+      $cena = wc_format_decimal( $order->get_item_subtotal( $product ) );
+      echo "_srt.push(['_addProduct', '" . $product['name'] . "', '" . $cena . "', '" . $product['qty'] . "']);";
+    } ?>
+    _srt.push(['_trackTrans']);
+
+(function() {
+    var s = document.createElement("script");
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = ("https:" == document.location.protocol ? "https" : "http") + "://www.srovname.cz/js/track-trans.js";
+    var x = document.getElementsByTagName("script")[0];
+    x.parentNode.insertBefore(s, x);
+})();
+</script>
+
+<?php
+  }
+}
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
@@ -83,6 +114,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
+    add_action( 'woocommerce_thankyou', 'ceske_sluzby_srovname_mereni_konverzi' );
     add_filter( 'wc_order_is_editable', 'ceske_sluzby_moznost_menit_dobirku', 10, 2 );
     
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );

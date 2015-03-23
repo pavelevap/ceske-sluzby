@@ -70,6 +70,22 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_sklik_title'
       ),
       array(
+        'title' => 'Srovnáme.cz',
+        'type' => 'title',
+        'desc' => '',
+        'id' => 'wc_ceske_sluzby_srovname_title'
+      ),
+      array(
+        'title' => 'Identifikační klíč',
+        'type' => 'text',
+        'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="http://www.srovname.cz/muj-obchod">zde</a>.',
+        'id' => 'wc_ceske_sluzby_srovname_konverze-objednavky'
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_srovname_title'
+      ),
+      array(
         'title' => 'Další nastavení',
         'type' => 'title',
         'desc' => '',
