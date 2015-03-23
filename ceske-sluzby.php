@@ -98,28 +98,26 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_ulozenka' );
 }
 
-add_action( 'woocommerce_review_order_before_payment', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
+add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
 function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   $available_shipping = WC()->shipping->get_shipping_methods();
   $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
   $settings = array();
-  
+
   if ( $chosen_shipping_method[0] == "ceske_sluzby_ulozenka" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
 
     if ( $settings['enabled'] == "yes" && ! empty ( $settings['ulozenka_id-obchodu'] ) ) { ?>
   
-<table class="ulozenka">
-    <tr>
+    <tr class="ulozenka">
         <td>
             <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
         </td>
-        <td style="padding: 7px; vertical-align: middle;">
-            <font size="2">Uloženka - vyberte prosím pobočku:</font><br>
+        <td>
+            <font size="2">Uloženka - výběr pobočky:</font><br>
             <div id="ulozenka-branch-select-options"></div>
         </td>
     </tr>
-</table>
 
 <script>
     var response = "";
@@ -151,17 +149,6 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
             }
         }
         request.send();
-</script>
-
-<script>
-jQuery(document).ready(function($){
-  $doprava = $("#shipping_method input[type='radio']:checked").val();
-  if ( $doprava == 'ceske_sluzby_ulozenka') {
-    $('.ulozenka').show();  
-  } else {
-    $('.ulozenka').hide();
-  }
-})
 </script>
 
 <?php }
