@@ -68,6 +68,22 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_sklik_title'
+      ),
+      array(
+        'title' => 'Další nastavení',
+        'type' => 'title',
+        'desc' => '',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
+      ),
+      array(
+        'title' => 'Možnost změny objednávek pro dobírku',
+        'type' => 'checkbox',
+        'desc' => 'Povolí možnost změny objednávek, které jsou provedené prostřednictvím dobírky.',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
       )
     );
 

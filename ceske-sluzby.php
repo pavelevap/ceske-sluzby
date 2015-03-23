@@ -83,6 +83,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
+    add_filter( 'wc_order_is_editable', 'ceske_sluzby_moznost_menit_dobirku', 10, 2 );
     
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
     add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
@@ -201,6 +202,16 @@ function ceske_sluzby_ulozenka_pobocka_email( $order ) {
       echo "<p><strong>Uloženka:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true ) . "</p>";
     }
   }
+}
+
+function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
+// http://www.separatista.net/forum/tema/woocommerce-a-dobirka
+  $moznost_zmeny = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena' );
+  $status = $objednavka->get_status();
+  if ( $moznost_zmeny == "yes" && $status == "processing" ) {
+    $zmena = true;
+  }
+  return $zmena;
 }
 
 
