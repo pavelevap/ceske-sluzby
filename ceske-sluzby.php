@@ -3,7 +3,7 @@
  * Plugin Name: České služby pro WordPress
  * Plugin URI: http://www.separatista.net
  * Description: Implementace různých českých služeb do WordPressu.
- * Version: 0.1
+ * Version: 0.2
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
  * License: GPL2
