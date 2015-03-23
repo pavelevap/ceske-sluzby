@@ -71,34 +71,42 @@ function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
 }
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
-	if( class_exists( 'WooCommerce' ) ) {
+  if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
     if( is_admin() ) {
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-admin.php';
       WC_Settings_Tab_Ceske_Sluzby_Admin::init();
     }
+
+    add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_ulozenka_init' );
+    add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_ulozenka' );
+  
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
+    
+    add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
+    add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
+    add_action( 'woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku' );
+    add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
+    
+    add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
 
-if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-	function your_shipping_method_init() {
-		if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Ulozenka' ) ) {
-      require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka.php';
-		}
-	} 
-	add_action( 'woocommerce_shipping_init', 'your_shipping_method_init' );
- 
-	function ceske_sluzby_doprava_ulozenka( $methods ) {
-		$methods[] = 'WC_Shipping_Ceske_Sluzby_Ulozenka';
-		return $methods;
+function ceske_sluzby_doprava_ulozenka_init() {
+	if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Ulozenka' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka.php';
 	}
-	add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_ulozenka' );
+}
+ 
+function ceske_sluzby_doprava_ulozenka( $methods ) {
+	$methods[] = 'WC_Shipping_Ceske_Sluzby_Ulozenka';
+	return $methods;
 }
 
-add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
 function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   $available_shipping = WC()->shipping->get_shipping_methods();
   $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
@@ -155,14 +163,12 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   }
 }
 
-add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
 function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
     if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
       wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
     }
 }
 
-add_action('woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku');
 function ceske_sluzby_ulozenka_overit_pobocku() {
 	global $woocommerce;
 	if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
@@ -170,7 +176,6 @@ function ceske_sluzby_ulozenka_overit_pobocku() {
   }
 }
 
-add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
 function ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku( $order ) {
   if ( $order->has_shipping_method('ceske_sluzby_ulozenka') ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
@@ -179,7 +184,6 @@ function ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku( $order ) {
   }
 }
 
-add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
 function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
   $available_shipping = WC()->shipping->get_shipping_methods();
   $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
@@ -192,8 +196,6 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
   }
 }
 
-add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
-add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
 function ceske_sluzby_ulozenka_pobocka_email( $order ) {
   if ( $order->has_shipping_method('ceske_sluzby_ulozenka') ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
