@@ -6,6 +6,28 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_filter( 'woocommerce_settings_tabs_array', __CLASS__ . '::add_settings_tab', 100 );
     add_action( 'woocommerce_settings_tabs_ceske-sluzby', __CLASS__ . '::settings_tab' );
     add_action( 'woocommerce_update_options_ceske-sluzby', __CLASS__ . '::update_settings' );
+    add_action( 'woocommerce_sections_ceske-sluzby', __CLASS__ . '::output_sections' );
+  }
+  
+  public static function output_sections() {
+    global $current_section;
+    $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+    $sections = array();
+    if ( $aktivace_xml == "yes" ) {
+      $sections = array(
+        '' => 'Základní nastavení',
+        'xml-feed' => 'XML feed'
+      );
+    }
+    if ( empty( $sections ) ) {
+      return;
+    }
+    echo '<ul class="subsubsub">';
+    $array_keys = array_keys( $sections );
+    foreach ( $sections as $id => $label ) {
+      echo '<li><a href="' . admin_url( 'admin.php?page=wc-settings&tab=ceske-sluzby&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) . ' </li>';
+    }
+    echo '</ul><br class="clear" />';
   }
 
   public static function add_settings_tab( $settings_tabs ) {
@@ -18,10 +40,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function update_settings() {
-    woocommerce_update_options( self::get_settings() );
+    global $current_section;
+    woocommerce_update_options( self::get_settings( $current_section ) );
   }
 
-  public static function get_settings() {
+  public static function get_settings( $current_section = '' ) {
+    global $current_section;
+
+    if ( '' == $current_section ) {
     $settings = array(
       array(
         'title' => 'Služby pro WordPress',
@@ -48,6 +74,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.heureka.cz/obchody/mereni-konverzi/">zde</a>.',
         'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
         'css'   => 'width: 300px'
+      ),
+      array(
+        'title' => 'Aktivovat XML feed',
+        'type' => 'checkbox',
+        'desc' => 'Nastavení pro XML feed bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">zde</a>.',
+        'id' => 'wc_ceske_sluzby_heureka_xml_feed-aktivace'
       ),
       array(
         'type' => 'sectionend',
@@ -98,11 +130,53 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
       ),
       array(
+        'title' => 'Pouze doprava zdarma',
+        'type' => 'checkbox',
+        'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+      ),
+      array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
       )
     );
-
+    }
+    if ( 'xml-feed' == $current_section ) {
+        $settings = array(
+      array(
+        'title' => 'XML feed',
+        'type' => 'title',
+        'desc' => 'Zde budou postupně přidávána další nastavení.',
+        'id' => 'wc_ceske_sluzby_xml_feed_title'
+      ),
+      array(
+        'title' => 'Heureka.cz',
+        'type' => 'title',
+        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Podrobný manuál naleznete <a href="http://sluzby.heureka.cz/napoveda/xml-feed/">zde</a>.',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+      ),
+      array(
+        'title' => 'Dodací doba',
+        'type' => 'number',
+        'desc' => 'Zboží může být skladem (0), dostupné do tří dnů (1 - 3), do týdne (4 - 7), do dvou týdnů (8 - 14), do měsíce (15 - 30) či více než měsíc (31 a více).',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba',
+        'css' => 'width: 50px',
+        'custom_attributes' => array(
+        )
+      ),
+      array(
+        'title' => 'Podpora EAN kódů',
+        'type' => 'text',
+        'desc' => 'Pokud doplňujete EAN kód do pole SKU, tak zadejte hodnotu "SKU" (bez uvozovek). Podpora pro další možnosti zadávání EAN (uživatelská pole) bude doplněna.',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean',
+        'css' => 'width: 100px',
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+      )
+      );
+    }
     return $settings;
   }
 }

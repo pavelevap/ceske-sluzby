@@ -2,8 +2,7 @@
 Donate link: http://www.separatista.net
 Tags: Heureka, Sklik, WooCommerce, Uloženka, Srovname
 Requires at least: 4.0
-Tested up to: 4.1
-Stable tag: 0.2
+Stable tag: 0.3
 
 Implementace různých českých služeb do WordPressu
 
@@ -23,6 +22,8 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Měření konverzí (Srovname.cz)
 * WooCommerce: Doprava (Uloženka.cz)
 * WooCommerce: Možnost změny objednávek pro dobírku
+* WooCommerce: XML feed (Heureka.cz)
+* WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 
 == Oficiální podpora pluginu ==
 
@@ -35,6 +36,17 @@ Fórum podpory: http://www.separatista.net/forum
 Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České služby.
 
 == Changelog ==
+
+= 0.3 =
+* WooCommerce: XML feed (Heureka.cz)
+* Možnost volitelné aktivace generovaného feedu
+* Implemetace samostatné záložky s nastavením
+* Možnost nastavení globální dodací doby pro všechny produkty
+* Možnost zobrazovat EAN kód pokud ho zadávate do pole SKU
+* Skryté produkty nejsou součástí feedu
+* Generován základní strom použitých kategorií
+* Pro snadné generování feedu použita PHP knihovna XMLWriter
+* WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 
 = 0.2 =
 * WooCommerce: Měření konverzí (Srovname.cz)

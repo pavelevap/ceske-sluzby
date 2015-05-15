@@ -3,7 +3,7 @@
  * Plugin Name: České služby pro WordPress
  * Plugin URI: http://www.separatista.net
  * Description: Implementace různých českých služeb do WordPressu.
- * Version: 0.2
+ * Version: 0.3
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
  * License: GPL2
@@ -116,6 +116,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_srovname_mereni_konverzi' );
     add_filter( 'wc_order_is_editable', 'ceske_sluzby_moznost_menit_dobirku', 10, 2 );
+    add_filter( 'woocommerce_package_rates', 'ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma', 10, 2 );
     
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
     add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
@@ -246,6 +247,33 @@ function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
   return $zmena;
 }
 
+add_action( 'init', 'ceske_sluzby_heureka_xml_feed' );
+function ceske_sluzby_heureka_xml_feed() {
+  $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+  if ( $aktivace_xml == "yes" ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+    add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
+  }
+}
+
+http://docs.woothemes.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
+function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
+  $omezit_dopravu = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma' );
+  if ( $omezit_dopravu == "yes" ) {
+    if ( isset( $rates['free_shipping'] ) ) {
+      $free_shipping = $rates['free_shipping'];
+      if ( isset( $rates['local_pickup'] ) ) {
+        $local_pickup = $rates['local_pickup'];
+      }
+      $rates = array();
+      $rates['free_shipping'] = $free_shipping;
+      if ( isset( $local_pickup ) ) {
+        $rates['local_pickup'] = $local_pickup;
+      }
+    }
+  }
+	return $rates;
+}
 
 
 
