@@ -10,6 +10,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
   
   public static function output_sections() {
+    // Neduplikovat do budoucna tuto funkci...
     global $current_section;
     $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
     $sections = array();
@@ -162,6 +163,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba',
         'css' => 'width: 50px',
         'custom_attributes' => array(
+          'min' => 0,
+          'step' => 1
         )
       ),
       array(

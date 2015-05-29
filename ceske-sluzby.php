@@ -3,7 +3,7 @@
  * Plugin Name: České služby pro WordPress
  * Plugin URI: http://www.separatista.net
  * Description: Implementace různých českých služeb do WordPressu.
- * Version: 0.3
+ * Version: 0.4-alpha
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
  * License: GPL2
@@ -17,8 +17,15 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
     
     // https://github.com/heureka/heureka-overeno-php-api
     require_once( dirname( __FILE__ ) . '/src/HeurekaOvereno.php' );
-
-    $overeno = new HeurekaOvereno( $api );
+    
+    $language = get_locale();
+    if ( $language == "sk_SK" ) {
+      $overeno = new HeurekaOvereno( $api, HeurekaOvereno::LANGUAGE_SK );
+    }
+    else {
+      $overeno = new HeurekaOvereno( $api );
+    }
+    
     $overeno->setEmail( $posted['billing_email'] );
 
     $products = $order->get_items();

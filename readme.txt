@@ -2,6 +2,7 @@
 Donate link: http://www.separatista.net
 Tags: Heureka, Sklik, WooCommerce, Uloženka, Srovname
 Requires at least: 4.0
+Tested up to: 4.2.2
 Stable tag: 0.3
 
 Implementace různých českých služeb do WordPressu
@@ -16,7 +17,7 @@ Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
 Plugin zatím podporuje následující služby a pluginy:
 
-* WooCommerce: Ověřeno zákazníky (Heureka.cz)
+* WooCommerce: Ověřeno zákazníky (Heureka.cz a Heureka.sk)
 * WooCommerce: Měření konverzí (Heureka.cz)
 * WooCommerce: Měření konverzí (Sklik.cz)
 * WooCommerce: Měření konverzí (Srovname.cz)
@@ -36,6 +37,9 @@ Fórum podpory: http://www.separatista.net/forum
 Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České služby.
 
 == Changelog ==
+
+= 0.4 =
+* WooCommerce: Ověřeno zákazníky (Heureka.sk)
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)
