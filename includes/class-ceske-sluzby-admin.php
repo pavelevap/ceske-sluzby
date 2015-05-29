@@ -177,6 +177,16 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+      ),
+      array(
+        'title' => 'Zbozi.cz',
+        'type' => 'title',
+        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/specifikace-xml/">zde</a>. Nastavení je stejné jako pro Heureka.cz.',
+        'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
       )
       );
     }

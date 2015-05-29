@@ -24,6 +24,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Doprava (Uloženka.cz)
 * WooCommerce: Možnost změny objednávek pro dobírku
 * WooCommerce: XML feed (Heureka.cz)
+* WooCommerce: XML feed (Zbozi.cz)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 
 == Oficiální podpora pluginu ==
@@ -40,6 +41,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)
+* WooCommerce: XML feed (Zbozi.cz)
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)
