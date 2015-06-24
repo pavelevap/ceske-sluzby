@@ -83,6 +83,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_heureka_xml_feed-aktivace'
       ),
       array(
+        'title' => 'Aktivovat zobrazení recenzí',
+        'type' => 'checkbox',
+        'desc' => 'Po aktivaci můžete zobrazit aktuální recenze pomocí zkráceného zápisu (shortcode): <code>[heureka-recenze-obchodu]</code>.',
+        'id' => 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace'
+      ),
+      array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_heureka_title'
       ),

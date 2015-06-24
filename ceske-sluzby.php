@@ -3,7 +3,7 @@
  * Plugin Name: České služby pro WordPress
  * Plugin URI: http://www.separatista.net
  * Description: Implementace různých českých služeb do WordPressu.
- * Version: 0.4-alpha
+ * Version: 0.4-beta1
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
  * License: GPL2
@@ -144,6 +144,11 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
+    
+    $aktivace_recenzi = get_option( 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace' );
+    if ( $aktivace_recenzi == "yes" ) {
+      add_shortcode( 'heureka-recenze-obchodu', 'ceske_sluzby_heureka_recenze_obchodu' );
+    }
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -391,5 +396,42 @@ function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
 	return $rates;
 }
 
+function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
+  $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
+  if ( ! empty( $api ) ) {
 
+    if ( false === ( $source_xml = get_transient( 'ceske_sluzby_heureka_recenze_zakazniku' ) ) ) {
+      $language = get_locale();
+      if ( $language == "sk_SK" ) {
+        $url = "http://www.heureka.sk/direct/dotaznik/export-review.php?key=" . $api;
+      } else {
+        $url = "http://www.heureka.cz/direct/dotaznik/export-review.php?key=" . $api;
+      }
+      $source_xml = wp_remote_retrieve_body( wp_remote_get( $url ) );
+      set_transient( 'ceske_sluzby_heureka_recenze_zakazniku', $source_xml, 24 * HOUR_IN_SECONDS );
+    }
+
+    $recenze_xml = simplexml_load_string( $source_xml, 'SimpleXMLElement', LIBXML_NOCDATA );
+
+    $output = '<div class="recenze-zakazniku">';
+    foreach( $recenze_xml as $recenze ) {
+      if ( ! empty ( $recenze->summary ) ) {
+        $output .= '<ul>';
+        $output .= '<li>';
+        $output .= '<strong>' . $recenze->summary . '</strong><br />';
+        if ( ! empty ( $recenze->total_rating ) ) {
+          $output .= 'Hodnocení: ' . $recenze->total_rating . '/5 | ';
+        }
+        $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
+        if ( ! empty ( $recenze->name ) ) {
+          $output .= ' | Autor: ' . $recenze->name;
+        } 
+        $output .= '</li>';
+        $output .= '</ul>';
+      }
+    }
+    $output .= '</div>';
+  }
+	return $output;
+}
 
