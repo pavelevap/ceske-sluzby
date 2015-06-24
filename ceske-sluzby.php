@@ -117,6 +117,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
 
     add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_ulozenka_init' );
     add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_ulozenka' );
+
+    add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_dpd_parcelshop_init' );
+    add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_dpd_parcelshop' );
   
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
@@ -132,7 +135,15 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
     
+    add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
+    add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
+    add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
+    add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
+    
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
+    add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -212,12 +223,12 @@ function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
 
 function ceske_sluzby_ulozenka_overit_pobocku() {
 	if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-		wc_add_notice( 'Pokud chcete platit prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
+		wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
   }
 }
 
 function ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku( $order ) {
-  if ( $order->has_shipping_method('ceske_sluzby_ulozenka') ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_ulozenka' ) ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
       echo "<p><strong>Uloženka:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true ) . "</p>";
     }
@@ -237,9 +248,106 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
 }
 
 function ceske_sluzby_ulozenka_pobocka_email( $order ) {
-  if ( $order->has_shipping_method('ceske_sluzby_ulozenka') ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_ulozenka' ) ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
       echo "<p><strong>Uloženka:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true ) . "</p>";
+    }
+  }
+}
+
+function ceske_sluzby_doprava_dpd_parcelshop_init() {
+	if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-dpd-parcelshop.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-json-loader.php';
+	}
+}
+ 
+function ceske_sluzby_doprava_dpd_parcelshop( $methods ) {
+	$methods[] = 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop';
+	return $methods;
+}
+
+function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
+  $available_shipping = WC()->shipping->get_shipping_methods();
+  $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+  $settings = array();
+
+  if ( $chosen_shipping_method[0] == "ceske_sluzby_dpd_parcelshop" ) {
+    $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
+
+    if ( $settings['enabled'] == "yes" ) {
+
+    $pobocky = new Ceske_Sluzby_Json_Loader();
+    // http://docs.ulozenkav3.apiary.io/#pepravnsluby
+
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) { $zeme_code = "CZE"; }
+    if ( $zeme == "SK" ) { $zeme_code = "SVK"; }
+
+    $parametry = array( 'provider' => 5, 'country' => $zeme_code );
+    ?>
+    
+    <tr class="dpd-parcelshop">
+      <td>
+        <img src="http://www.dpdparcelshop.cz/images/DPD-logo.png" width="140" border="0">
+      </td>
+      <td>
+        <font size="2">DPD ParcelShop - výběr pobočky:</font><br>
+        <div id="dpd-parcelshop-branch-select-options">
+          <select name="dpd_parcelshop_branches">
+          <option>Vyberte pobočku</option>
+    
+    <?php
+    foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
+      echo '<option value="' . $pobocka->name . '">' . $pobocka->name . '</option>';
+    } ?>
+    
+        </div>
+      </td>
+    </tr>
+    
+    <?php }
+  }
+}
+
+function ceske_sluzby_dpd_parcelshop_ulozeni_pobocky( $order_id, $item_id ) {
+    if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+      wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+    }
+}
+
+function ceske_sluzby_dpd_parcelshop_overit_pobocku() {
+	if ( $_POST["dpd_parcelshop_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+		wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím DPD ParcelShop, zvolte prosím pobočku.', 'error' );
+  }
+}
+
+function ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku( $order ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_dpd_parcelshop' ) ) {
+    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+      echo "<p><strong>DPD ParcelShop:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true ) . "</p>";
+    }
+  }
+}
+
+function ceske_sluzby_dpd_parcelshop_dobirka_pay4pay( $amount ) {
+  $available_shipping = WC()->shipping->get_shipping_methods();
+  $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+  if ( $chosen_shipping_method[0] == "ceske_sluzby_dpd_parcelshop" ) {
+    $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) { return $settings['dpd_parcelshop_dobirka']; }
+    if ( $zeme == "SK" ) { return $settings['dpd_parcelshop_dobirka-slovensko']; } 
+  }
+  else {
+    return $amount;
+  }
+}
+
+function ceske_sluzby_dpd_parcelshop_pobocka_email( $order ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_dpd_parcelshop' ) ) {
+    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+      echo "<p><strong>DPD ParcelShop:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true ) . "</p>";
     }
   }
 }

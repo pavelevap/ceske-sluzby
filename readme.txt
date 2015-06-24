@@ -22,6 +22,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Měření konverzí (Sklik.cz)
 * WooCommerce: Měření konverzí (Srovname.cz)
 * WooCommerce: Doprava (Uloženka.cz)
+* WooCommerce: Doprava (DPD ParcelShop)
 * WooCommerce: Možnost změny objednávek pro dobírku
 * WooCommerce: XML feed (Heureka.cz)
 * WooCommerce: XML feed (Zbozi.cz)
@@ -42,6 +43,10 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)
 * WooCommerce: XML feed (Zbozi.cz)
+* WooCommerce: Doprava (DPD ParcelShop)
+* Základní implementace (není přímo napojeno na provozovatele)
+* Možnost nastavení jednotné ceny za doručení a dobírky (CZ i SK)
+* Automatická nabídka poboček podle země zákazníka (CZ a SK)
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)
