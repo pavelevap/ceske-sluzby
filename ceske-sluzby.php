@@ -9,6 +9,14 @@
  * License: GPL2
  */
 
+$language = get_locale();
+if ( $language == "sk_SK" ) {
+  define( "HEUREKA_URL", "heureka.sk" );
+}
+else {
+  define( "HEUREKA_URL", "heureka.cz" );
+}
+
 function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
@@ -57,7 +65,7 @@ var _hrq = _hrq || [];
 
 (function() {
     var ho = document.createElement('script'); ho.type = 'text/javascript'; ho.async = true;
-    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.heureka.cz/direct/js/cache/1-roi-async.js';
+    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.<?php echo HEUREKA_URL; ?>/direct/js/cache/1-roi-async.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ho, s);
 })();
 </script>
@@ -399,14 +407,8 @@ function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
 function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
-
     if ( false === ( $source_xml = get_transient( 'ceske_sluzby_heureka_recenze_zakazniku' ) ) ) {
-      $language = get_locale();
-      if ( $language == "sk_SK" ) {
-        $url = "http://www.heureka.sk/direct/dotaznik/export-review.php?key=" . $api;
-      } else {
-        $url = "http://www.heureka.cz/direct/dotaznik/export-review.php?key=" . $api;
-      }
+      $url = "http://www." . HEUREKA_URL . "/direct/dotaznik/export-review.php?key=" . $api;
       $source_xml = wp_remote_retrieve_body( wp_remote_get( $url ) );
       set_transient( 'ceske_sluzby_heureka_recenze_zakazniku', $source_xml, 24 * HOUR_IN_SECONDS );
     }

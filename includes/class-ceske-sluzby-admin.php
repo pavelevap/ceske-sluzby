@@ -57,7 +57,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_title'
       ),
       array(
-        'title' => 'Heureka.cz',
+        'title' => 'Heureka.cz (.sk)',
         'type' => 'title',
         'desc' => '',
         'id' => 'wc_ceske_sluzby_heureka_title'
@@ -65,14 +65,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'API klíč: Ověřeno zákazníky',
         'type' => 'text',
-        'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.heureka.cz/sluzby/certifikat-spokojenosti/">zde</a>.',
+        'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
         'id' => 'wc_ceske_sluzby_heureka_overeno-api',
         'css' => 'width: 300px'
       ),
       array(
         'title' => 'API klíč: Měření konverzí',
         'type' => 'text',
-        'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.heureka.cz/obchody/mereni-konverzi/">zde</a>.',
+        'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>.',
         'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
         'css'   => 'width: 300px'
       ),
@@ -157,9 +157,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_xml_feed_title'
       ),
       array(
-        'title' => 'Heureka.cz',
+        'title' => 'Heureka.cz (.sk)',
         'type' => 'title',
-        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Podrobný manuál naleznete <a href="http://sluzby.heureka.cz/napoveda/xml-feed/">zde</a>.',
+        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
       ),
       array(

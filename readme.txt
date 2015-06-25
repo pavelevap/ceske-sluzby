@@ -18,7 +18,7 @@ Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 Plugin zatím podporuje následující služby a pluginy:
 
 * WooCommerce: Ověřeno zákazníky (Heureka.cz a Heureka.sk)
-* WooCommerce: Měření konverzí (Heureka.cz)
+* WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk)
 * WooCommerce: Měření konverzí (Sklik.cz)
 * WooCommerce: Měření konverzí (Srovname.cz)
 * WooCommerce: Doprava (Uloženka.cz)
@@ -51,6 +51,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
 * Aktualizace dat jednou denně
 * Jednoduchý shortcode: [heureka-recenze-obchodu]
+* WooCommerce: Měření konverzí (Heureka.sk)
+* Automatická podpora slovenské verze podle nastavené lokalizace
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)
