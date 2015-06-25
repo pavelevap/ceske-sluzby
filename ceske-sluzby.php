@@ -377,7 +377,7 @@ function ceske_sluzby_aktivace_xml_feed() {
   }
 }
 
-http://docs.woothemes.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
+// http://docs.woothemes.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
 function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
   $omezit_dopravu = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma' );
   if ( $omezit_dopravu == "yes" ) {

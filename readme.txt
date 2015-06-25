@@ -1,6 +1,6 @@
 === České služby pro WordPress ===
 Donate link: http://www.separatista.net
-Tags: Heureka, Sklik, WooCommerce, Uloženka, Srovname
+Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz
 Requires at least: 4.0
 Tested up to: 4.2.2
 Stable tag: 0.3
