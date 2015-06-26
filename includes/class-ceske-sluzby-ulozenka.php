@@ -19,17 +19,20 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
   }
  
   public function calculate_shipping( $package ) {
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) { $cena = $this->get_option( 'ulozenka_zakladni-cena' ); }
+    if ( $zeme == "SK" ) { $cena = $this->get_option( 'ulozenka_zakladni-cena-slovensko' ); }
     $rate = array(
       'id' => $this->id,
       'label' => $this->title,
-      'cost' => $this->get_option( 'ulozenka_zakladni-cena' ),
+      'cost' => $cena,
       'calc_tax' => 'per_item'
     );
     $this->add_rate( $rate );
   }
       
   public function init_form_fields() {
-    $this->form_fields = array(
+    $zakladni = array(
       'enabled' => array(
 				'title'   => 'Povolit',
 				'type'    => 'checkbox',
@@ -44,12 +47,12 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'css'         => 'width: 300px;'
       ),
       'ulozenka_id-obchodu' => array(
-				'title'       => 'ID Obchodu',
+				'title'       => 'ID obchodu',
 				'type'        => 'text',
 				'description' => 'Zadejte ID obchodu z administrace Uloženka.',
 				'default'     => '',
 				'css'         => 'width: 100px;'
-        ),
+      ),
       'ulozenka_zakladni-cena' => array(
 				'title'       => 'Základní cena',
 				'type'        => 'price',
@@ -67,5 +70,31 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'placeholder' => wc_format_localized_price( 0 )
       )
     );
+    
+    $slovensko = array(
+      'ulozenka_zakladni-cena-slovensko' => array(
+				'title'       => 'Základní cena (Slovensko)',
+				'type'        => 'price',
+				'description' => 'Pokud nebude cena vyplněna, tak bude nulová.',
+				'default'     => '',
+				'css'         => 'width: 100px;',
+				'placeholder' => wc_format_localized_price( 0 )
+      ),
+      'ulozenka_dobirka-slovensko' => array(
+				'title'       => 'Poplatek za dobírku (Slovensko)',
+				'type'        => 'price',
+				'description' => 'Pro fungování dodatečného poplatku za dobírku je třeba použít plugin <a href="https://wordpress.org/plugins/woocommerce-pay-for-payment/">WooCommerce Pay for Payment</a> a nastavit u něj stejný poplatek za dobírku (menu Pokladna - Hotově při doručení).',
+				'default'     => '',
+				'css'         => 'width: 100px;',
+				'placeholder' => wc_format_localized_price( 0 )
+      )
+    );
+
+    $zvolene_zeme = WC()->countries->get_shipping_countries();
+    if ( array_key_exists( 'SK', $zvolene_zeme ) ) {
+      $this->form_fields = array_merge( $zakladni, $slovensko );
+    } else {
+      $this->form_fields = $zakladni;
+    }
   }      
 }

@@ -40,12 +40,18 @@ class Ceske_Sluzby_Json_Loader {
 
   function build( $params ) {
     $base_url = 'https://api.ulozenka.cz/v3/transportservices/';
+    $available_shipping = WC()->shipping->get_shipping_methods();
+    $settings = $available_shipping[ "ceske_sluzby_ulozenka" ]->settings;
+
     if ( ! is_null( $params ) ) {
       if ( ! empty( $params['provider'] ) ) {
         $base_url = $base_url . $params['provider'] . '/branches';
       }
       if ( ! empty( $params['country'] ) ) {
-        $base_url = $base_url . '?includeInactive=0&destinationOnly=1&partner=0&destinationCountry='. $params['country'];
+        $base_url .= '?includeInactive=0&destinationOnly=1&destinationCountry=' . $params['country'];
+      }
+      if ( ! empty( $settings['ulozenka_id-obchodu'] ) ) {
+        $base_url .= '&shopId=' . $settings['ulozenka_id-obchodu'];
       }
       return $base_url;
     } else {
@@ -53,5 +59,4 @@ class Ceske_Sluzby_Json_Loader {
     }
   }
 }
-
 // Je třeba doplnit cachovanou verzi (transients).

@@ -180,51 +180,38 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   if ( $chosen_shipping_method[0] == "ceske_sluzby_ulozenka" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
 
-    if ( $settings['enabled'] == "yes" && ! empty ( $settings['ulozenka_id-obchodu'] ) ) { ?>
-  
+    if ( $settings['enabled'] == "yes" && ! empty ( $settings['ulozenka_id-obchodu'] ) ) {
+
+    $pobocky = new Ceske_Sluzby_Json_Loader();
+    // http://docs.ulozenkav3.apiary.io/#pepravnsluby
+
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) { $zeme_code = "CZE"; }
+    if ( $zeme == "SK" ) { $zeme_code = "SVK"; }
+
+    $parametry = array( 'provider' => 1, 'country' => $zeme_code );
+    ?>
+    
     <tr class="ulozenka">
-        <td>
-            <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
-        </td>
-        <td>
-            <font size="2">Uloženka - výběr pobočky:</font><br>
-            <div id="ulozenka-branch-select-options"></div>
-        </td>
+      <td>
+        <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
+      </td>
+      <td>
+        <font size="2">Uloženka - výběr pobočky:</font><br>
+        <div id="ulozenka-branch-select-options">
+          <select name="ulozenka_branches">
+          <option>Vyberte pobočku</option>
+    
+    <?php
+    foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
+      echo '<option value="' . $pobocka->name . '">' . $pobocka->name . '</option>';
+    } ?>
+    
+        </div>
+      </td>
     </tr>
-
-<script>
-    var response = "";
-    var request = new XMLHttpRequest();
-    optionsDiv = document.getElementById('ulozenka-branch-select-options');
-    request.open("GET", "https://api.ulozenka.cz/v2/branches?shopId=<?php echo $settings['ulozenka_id-obchodu']; ?>&partner=0", true);
-        request.setRequestHeader('Accept', 'application/json')
-        request.onreadystatechange = function() {
-            if (request.readyState == 4) {
-                if (request.status == 200 || request.status == 0) {
-                    response = JSON.parse(request.responseText);
-                    branches = response.data;
-                    select = document.createElement("select");
-                    select.setAttribute('name', "ulozenka_branches");
-                    optionsDiv.appendChild(select);
-                    option = document.createElement("option");
-                    option.innerHTML = 'Vyberte pobočku';
-                    select.appendChild(option);
-                    for (i = 0; i < branches.length; i++) {
-                        branch = branches[i];
-                        option = document.createElement("option");
-                        option.setAttribute('value', branch.name);
-                        option.innerHTML = ""+branch.name+"";
-                        select.appendChild(option);
-                    }
-                } else {
-                    optionsDiv.innerHTML = "Nepodařilo se načíst seznam poboček.";
-                }
-            }
-        }
-        request.send();
-</script>
-
-<?php }
+    
+    <?php }
   }
 }
 
@@ -253,7 +240,9 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
   $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
   if ( $chosen_shipping_method[0] == "ceske_sluzby_ulozenka" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
-    return $settings['ulozenka_dobirka'];
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) { if ( empty( $settings['ulozenka_dobirka'] ) ) { return $amount; } else { return $settings['ulozenka_dobirka']; } }
+    if ( $zeme == "SK" ) { if ( empty( $settings['ulozenka_dobirka-slovensko'] ) ) { return $amount; } else { return $settings['ulozenka_dobirka-slovensko']; } }
   }
   else {
     return $amount;
@@ -349,8 +338,8 @@ function ceske_sluzby_dpd_parcelshop_dobirka_pay4pay( $amount ) {
   if ( $chosen_shipping_method[0] == "ceske_sluzby_dpd_parcelshop" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
     $zeme = WC()->customer->get_shipping_country();
-    if ( $zeme == "CZ" ) { return $settings['dpd_parcelshop_dobirka']; }
-    if ( $zeme == "SK" ) { return $settings['dpd_parcelshop_dobirka-slovensko']; } 
+    if ( $zeme == "CZ" ) { if ( empty( $settings['dpd_parcelshop_dobirka'] ) ) { return $amount; } else { return $settings['dpd_parcelshop_dobirka']; } }
+    if ( $zeme == "SK" ) { if ( empty( $settings['dpd_parcelshop_dobirka-slovensko'] ) ) { return $amount; } else { return $settings['dpd_parcelshop_dobirka-slovensko']; } }
   }
   else {
     return $amount;

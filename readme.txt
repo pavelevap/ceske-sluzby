@@ -21,7 +21,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk)
 * WooCommerce: Měření konverzí (Sklik.cz)
 * WooCommerce: Měření konverzí (Srovname.cz)
-* WooCommerce: Doprava (Uloženka.cz)
+* WooCommerce: Doprava (Uloženka.cz) - CZ i SK
 * WooCommerce: Doprava (DPD ParcelShop) - CZ i SK
 * WooCommerce: Možnost změny objednávek pro dobírku
 * WooCommerce: XML feed (Heureka.cz)
@@ -46,10 +46,13 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: XML feed (Zbozi.cz)
 * WooCommerce: Doprava (DPD ParcelShop)
 * Základní implementace (není přímo napojeno na provozovatele)
+* Možnost provozovat samostatně nebo jako dodatečné pobočky pro Uloženku
 * Možnost nastavení jednotné ceny za doručení a dobírky (CZ i SK)
 * Automatická nabídka poboček podle země zákazníka (CZ i SK)
+* Uloženka nově podporuje všechny výše uvedené funkce jako DPD ParcelShop
+* Napojeno na API Uloženky (nastavení obchodu a volba poboček)
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
-* Aktualizace dat jednou denně
+* Aktualizace recenzí jednou denně
 * Jednoduchý shortcode: [heureka-recenze-obchodu]
 * WooCommerce: Měření konverzí (Heureka.sk)
 * Automatická podpora slovenské verze podle nastavené lokalizace

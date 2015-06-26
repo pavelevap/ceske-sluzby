@@ -5,7 +5,7 @@ class WC_Shipping_Ceske_Sluzby_DPD_ParcelShop extends WC_Shipping_Method {
   public function __construct() {
      $this->id = 'ceske_sluzby_dpd_parcelshop';
      $this->method_title = 'DPD ParcelShop';
-     $this->method_description = 'Základní možnosti nastavení.';
+     $this->method_description = 'Základní možnosti nastavení. Funguje samostatně nebo jako doplňkové pobočky pro Uloženku (v tomto případě je vhodné <a href="' . site_url() . '/wp-admin/admin.php?page=wc-settings&tab=shipping&section=wc_shipping_ceske_sluzby_ulozenka">zadat</a> ID obchodu).';
      $this->title = $this->get_option( 'dpd_parcelshop_nazev' );
      $this->enabled = $this->get_option( 'enabled' );
      $this->init();
@@ -18,7 +18,6 @@ class WC_Shipping_Ceske_Sluzby_DPD_ParcelShop extends WC_Shipping_Method {
   }
  
   public function calculate_shipping( $package ) {
-    //var_dump( $package );
     $zeme = WC()->customer->get_shipping_country();
     if ( $zeme == "CZ" ) { $cena = $this->get_option( 'dpd_parcelshop_zakladni-cena' ); }
     if ( $zeme == "SK" ) { $cena = $this->get_option( 'dpd_parcelshop_zakladni-cena-slovensko' ); }
