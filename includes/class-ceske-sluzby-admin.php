@@ -203,6 +203,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Poštovné',
         'type' => 'number',
+        'desc' => 'Uvedeno může být nejnižší základní poštovné (zadávejte konkrétní číslo, pokud je poštovné zdarma tak nulu).',
         'id' => 'wc_ceske_sluzby_xml_feed_pricemania_postovne',
         'css' => 'width: 50px',
         'custom_attributes' => array(
