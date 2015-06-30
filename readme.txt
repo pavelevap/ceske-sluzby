@@ -24,10 +24,11 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Doprava (Uloženka.cz) - CZ i SK
 * WooCommerce: Doprava (DPD ParcelShop) - CZ i SK
 * WooCommerce: Možnost změny objednávek pro dobírku
-* WooCommerce: XML feed (Heureka.cz)
+* WooCommerce: XML feed (Heureka.cz a Heureka.sk)
 * WooCommerce: XML feed (Zbozi.cz)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
+* WooCommerce: XML feed (Pricemania.cz a Pricemania.sk)
 
 == Oficiální podpora pluginu ==
 
@@ -57,6 +58,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Měření konverzí (Heureka.sk)
 * Automatická podpora slovenské verze podle nastavené lokalizace
 * Optimalizace databázového dotazu pro generování XML feedů
+* WooCommerce: XML feed (Pricemania.cz a Pricemania.sk)
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)

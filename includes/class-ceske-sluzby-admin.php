@@ -193,6 +193,26 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
+      ),
+      array(
+        'title' => 'Pricemania.cz (.sk)',
+        'type' => 'title',
+        'desc' => 'Generovaný feed je dostupný v podobě .xml souboru <a href="' . WP_CONTENT_URL . '/pricemania.xml">zde</a> (aktualizace probíhá automaticky jednou denně). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
+      ),
+      array(
+        'title' => 'Poštovné',
+        'type' => 'number',
+        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_postovne',
+        'css' => 'width: 50px',
+        'custom_attributes' => array(
+          'min' => 0,
+          'step' => 1
+        )
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
       )
       );
     }

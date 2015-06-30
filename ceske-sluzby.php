@@ -366,12 +366,22 @@ function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
 
 add_action( 'init', 'ceske_sluzby_aktivace_xml_feed' );
 function ceske_sluzby_aktivace_xml_feed() {
-  $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
-  if ( $aktivace_xml == "yes" ) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
-    add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
-    add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
-  }
+	$aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+	if ( $aktivace_xml == "yes" ) {
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+		add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
+		add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
+
+		if ( ! wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
+			wp_schedule_event( current_time( 'timestamp' ), 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
+		}
+	}
+}
+
+add_action( 'ceske_sluzby_pricemania_aktualizace_xml', 'ceske_sluzby_pricemania_xml_feed_aktualizace' );
+function ceske_sluzby_pricemania_xml_feed_aktualizace() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+	pricemania_xml_feed_aktualizace();
 }
 
 // http://docs.woothemes.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
