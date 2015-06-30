@@ -7,7 +7,8 @@ function heureka_xml_feed_zobrazeni() {
     'post_status' => 'publish',
     'meta_key' => '_visibility',
     'meta_value' => 'hidden',
-    'meta_compare' => '!='
+    'meta_compare' => '!=',
+    'fields' => 'ids'
   );
   $products = get_posts( $args );
   
@@ -19,17 +20,15 @@ function heureka_xml_feed_zobrazeni() {
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
   
-  foreach ( $products as $product ) {
+  foreach ( $products as $product_id ) {
     
     $ean = "";
     $dodaci_doba = "";
     $description = "";
     $skladem = false;
     $strom_kategorie = "";
-    
-    setup_postdata( $product );
-    $produkt = new WC_Product( $product->ID );
-    
+
+    $produkt = new WC_Product( $product_id );
     $sku = $produkt->get_sku();
     if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
       $ean = $sku;
@@ -40,13 +39,13 @@ function heureka_xml_feed_zobrazeni() {
       $dodaci_doba = $global_dodaci_doba;
     }
     
-    if ( ! empty ( $product->post_excerpt ) ) {
-      $description = $product->post_excerpt;
+    if ( ! empty ( $produkt->post->post_excerpt ) ) {
+      $description = $produkt->post->post_excerpt;
     } else {
-      $description = $product->post_content;
+      $description = $produkt->post->post_content;
     }
 
-    $kategorie = get_the_terms( $product->ID, 'product_cat' );
+    $kategorie = get_the_terms( $product_id, 'product_cat' );
     if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
       $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
       if ( ! empty ( $rodice_kategorie ) ) {
@@ -59,9 +58,9 @@ function heureka_xml_feed_zobrazeni() {
     }
 
     $xmlWriter->startElement( 'SHOPITEM' );
-    $xmlWriter->writeElement( 'ITEM_ID', $product->ID );
+    $xmlWriter->writeElement( 'ITEM_ID', $product_id );
     $xmlWriter->startElement( 'PRODUCTNAME' );
-      $xmlWriter->text( wp_strip_all_tags( $product->post_title ) );
+      $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
     $xmlWriter->endElement();
     if ( ! empty ( $description ) ) {
       $xmlWriter->startElement( 'DESCRIPTION' );
@@ -73,8 +72,8 @@ function heureka_xml_feed_zobrazeni() {
         $xmlWriter->text( $strom_kategorie );
       $xmlWriter->endElement();
     }
-    $xmlWriter->writeElement( 'URL', get_permalink( $product->ID ) );
-    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product->ID ) ) );
+    $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
     if ( $dodaci_doba != "" ) {
       $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
     }
@@ -83,12 +82,11 @@ function heureka_xml_feed_zobrazeni() {
       $xmlWriter->writeElement( 'EAN', $ean );
     }
     $xmlWriter->endElement();
+    // http://narhinen.net/2011/01/15/Serving-large-xml-files.html
   }
-   
-  wp_reset_postdata();
 
   $xmlWriter->endElement();
-  
+
   $xmlWriter->endDocument();
   header( 'Content-type: text/xml' );
   echo $xmlWriter->outputMemory();
@@ -101,7 +99,8 @@ function zbozi_xml_feed_zobrazeni() {
     'post_status' => 'publish',
     'meta_key' => '_visibility',
     'meta_value' => 'hidden',
-    'meta_compare' => '!='
+    'meta_compare' => '!=',
+    'fields' => 'ids'
   );
   $products = get_posts( $args );
   
@@ -113,16 +112,15 @@ function zbozi_xml_feed_zobrazeni() {
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
   
-  foreach ( $products as $product ) {
+  foreach ( $products as $product_id ) {
     
     $ean = "";
     $dodaci_doba = "";
     $description = "";
     $skladem = false;
     $strom_kategorie = "";
-    
-    setup_postdata( $product );
-    $produkt = new WC_Product( $product->ID );
+
+    $produkt = new WC_Product( $product_id );
     
     $sku = $produkt->get_sku();
     if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
@@ -134,13 +132,13 @@ function zbozi_xml_feed_zobrazeni() {
       $dodaci_doba = $global_dodaci_doba;
     }
     
-    if ( ! empty ( $product->post_excerpt ) ) {
-      $description = $product->post_excerpt;
+    if ( ! empty ( $produkt->post->post_excerpt ) ) {
+      $description = $produkt->post->post_excerpt;
     } else {
-      $description = $product->post_content;
+      $description = $produkt->post->post_content;
     }
 
-    $kategorie = get_the_terms( $product->ID, 'product_cat' );
+    $kategorie = get_the_terms( $product_id, 'product_cat' );
     if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
       $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
       if ( ! empty ( $rodice_kategorie ) ) {
@@ -154,7 +152,7 @@ function zbozi_xml_feed_zobrazeni() {
 
     $xmlWriter->startElement( 'SHOPITEM' );
     $xmlWriter->startElement( 'PRODUCT' );
-      $xmlWriter->text( wp_strip_all_tags( $product->post_title ) );
+      $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
     $xmlWriter->endElement();
     if ( ! empty ( $description ) ) {
       $xmlWriter->startElement( 'DESCRIPTION' );
@@ -166,8 +164,8 @@ function zbozi_xml_feed_zobrazeni() {
         $xmlWriter->text( $strom_kategorie );
       $xmlWriter->endElement();
     }
-    $xmlWriter->writeElement( 'URL', get_permalink( $product->ID ) );
-    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product->ID ) ) );
+    $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
     if ( $dodaci_doba != "" ) {
       $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
     }
@@ -177,8 +175,6 @@ function zbozi_xml_feed_zobrazeni() {
     }
     $xmlWriter->endElement();
   }
-   
-  wp_reset_postdata();
 
   $xmlWriter->endElement();
   

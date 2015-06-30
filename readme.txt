@@ -56,6 +56,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * Jednoduchý shortcode: [heureka-recenze-obchodu]
 * WooCommerce: Měření konverzí (Heureka.sk)
 * Automatická podpora slovenské verze podle nastavené lokalizace
+* Optimalizace databázového dotazu pro generování XML feedů
 
 = 0.3 =
 * WooCommerce: XML feed (Heureka.cz)
