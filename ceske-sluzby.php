@@ -373,6 +373,7 @@ function ceske_sluzby_aktivace_xml_feed() {
 		add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
 
 		if ( ! wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
+			pricemania_xml_feed_aktualizace(); // Musíme poprvé spustit?
 			wp_schedule_event( current_time( 'timestamp' ), 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
 		}
 	}
