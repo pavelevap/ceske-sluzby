@@ -1,9 +1,9 @@
 === České služby pro WordPress ===
 Donate link: http://www.separatista.net
-Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz
+Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz, Pricemania.cz
 Requires at least: 4.0
 Tested up to: 4.2.2
-Stable tag: 0.3
+Stable tag: 0.4
 
 Implementace různých českých služeb do WordPressu
 
@@ -23,7 +23,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Měření konverzí (Srovname.cz)
 * WooCommerce: Doprava (Uloženka.cz) - CZ i SK
 * WooCommerce: Doprava (DPD ParcelShop) - CZ i SK
-* WooCommerce: Možnost změny objednávek pro dobírku
+* WooCommerce: Možnost změny provedených objednávek v případě dobírky
 * WooCommerce: XML feed (Heureka.cz a Heureka.sk)
 * WooCommerce: XML feed (Zbozi.cz)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
@@ -48,8 +48,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Doprava (DPD ParcelShop)
 * Základní implementace (není přímo napojeno na provozovatele)
 * Možnost provozovat samostatně nebo jako dodatečné pobočky pro Uloženku
-* Možnost nastavení jednotné ceny za doručení a dobírky (CZ i SK)
-* Automatická nabídka poboček podle země zákazníka (CZ i SK)
+* Nastavení jednotné ceny za doručení a dobírku (CZ i SK)
+* Automatická nabídka poboček podle zvolené země zákazníka (CZ i SK)
 * Uloženka nově podporuje všechny výše uvedené funkce jako DPD ParcelShop
 * Napojeno na API Uloženky (nastavení obchodu a volba poboček)
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
@@ -73,7 +73,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 = 0.2 =
 * WooCommerce: Měření konverzí (Srovname.cz)
-* WooCommerce: Možnost změny objednávek pro dobírku
+* WooCommerce: Možnost změny provedených objednávek v případě dobírky
 * Oprava zobrazení Uloženky ve WooCommerce 2.3.x
 * Plugin vyžaduje WooCommerce verzi 2.2.x
 * Použití funkce wc_add_notice()
