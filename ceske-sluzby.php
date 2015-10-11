@@ -65,7 +65,7 @@ var _hrq = _hrq || [];
 
 (function() {
     var ho = document.createElement('script'); ho.type = 'text/javascript'; ho.async = true;
-    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.<?php echo HEUREKA_URL; ?>/direct/js/cache/1-roi-async.js';
+    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.<?php echo HEUREKA_URL; ?>/direct/js/ext/1-roi-async.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ho, s);
 })();
 </script>
