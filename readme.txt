@@ -42,6 +42,9 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 == Changelog ==
 
+= 0.5 =
+* WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk) - aktualizován měřící skript
+
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)
 * WooCommerce: XML feed (Zbozi.cz)
