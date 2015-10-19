@@ -445,13 +445,13 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
 
 function ceske_sluzby_xml_heureka_kategorie_pridat_pole() { ?>
   <tr class="form-field">
-    <th scope="row" valign="top"><label>České služby: Kategorie Heureka.cz</label></th>
+    <th scope="row" valign="top"><label>České služby: Kategorie Heureka XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="" size="70"/>
       <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii z Heureka.cz (aktuální přehled naleznete <a href="http://www.heureka.cz/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+        Zatím je nutné ručně doplnit příslušnou kategorii z Heureky (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
         Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
-        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "Heureka.cz | ".
+        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "<?php echo ucfirst( HEUREKA_URL ); ?> | ".
       </p>
     </td>
   </tr>
@@ -462,13 +462,13 @@ function ceske_sluzby_xml_heureka_kategorie_upravit_pole( $term ) {
   $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
 ?>
   <tr class="form-field">
-    <th scope="row" valign="top"><label>České služby: Kategorie Heureka.cz</label></th>
+    <th scope="row" valign="top"><label>České služby: Kategorie Heureka XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" />
       <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii z Heureka.cz (aktuální přehled naleznete <a href="http://www.heureka.cz/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+        Zatím je nutné ručně doplnit příslušnou kategorii z Heureky (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
         Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
-        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "Heureka.cz | ".
+        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "<?php echo ucfirst( HEUREKA_URL ); ?> | ".
       </p>
     </td>
   </tr>
@@ -478,6 +478,7 @@ function ceske_sluzby_xml_heureka_kategorie_upravit_pole( $term ) {
 function ceske_sluzby_xml_heureka_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '' ) {
   if ( isset( $_POST['ceske-sluzby-xml-heureka-kategorie'] ) && 'product_cat' === $taxonomy ) {
     $heureka_kategorie = str_replace( 'Heureka.cz | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
+    $heureka_kategorie = str_replace( 'Heureka.sk | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
     update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-heureka-kategorie', esc_attr( $heureka_kategorie ) );
   }
 }
