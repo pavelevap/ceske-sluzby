@@ -9,6 +9,15 @@ Implementace různých českých služeb do WordPressu
 
 == Description ==
 
+Našli jste nějakou chybu?
+Nahlašte ji prosím přímo na <a href="http://www.separatista.net/forum">fóru</a>.
+
+Chcete se zapojit do dalšího vývoje?
+Potom můžete použít přímo <a href="https://github.com/pavelevap/ceske-sluzby">Github</a>.
+
+Nějaká funkce chybí?
+Můžete ji sponzorovat a urychlit její implementaci.
+
 Implementace různých českých služeb do WordPressu.
 
 Plugin sice na několika webech bez problémů funguje, ale berte ho prosím stále jako testovací verzi.
@@ -44,6 +53,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 = 0.5 =
 * WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk) - aktualizován měřící skript
+* WooCommerce: XML feed (Heureka.cz a Heureka.sk) - možnost doplnění CATEGORYTEXT v nastavení kategorie
 
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)

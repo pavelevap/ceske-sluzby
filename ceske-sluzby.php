@@ -157,6 +157,12 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     if ( $aktivace_recenzi == "yes" ) {
       add_shortcode( 'heureka-recenze-obchodu', 'ceske_sluzby_heureka_recenze_obchodu' );
     }
+    add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_heureka_kategorie_pridat_pole', 99 );
+    add_action( 'product_cat_edit_form_fields', 'ceske_sluzby_xml_heureka_kategorie_upravit_pole', 99 );
+    add_action( 'created_term', 'ceske_sluzby_xml_heureka_kategorie_ulozit', 20, 3 );
+    add_action( 'edit_term', 'ceske_sluzby_xml_heureka_kategorie_ulozit', 20, 3 );
+    add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_heureka_kategorie_pridat_sloupec' );
+    add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_heureka_kategorie_sloupec', 10, 3 );
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -435,5 +441,60 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
     $output .= '</div>';
   }
 	return $output;
+}
+
+function ceske_sluzby_xml_heureka_kategorie_pridat_pole() { ?>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>České služby: Kategorie Heureka.cz</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="" size="70"/>
+      <p class="description">
+        Zatím je nutné ručně doplnit příslušnou kategorii z Heureka.cz (aktuální přehled naleznete <a href="http://www.heureka.cz/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+        Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
+        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "Heureka.cz | ".
+      </p>
+    </td>
+  </tr>
+<?php
+}
+
+function ceske_sluzby_xml_heureka_kategorie_upravit_pole( $term ) {
+  $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+?>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>České služby: Kategorie Heureka.cz</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" />
+      <p class="description">
+        Zatím je nutné ručně doplnit příslušnou kategorii z Heureka.cz (aktuální přehled naleznete <a href="http://www.heureka.cz/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+        Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
+        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "Heureka.cz | ".
+      </p>
+    </td>
+  </tr>
+<?php
+}
+
+function ceske_sluzby_xml_heureka_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '' ) {
+  if ( isset( $_POST['ceske-sluzby-xml-heureka-kategorie'] ) && 'product_cat' === $taxonomy ) {
+    $heureka_kategorie = str_replace( 'Heureka.cz | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
+    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-heureka-kategorie', esc_attr( $heureka_kategorie ) );
+  }
+}
+
+function ceske_sluzby_xml_heureka_kategorie_pridat_sloupec( $columns ) {
+  $new_columns = array();
+  $new_columns['xml-heureka'] = 'XML Heureka';
+  return array_merge( $columns, $new_columns );
+}
+
+function ceske_sluzby_xml_heureka_kategorie_sloupec( $columns, $column, $id ) {
+  if ( 'xml-heureka' == $column ) {
+    $heureka_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
+    if ( $heureka_kategorie ) {
+      $columns .= '<a href="#" title="' . $heureka_kategorie . '">Ano</a>';
+    }
+  }
+  return $columns;
 }
 

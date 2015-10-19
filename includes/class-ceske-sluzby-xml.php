@@ -46,15 +46,21 @@ function heureka_xml_feed_zobrazeni() {
     }
 
     $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
-      $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-      if ( ! empty ( $rodice_kategorie ) ) {
-        foreach ( $rodice_kategorie as $rodic ) {
-          $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-          $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-        }
+    if ( $kategorie && ! is_wp_error( $kategorie ) ) {
+      $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+      if ( $heureka_kategorie ) {
+        $strom_kategorie = $heureka_kategorie;
       }
-      $strom_kategorie .= $kategorie[0]->name;
+      else {
+        $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
+        if ( ! empty ( $rodice_kategorie ) ) {
+          foreach ( $rodice_kategorie as $rodic ) {
+            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+          }
+        }
+        $strom_kategorie .= $kategorie[0]->name;
+      }
     }
 
     $xmlWriter->startElement( 'SHOPITEM' );
