@@ -2,7 +2,7 @@
 Donate link: http://www.separatista.net
 Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz, Pricemania.cz
 Requires at least: 4.0
-Tested up to: 4.2.2
+Tested up to: 4.3.1
 Stable tag: 0.4
 
 Implementace různých českých služeb do WordPressu
@@ -10,10 +10,10 @@ Implementace různých českých služeb do WordPressu
 == Description ==
 
 Našli jste nějakou chybu?
-Nahlašte ji prosím přímo na <a href="http://www.separatista.net/forum">fóru</a>.
+Nahlašte ji prosím přímo na fóru: http://www.separatista.net/forum
 
 Chcete se zapojit do dalšího vývoje?
-Potom můžete použít přímo <a href="https://github.com/pavelevap/ceske-sluzby">Github</a>.
+Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzby
 
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
@@ -54,6 +54,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 = 0.5 =
 * WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk) - aktualizován měřící skript
 * WooCommerce: XML feed (Heureka.cz a Heureka.sk) - možnost doplnění CATEGORYTEXT v nastavení kategorie
+* WooCommerce: XML feed (Zbozi.cz) - aktualizace pro novou strukturu XML
 
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)

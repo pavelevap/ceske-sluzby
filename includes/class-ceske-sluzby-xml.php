@@ -156,8 +156,9 @@ function zbozi_xml_feed_zobrazeni() {
       $strom_kategorie .= $kategorie[0]->name;
     }
 
+    $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
     $xmlWriter->startElement( 'SHOPITEM' );
-    $xmlWriter->startElement( 'PRODUCT' );
+    $xmlWriter->startElement( 'PRODUCTNAME' );
       $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
     $xmlWriter->endElement();
     if ( ! empty ( $description ) ) {
@@ -183,7 +184,7 @@ function zbozi_xml_feed_zobrazeni() {
   }
 
   $xmlWriter->endElement();
-  
+
   $xmlWriter->endDocument();
   header( 'Content-type: text/xml' );
   echo $xmlWriter->outputMemory();
