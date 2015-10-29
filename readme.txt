@@ -9,6 +9,8 @@ Implementace různých českých služeb do WordPressu
 
 == Description ==
 
+Implementace různých českých služeb do WordPressu.
+
 Našli jste nějakou chybu?
 Nahlašte ji prosím přímo na fóru: http://www.separatista.net/forum
 
@@ -18,9 +20,7 @@ Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzb
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
 
-Implementace různých českých služeb do WordPressu.
-
-Plugin sice na několika webech bez problémů funguje, ale berte ho prosím stále jako testovací verzi.
+Plugin sice bez problémů funguje na více než 200 různých webech, ale berte ho prosím stále jako testovací verzi.
 
 Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
@@ -55,6 +55,10 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk) - aktualizován měřící skript
 * WooCommerce: XML feed (Heureka.cz a Heureka.sk) - možnost doplnění CATEGORYTEXT v nastavení kategorie
 * WooCommerce: XML feed (Zbozi.cz) - aktualizace pro novou strukturu XML
+* WooCommerce: Doprava (DPD ParcelShop, Uloženka.cz) - různé opravy:
+ * Zamezení dvojitému načítání funkce pro zobrazení poboček pomocí podmínky is_ajax().
+ * Funkce get_shipping_methods() nahrazena funkcí load_shipping_methods(), takže by se měly pobočky bez problémů zobrazovat.
+ * Zachování zvolené pobočky při změně platební metody.
 
 = 0.4 =
 * WooCommerce: Ověřeno zákazníky (Heureka.sk)

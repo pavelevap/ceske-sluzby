@@ -40,7 +40,7 @@ class Ceske_Sluzby_Json_Loader {
 
   function build( $params ) {
     $base_url = 'https://api.ulozenka.cz/v3/transportservices/';
-    $available_shipping = WC()->shipping->get_shipping_methods();
+    $available_shipping = WC()->shipping->load_shipping_methods();
     $settings = $available_shipping[ "ceske_sluzby_ulozenka" ]->settings;
 
     if ( ! is_null( $params ) ) {
