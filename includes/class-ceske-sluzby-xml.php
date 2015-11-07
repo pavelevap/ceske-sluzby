@@ -17,6 +17,7 @@ function heureka_xml_feed_zobrazeni() {
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
+  $xmlWriter->setIndent( true );
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
   
@@ -115,6 +116,7 @@ function zbozi_xml_feed_zobrazeni() {
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
+  $xmlWriter->setIndent( true );
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
   
@@ -208,6 +210,7 @@ function pricemania_xml_feed_aktualizace() {
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
+  $xmlWriter->setIndent( true );
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'products' );
   
