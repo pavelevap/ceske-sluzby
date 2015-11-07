@@ -120,6 +120,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
     if( is_admin() ) {
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-admin.php';
+      require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek.php';
       WC_Settings_Tab_Ceske_Sluzby_Admin::init();
     }
 

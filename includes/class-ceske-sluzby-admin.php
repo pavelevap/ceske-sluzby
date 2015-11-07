@@ -131,6 +131,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
       ),
       array(
+        'title' => 'Sledování zásilek',
+        'type' => 'checkbox',
+        'desc' => 'Aktivovat možnost zadávání infromací pro sledování zásilek u každé objednávky.',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
+      ),
+      array(
         'title' => 'Možnost změny objednávek pro dobírku',
         'type' => 'checkbox',
         'desc' => 'Povolí možnost změny objednávek, které jsou provedené prostřednictvím dobírky.',
