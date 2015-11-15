@@ -215,7 +215,9 @@ function pricemania_xml_feed_aktualizace() {
   $xmlWriter->startElement( 'products' );
   
   $i = 0;
-  unlink( WP_CONTENT_DIR . '/pricemania.xml' );
+  if ( file_exists( WP_CONTENT_DIR . '/pricemania.xml' ) ) {
+    unlink( WP_CONTENT_DIR . '/pricemania.xml' );
+  }
   
   foreach ( $products as $product_id ) {
     
