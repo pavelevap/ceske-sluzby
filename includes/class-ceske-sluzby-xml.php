@@ -121,7 +121,7 @@ function zbozi_xml_feed_zobrazeni() {
   $xmlWriter->startElement( 'SHOP' );
   
   foreach ( $products as $product_id ) {
-    
+   
     $ean = "";
     $dodaci_doba = "";
     $description = "";
@@ -193,34 +193,78 @@ function zbozi_xml_feed_zobrazeni() {
 }
 
 function pricemania_xml_feed_aktualizace() {
+  global $wpdb;
+
+  $lock_name = 'pricemania_xml.lock';
+  $lock_result = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO `$wpdb->options` ( `option_name`, `option_value`, `autoload` ) VALUES (%s, %s, 'no') /* LOCK */", $lock_name, time() ) );
+  if ( ! $lock_result ) {
+    $lock_result = get_option( $lock_name );
+    if ( ! $lock_result || ( $lock_result > ( time() - HOUR_IN_SECONDS ) ) ) {
+      wp_schedule_single_event( time() + ( 5 * MINUTE_IN_SECONDS ), 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
+      return;
+    }
+  }
+  update_option( $lock_name, time() );
+
+  $limit = 1000; // Defaultní počet produktů zpracovaných najednou...
+  $offset = 0;
+  $progress = get_option( 'pricemania_xml_progress' );
+  if ( ! empty ( $progress ) ) {
+    $offset = $progress;
+  }
+  
+  $xmlWriter = new XMLWriter();
+  $xmlWriter->openMemory();
+  $xmlWriter->setIndent( true );
+  
   $args = array(
-    'nopaging' => true,
     'post_type' => 'product',
     'post_status' => 'publish',
     'meta_key' => '_visibility',
     'meta_value' => 'hidden',
     'meta_compare' => '!=',
-    'fields' => 'ids'
+    'fields' => 'ids',
+    'posts_per_page' => $limit,
+    'offset' => $offset
   );
   $products = get_posts( $args );
+
+  $xmlWriter->startDocument( '1.0', 'utf-8' );
+  $xmlWriter->startElement( 'products' );
+ 
+  if ( ! $products ) {
+    if ( wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml_batch' ) ) {
+      $timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
+      wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
+    }
+
+    $xmlWriter->endElement();
+    $xmlWriter->endDocument();
+
+    $output = $xmlWriter->outputMemory();
+    $output = substr( $output, strpos( $output, "\n" ) + 1 );
+    $output = str_replace( '<products/>', '</products>', $output );
+    file_put_contents( WP_CONTENT_DIR . '/pricemania-test.xml', $output, FILE_APPEND );
+
+    if ( file_exists( WP_CONTENT_DIR . '/pricemania.xml' ) ) {
+      unlink( WP_CONTENT_DIR . '/pricemania.xml' );
+      rename( WP_CONTENT_DIR . '/pricemania-test.xml', WP_CONTENT_DIR . '/pricemania.xml' );
+    }
+
+    delete_option( 'pricemania_xml_progress' );
+    delete_option( $lock_name );
+    return;
+  }
+
+  wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   $postovne = get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' );
-
-  $xmlWriter = new XMLWriter();
-  $xmlWriter->openMemory();
-  $xmlWriter->setIndent( true );
-  $xmlWriter->startDocument( '1.0', 'utf-8' );
-  $xmlWriter->startElement( 'products' );
   
   $i = 0;
-  if ( file_exists( WP_CONTENT_DIR . '/pricemania.xml' ) ) {
-    unlink( WP_CONTENT_DIR . '/pricemania.xml' );
-  }
-  
+
   foreach ( $products as $product_id ) {
-    
     $ean = "";
     $dodaci_doba = "";
     $description = "";
@@ -230,7 +274,7 @@ function pricemania_xml_feed_aktualizace() {
     $i = $i + 1;
 
     $produkt = new WC_Product( $product_id );
-    
+ 
     $sku = $produkt->get_sku();
     if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
       $ean = $sku;
@@ -274,6 +318,7 @@ function pricemania_xml_feed_aktualizace() {
         $xmlWriter->text( $strom_kategorie );
       $xmlWriter->endElement();
     }
+
     $xmlWriter->writeElement( 'manufacturer', '' ); // https://wordpress.org/plugins/woocommerce-brand/
     $xmlWriter->writeElement( 'url', get_permalink( $product_id ) );
     $xmlWriter->writeElement( 'picture', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
@@ -288,15 +333,21 @@ function pricemania_xml_feed_aktualizace() {
       $xmlWriter->writeElement( 'ean', $ean );
     }
     $xmlWriter->endElement();
-    
-    if ( 0 == $i%1000 ) {
-      file_put_contents( WP_CONTENT_DIR . '/pricemania.xml', $xmlWriter->flush( true ), FILE_APPEND );
-    }
+  } 
+
+  $output = $xmlWriter->outputMemory();
+  if ( ! empty ( $progress ) ) {
+    $output = substr($output, strpos($output, "\n") + 1);
+    $output = substr($output, strpos($output, "\n") + 1);
+  }
+  else {
+    header( 'Content-type: text/xml' );
   }
 
-  $xmlWriter->endElement();
+  file_put_contents( WP_CONTENT_DIR . '/pricemania-test.xml', $output, FILE_APPEND );
+  $xmlWriter->flush( true );
   
-  $xmlWriter->endDocument();
-  header( 'Content-type: text/xml' );
-  file_put_contents( WP_CONTENT_DIR . '/pricemania.xml', $xmlWriter->flush( true ), FILE_APPEND );
+  $offset = $offset + $limit;
+  update_option( 'pricemania_xml_progress', $offset );
+  delete_option( $lock_name );
 }

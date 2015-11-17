@@ -396,17 +396,22 @@ function ceske_sluzby_aktivace_xml_feed() {
 		add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
 
 		if ( ! wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
-			pricemania_xml_feed_aktualizace(); // Musíme poprvé spustit?
-			wp_schedule_event( current_time( 'timestamp' ), 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
+			wp_schedule_event( current_time( 'timestamp', 1 ), 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
 		}
-	}
+	} else {
+    if ( wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
+      $timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' );
+      wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml' ); 
+    }
+  }
 }
 
 add_action( 'ceske_sluzby_pricemania_aktualizace_xml', 'ceske_sluzby_pricemania_xml_feed_aktualizace' );
 function ceske_sluzby_pricemania_xml_feed_aktualizace() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
-	pricemania_xml_feed_aktualizace();
+  require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+  pricemania_xml_feed_aktualizace();
 }
+add_action( 'ceske_sluzby_pricemania_aktualizace_xml_batch', 'ceske_sluzby_pricemania_xml_feed_aktualizace' );
 
 // http://docs.woothemes.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
 function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
