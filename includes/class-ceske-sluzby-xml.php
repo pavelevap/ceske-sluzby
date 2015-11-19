@@ -22,74 +22,78 @@ function heureka_xml_feed_zobrazeni() {
   $xmlWriter->startElement( 'SHOP' );
   
   foreach ( $products as $product_id ) {
-    
     $ean = "";
     $dodaci_doba = "";
     $description = "";
-    $skladem = false;
     $strom_kategorie = "";
 
     $produkt = new WC_Product( $product_id );
-    $sku = $produkt->get_sku();
-    if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-      $ean = $sku;
-    }
-    
-    $skladem = $produkt->is_in_stock();
-    if ( $skladem && isset( $global_dodaci_doba ) ) {
-      $dodaci_doba = $global_dodaci_doba;
-    }
-    
-    if ( ! empty ( $produkt->post->post_excerpt ) ) {
-      $description = $produkt->post->post_excerpt;
-    } else {
-      $description = $produkt->post->post_content;
-    }
 
-    $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) {
-      $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-      if ( $heureka_kategorie ) {
-        $strom_kategorie = $heureka_kategorie;
+    if ( $produkt->is_in_stock() ) {
+      $sku = $produkt->get_sku();
+      if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
+        $ean = $sku;
+      }
+    
+      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+        $dodaci_doba = "";
+      }
+      elseif ( isset( $global_dodaci_doba ) ) {
+        $dodaci_doba = $global_dodaci_doba;
       }
       else {
-        $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-        if ( ! empty ( $rodice_kategorie ) ) {
-          foreach ( $rodice_kategorie as $rodic ) {
-            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-          }
-        }
-        $strom_kategorie .= $kategorie[0]->name;
+        $dodaci_doba = "";
       }
-    }
 
-    $xmlWriter->startElement( 'SHOPITEM' );
-    $xmlWriter->writeElement( 'ITEM_ID', $product_id );
-    $xmlWriter->startElement( 'PRODUCTNAME' );
-      $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
-    $xmlWriter->endElement();
-    if ( ! empty ( $description ) ) {
-      $xmlWriter->startElement( 'DESCRIPTION' );
-        $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
+      if ( ! empty ( $produkt->post->post_excerpt ) ) {
+        $description = $produkt->post->post_excerpt;
+      } else {
+        $description = $produkt->post->post_content;
+      }
+
+      $kategorie = get_the_terms( $product_id, 'product_cat' );
+      if ( $kategorie && ! is_wp_error( $kategorie ) ) {
+        $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+        if ( $heureka_kategorie ) {
+          $strom_kategorie = $heureka_kategorie;
+        }
+        else {
+          $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
+          if ( ! empty ( $rodice_kategorie ) ) {
+            foreach ( $rodice_kategorie as $rodic ) {
+              $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+              $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+            }
+          }
+          $strom_kategorie .= $kategorie[0]->name;
+        }
+      }
+
+      $xmlWriter->startElement( 'SHOPITEM' );
+      $xmlWriter->writeElement( 'ITEM_ID', $product_id );
+      $xmlWriter->startElement( 'PRODUCTNAME' );
+        $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
       $xmlWriter->endElement();
-    }
-    if ( ! empty ( $strom_kategorie ) ) {
-      $xmlWriter->startElement( 'CATEGORYTEXT' );
-        $xmlWriter->text( $strom_kategorie );
-      $xmlWriter->endElement();
-    }
-    $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
-    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
-    if ( $dodaci_doba != "" ) {
+      if ( ! empty ( $description ) ) {
+        $xmlWriter->startElement( 'DESCRIPTION' );
+          $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
+        $xmlWriter->endElement();
+      }
+      if ( ! empty ( $strom_kategorie ) ) {
+        $xmlWriter->startElement( 'CATEGORYTEXT' );
+          $xmlWriter->text( $strom_kategorie );
+        $xmlWriter->endElement();
+      }
+      $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+      $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
       $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
+      $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+      if ( ! empty ( $ean ) ) {
+        $xmlWriter->writeElement( 'EAN', $ean );
+      }
+      $xmlWriter->endElement();
+      // http://narhinen.net/2011/01/15/Serving-large-xml-files.html
     }
-    $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
-    if ( ! empty ( $ean ) ) {
-      $xmlWriter->writeElement( 'EAN', $ean );
-    }
-    $xmlWriter->endElement();
-    // http://narhinen.net/2011/01/15/Serving-large-xml-files.html
   }
 
   $xmlWriter->endElement();
@@ -121,70 +125,72 @@ function zbozi_xml_feed_zobrazeni() {
   $xmlWriter->startElement( 'SHOP' );
   
   foreach ( $products as $product_id ) {
-   
     $ean = "";
     $dodaci_doba = "";
     $description = "";
-    $skladem = false;
     $strom_kategorie = "";
 
     $produkt = new WC_Product( $product_id );
-    
-    $sku = $produkt->get_sku();
-    if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-      $ean = $sku;
-    }
-    
-    $skladem = $produkt->is_in_stock();
-    if ( $skladem && isset( $global_dodaci_doba ) ) {
-      $dodaci_doba = $global_dodaci_doba;
-    }
-    
-    if ( ! empty ( $produkt->post->post_excerpt ) ) {
-      $description = $produkt->post->post_excerpt;
-    } else {
-      $description = $produkt->post->post_content;
-    }
 
-    $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
-      $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-      if ( ! empty ( $rodice_kategorie ) ) {
-        foreach ( $rodice_kategorie as $rodic ) {
-          $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-          $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-        }
+    if ( $produkt->is_in_stock() ) {    
+      $sku = $produkt->get_sku();
+      if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
+        $ean = $sku;
       }
-      $strom_kategorie .= $kategorie[0]->name;
-    }
 
-    $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
-    $xmlWriter->startElement( 'SHOPITEM' );
-    $xmlWriter->startElement( 'PRODUCTNAME' );
-      $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
-    $xmlWriter->endElement();
-    if ( ! empty ( $description ) ) {
-      $xmlWriter->startElement( 'DESCRIPTION' );
-        $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
+      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+        $dodaci_doba = -1;
+      }
+      elseif ( isset( $global_dodaci_doba ) ) {
+        $dodaci_doba = $global_dodaci_doba;
+      }
+      else {
+        $dodaci_doba = -1;
+      }
+    
+      if ( ! empty ( $produkt->post->post_excerpt ) ) {
+        $description = $produkt->post->post_excerpt;
+      } else {
+        $description = $produkt->post->post_content;
+      }
+
+      $kategorie = get_the_terms( $product_id, 'product_cat' );
+      if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
+        $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
+        if ( ! empty ( $rodice_kategorie ) ) {
+          foreach ( $rodice_kategorie as $rodic ) {
+            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+          }
+        }
+        $strom_kategorie .= $kategorie[0]->name;
+      }
+
+      $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
+      $xmlWriter->startElement( 'SHOPITEM' );
+      $xmlWriter->startElement( 'PRODUCTNAME' );
+        $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
       $xmlWriter->endElement();
-    }
-    if ( ! empty ( $strom_kategorie ) ) {
-      $xmlWriter->startElement( 'CATEGORYTEXT' );
-        $xmlWriter->text( $strom_kategorie );
-      $xmlWriter->endElement();
-    }
-    $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
-    $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
-    if ( $dodaci_doba != "" ) {
+      if ( ! empty ( $description ) ) {
+        $xmlWriter->startElement( 'DESCRIPTION' );
+          $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
+        $xmlWriter->endElement();
+      }
+      if ( ! empty ( $strom_kategorie ) ) {
+        $xmlWriter->startElement( 'CATEGORYTEXT' );
+          $xmlWriter->text( $strom_kategorie );
+        $xmlWriter->endElement();
+      }
+      $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+      $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
       $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
+      $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+      if ( ! empty ( $ean ) ) {
+        $xmlWriter->writeElement( 'EAN', $ean );
+      }
+      $xmlWriter->endElement();
     }
-    $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
-    if ( ! empty ( $ean ) ) {
-      $xmlWriter->writeElement( 'EAN', $ean );
-    }
-    $xmlWriter->endElement();
   }
-
   $xmlWriter->endElement();
 
   $xmlWriter->endDocument();
@@ -244,11 +250,11 @@ function pricemania_xml_feed_aktualizace() {
     $output = $xmlWriter->outputMemory();
     $output = substr( $output, strpos( $output, "\n" ) + 1 );
     $output = str_replace( '<products/>', '</products>', $output );
-    file_put_contents( WP_CONTENT_DIR . '/pricemania-test.xml', $output, FILE_APPEND );
+    file_put_contents( WP_CONTENT_DIR . '/pricemania-tmp.xml', $output, FILE_APPEND );
 
     if ( file_exists( WP_CONTENT_DIR . '/pricemania.xml' ) ) {
       unlink( WP_CONTENT_DIR . '/pricemania.xml' );
-      rename( WP_CONTENT_DIR . '/pricemania-test.xml', WP_CONTENT_DIR . '/pricemania.xml' );
+      rename( WP_CONTENT_DIR . '/pricemania-tmp.xml', WP_CONTENT_DIR . '/pricemania.xml' );
     }
 
     delete_option( 'pricemania_xml_progress' );
@@ -268,7 +274,6 @@ function pricemania_xml_feed_aktualizace() {
     $ean = "";
     $dodaci_doba = "";
     $description = "";
-    $skladem = false;
     $strom_kategorie = "";
     
     $i = $i + 1;
@@ -280,9 +285,16 @@ function pricemania_xml_feed_aktualizace() {
       $ean = $sku;
     }
     
-    $skladem = $produkt->is_in_stock();
-    if ( $skladem && isset( $global_dodaci_doba ) ) {
-      $dodaci_doba = $global_dodaci_doba;
+    if ( $produkt->is_in_stock() ) {
+      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+        $dodaci_doba = 50;
+      }
+      elseif ( isset( $global_dodaci_doba ) ) {
+        $dodaci_doba = $global_dodaci_doba;
+      }
+    }
+    else {
+      $dodaci_doba = 100;
     }
     
     if ( ! empty ( $produkt->post->post_excerpt ) ) {
@@ -322,9 +334,7 @@ function pricemania_xml_feed_aktualizace() {
     $xmlWriter->writeElement( 'manufacturer', '' ); // https://wordpress.org/plugins/woocommerce-brand/
     $xmlWriter->writeElement( 'url', get_permalink( $product_id ) );
     $xmlWriter->writeElement( 'picture', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
-    if ( $dodaci_doba != "" ) {
-      $xmlWriter->writeElement( 'availability', $dodaci_doba );
-    }
+    $xmlWriter->writeElement( 'availability', $dodaci_doba );
     if ( $postovne != "" ) {
       $xmlWriter->writeElement( 'shipping', $postovne );
     }
@@ -344,7 +354,7 @@ function pricemania_xml_feed_aktualizace() {
     header( 'Content-type: text/xml' );
   }
 
-  file_put_contents( WP_CONTENT_DIR . '/pricemania-test.xml', $output, FILE_APPEND );
+  file_put_contents( WP_CONTENT_DIR . '/pricemania-tmp.xml', $output, FILE_APPEND );
   $xmlWriter->flush( true );
   
   $offset = $offset + $limit;
