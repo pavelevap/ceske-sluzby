@@ -193,7 +193,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Zbozi.cz',
         'type' => 'title',
-        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/specifikace-xml/">zde</a>. Nastavení je stejné jako pro Heureka.cz.',
+        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . site_url() . '/wp-content/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/specifikace-xml/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
         'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
       ),
       array(
@@ -203,7 +203,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Pricemania.cz (.sk)',
         'type' => 'title',
-        'desc' => 'Generovaný feed je dostupný v podobě .xml souboru <a href="' . WP_CONTENT_URL . '/pricemania.xml">zde</a> (aktualizace probíhá automaticky jednou denně). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+        'desc' => 'Generovaný feed je dostupný v podobě .xml <a href="' . WP_CONTENT_URL . '/pricemania.xml">souboru</a>. Aktualizace probíhá automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
         'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
       ),
       array(
