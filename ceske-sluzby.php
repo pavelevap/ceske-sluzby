@@ -118,10 +118,15 @@ var _srt = _srt || [];
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
-    if( is_admin() ) {
+    if ( is_admin() ) {
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-admin.php';
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek.php';
       WC_Settings_Tab_Ceske_Sluzby_Admin::init();
+      $xml_feed = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+      if ( $xml_feed == "yes" ) {
+        require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-product-tab.php';
+        new WC_Product_Tab_Ceske_Sluzby_Admin();
+      }
     }
 
     add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_ulozenka_init' );
@@ -520,4 +525,3 @@ function ceske_sluzby_xml_heureka_kategorie_sloupec( $columns, $column, $id ) {
   }
   return $columns;
 }
-
