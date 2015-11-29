@@ -21,6 +21,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_product_tab_obsah() {
     // Zobrazit aktuální hodnoty v podobě ukázky XML
     // http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
+    $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     echo '<div id="ceske_sluzby_tab_data" class="panel woocommerce_options_panel">';
     echo '<div class="options_group show_if_simple">';
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
@@ -36,34 +37,40 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     echo '</div>';
 
-    echo '<div class="options_group show_if_simple">'; // hide_if_grouped - skrýt u seskupených produktů
-    echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>)</div>';
-    woocommerce_wp_text_input(
-      array( 
-        'id' => 'ceske_sluzby_xml_heureka_productname', 
-        'label' => 'Přesný název (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/povinne-nazvy/" target="_blank">manuál</a>)', 
-        'placeholder' => 'PRODUCTNAME',
-        'desc_tip' => 'true',
-        'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
-      )
-    );
-
-    echo '</div>';
+    if ( $xml_feed_heureka == "yes" ) {
+      echo '<div class="options_group show_if_simple">'; // hide_if_grouped - skrýt u seskupených produktů
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>)</div>';
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_heureka_productname', 
+          'label' => 'Přesný název (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/povinne-nazvy/" target="_blank">manuál</a>)', 
+          'placeholder' => 'PRODUCTNAME',
+          'desc_tip' => 'true',
+          'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
+        )
+      );
+      echo '</div>';
+    }
 
     echo '</div>';
   }
 
   public function ceske_sluzby_product_tab_ulozeni( $post_id ) {
-    $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
-    if( ! empty( $heureka_productname ) ) {
-      update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
+    if ( isset( $_POST['ceske_sluzby_xml_heureka_productname'] ) ) {
+      $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
+      if( ! empty( $heureka_productname ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
+      }
     }
-    $xml_vynechano = $_POST['ceske_sluzby_xml_vynechano'];
+
     $xml_vynechano_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', true );
-    if ( isset( $xml_vynechano ) ) {
-      update_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', $xml_vynechano );  
-    } elseif ( $xml_vynechano != $xml_vynechano_ulozeno ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );  
+    if ( isset( $_POST['ceske_sluzby_xml_vynechano'] ) ) {
+      $xml_vynechano = $_POST['ceske_sluzby_xml_vynechano'];
+      if ( ! empty( $xml_vynechano ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', $xml_vynechano );  
+      }
+    } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );  
     }
   }
 }
