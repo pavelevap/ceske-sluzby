@@ -169,6 +169,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
       ),
       array(
+        'title' => 'Aktivovat feed',
+        'type' => 'checkbox',
+        'desc' => 'Povolí možnost postupného generování .xml souboru pro Heureka.cz (.sk) a zobrazí příslušná nastavení v administraci.',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka-aktivace'
+      ),
+      array(
         'title' => 'Dodací doba',
         'type' => 'number',
         'desc' => 'Zboží může být skladem (0), dostupné do tří dnů (1 - 3), do týdne (4 - 7), do dvou týdnů (8 - 14), do měsíce (15 - 30) či více než měsíc (31 a více).',
@@ -193,8 +199,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Zbozi.cz',
         'type' => 'title',
-        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . site_url() . '/wp-content/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/specifikace-xml/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/specifikace-xml/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
         'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
+      ),
+      array(
+        'title' => 'Aktivovat feed',
+        'type' => 'checkbox',
+        'desc' => 'Povolí možnost postupného generování .xml souboru pro Zbozi.cz a zobrazí příslušná nastavení v administraci.',
+        'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
       ),
       array(
         'type' => 'sectionend',
@@ -205,6 +217,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'type' => 'title',
         'desc' => 'Generovaný feed je dostupný v podobě .xml <a href="' . WP_CONTENT_URL . '/pricemania.xml">souboru</a>. Aktualizace probíhá automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
         'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
+      ),
+      array(
+        'title' => 'Aktivovat feed',
+        'type' => 'checkbox',
+        'desc' => 'Povolí možnost postupného generování .xml souboru pro Pricemania.cz (.sk) a zobrazí příslušná nastavení v administraci.',
+        'id' => 'wc_ceske_sluzby_xml_feed_pricemania-aktivace'
       ),
       array(
         'title' => 'Poštovné',
