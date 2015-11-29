@@ -271,6 +271,8 @@ function zbozi_xml_feed_aktualizace() {
 
     if ( file_exists( WP_CONTENT_DIR . '/zbozi.xml' ) ) {
       unlink( WP_CONTENT_DIR . '/zbozi.xml' );
+    }
+    if ( file_exists( WP_CONTENT_DIR . '/zbozi-tmp.xml' ) ) {
       rename( WP_CONTENT_DIR . '/zbozi-tmp.xml', WP_CONTENT_DIR . '/zbozi.xml' );
     }
 
@@ -425,6 +427,8 @@ function pricemania_xml_feed_aktualizace() {
 
     if ( file_exists( WP_CONTENT_DIR . '/pricemania.xml' ) ) {
       unlink( WP_CONTENT_DIR . '/pricemania.xml' );
+    }
+    if ( file_exists( WP_CONTENT_DIR . '/pricemania-tmp.xml' ) ) {
       rename( WP_CONTENT_DIR . '/pricemania-tmp.xml', WP_CONTENT_DIR . '/pricemania.xml' );
     }
 
