@@ -22,6 +22,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     // Zobrazit aktuální hodnoty v podobě ukázky XML
     // http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
+    $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
     echo '<div id="ceske_sluzby_tab_data" class="panel woocommerce_options_panel">';
     echo '<div class="options_group show_if_simple">';
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
@@ -51,6 +52,21 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       );
       echo '</div>';
     }
+    
+    if ( $xml_feed_zbozi == "yes" ) {
+      echo '<div class="options_group show_if_simple">';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_zbozi_productname', 
+          'label' => 'Přesný název (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">manuál</a>)', 
+          'placeholder' => 'PRODUCTNAME',
+          'desc_tip' => 'true',
+          'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
+        )
+      );
+      echo '</div>';
+    }
 
     echo '</div>';
   }
@@ -60,6 +76,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
       if( ! empty( $heureka_productname ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
+      }
+    }
+    
+    if ( isset( $_POST['ceske_sluzby_xml_zbozi_productname'] ) ) {
+      $zbozi_productname = $_POST['ceske_sluzby_xml_zbozi_productname'];
+      if( ! empty( $zbozi_productname ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_productname', esc_attr( $zbozi_productname ) );
       }
     }
 
