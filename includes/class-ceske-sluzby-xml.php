@@ -5,9 +5,17 @@ function heureka_xml_feed_zobrazeni() {
     'nopaging' => true,
     'post_type' => 'product',
     'post_status' => 'publish',
-    'meta_key' => '_visibility',
-    'meta_value' => 'hidden',
-    'meta_compare' => '!=',
+    'meta_query' => array(
+      array(
+        'key' => '_visibility',
+        'value' => 'hidden',
+        'compare' => '!=',
+      ),
+      array(
+        'key' => 'ceske_sluzby_xml_vynechano',
+        'compare' => 'NOT EXISTS',
+      ),
+    ),
     'fields' => 'ids'
   );
   $products = get_posts( $args );
@@ -68,12 +76,21 @@ function heureka_xml_feed_zobrazeni() {
           $strom_kategorie .= $kategorie[0]->name;
         }
       }
+      
+      $nazev = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
       $xmlWriter->startElement( 'SHOPITEM' );
       $xmlWriter->writeElement( 'ITEM_ID', $product_id );
-      $xmlWriter->startElement( 'PRODUCTNAME' );
-        $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
-      $xmlWriter->endElement();
+      if ( ! empty ( $nazev ) ) {
+        $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev ) ); // Potřebujeme wp_strip_all_tags()?
+        $xmlWriter->startElement( 'PRODUCT' );
+          $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
+        $xmlWriter->endElement();
+      } else {
+        $xmlWriter->startElement( 'PRODUCTNAME' );
+          $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
+        $xmlWriter->endElement();
+      }
       if ( ! empty ( $description ) ) {
         $xmlWriter->startElement( 'DESCRIPTION' );
           $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
