@@ -174,14 +174,14 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
 
 function ceske_sluzby_doprava_ulozenka_init() {
-	if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Ulozenka' ) ) {
+  if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Ulozenka' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka.php';
-	}
+  }
 }
  
 function ceske_sluzby_doprava_ulozenka( $methods ) {
-	$methods[] = 'WC_Shipping_Ceske_Sluzby_Ulozenka';
-	return $methods;
+  $methods[] = 'WC_Shipping_Ceske_Sluzby_Ulozenka';
+  return $methods;
 }
 
 function ceske_sluzby_ulozenka_zobrazit_pobocky() {
@@ -237,14 +237,14 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
 }
 
 function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
-    if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-      wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
-    }
+  if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
+    wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
+  }
 }
 
 function ceske_sluzby_ulozenka_overit_pobocku() {
-	if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-		wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
+  if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
+    wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
   }
 }
 
@@ -279,15 +279,15 @@ function ceske_sluzby_ulozenka_pobocka_email( $order ) {
 }
 
 function ceske_sluzby_doprava_dpd_parcelshop_init() {
-	if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop' ) ) {
+  if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-dpd-parcelshop.php';
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-json-loader.php';
-	}
+  }
 }
  
 function ceske_sluzby_doprava_dpd_parcelshop( $methods ) {
-	$methods[] = 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop';
-	return $methods;
+  $methods[] = 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop';
+  return $methods;
 }
 
 function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
@@ -341,14 +341,14 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
 }
 
 function ceske_sluzby_dpd_parcelshop_ulozeni_pobocky( $order_id, $item_id ) {
-    if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
-      wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
-    }
+  if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+    wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+  }
 }
 
 function ceske_sluzby_dpd_parcelshop_overit_pobocku() {
-	if ( $_POST["dpd_parcelshop_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
-		wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím DPD ParcelShop, zvolte prosím pobočku.', 'error' );
+  if ( $_POST["dpd_parcelshop_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+    wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím DPD ParcelShop, zvolte prosím pobočku.', 'error' );
   }
 }
 
@@ -394,36 +394,36 @@ function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
 
 add_action( 'init', 'ceske_sluzby_aktivace_xml_feed' );
 function ceske_sluzby_aktivace_xml_feed() {
-	$aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
-	if ( $aktivace_xml == "yes" ) {
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
-		add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
-		add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
+  $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+  if ( $aktivace_xml == "yes" ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+    add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
+    add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
 
-		$zbozi_xml = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
-		if ( $zbozi_xml == "yes" ) {
-			if ( ! wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
-				wp_schedule_event( current_time( 'timestamp', 1 ), 'daily', 'ceske_sluzby_zbozi_aktualizace_xml' );
-			}
-		} else {
-			if ( wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
-				$timestamp = wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' );
-				wp_unschedule_event( $timestamp, 'ceske_sluzby_zbozi_aktualizace_xml' ); 
-			}
-		}
+    $zbozi_xml = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+    if ( $zbozi_xml == "yes" ) {
+      if ( ! wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
+        wp_schedule_event( current_time( 'timestamp', 1 ), 'daily', 'ceske_sluzby_zbozi_aktualizace_xml' );
+      }
+    } else {
+      if ( wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
+        $timestamp = wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' );
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_zbozi_aktualizace_xml' ); 
+      }
+    }
 
-		$pricemania_xml = get_option( 'wc_ceske_sluzby_xml_feed_pricemania-aktivace' );
-		if ( $pricemania_xml == "yes" ) {
-			if ( ! wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
-				wp_schedule_event( current_time( 'timestamp', 1 ) + HOUR_IN_SECONDS, 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
-			}
-		} else {
-			if ( wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
-				$timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' );
-				wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml' );
-			}
-		}
-	} else {
+    $pricemania_xml = get_option( 'wc_ceske_sluzby_xml_feed_pricemania-aktivace' );
+    if ( $pricemania_xml == "yes" ) {
+      if ( ! wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
+        wp_schedule_event( current_time( 'timestamp', 1 ) + HOUR_IN_SECONDS, 'daily', 'ceske_sluzby_pricemania_aktualizace_xml' );
+      }
+    } else {
+      if ( wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' ) ) {
+        $timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' );
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml' );
+      }
+    }
+  } else {
     if ( wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' );
       wp_unschedule_event( $timestamp, 'ceske_sluzby_zbozi_aktualizace_xml' );
