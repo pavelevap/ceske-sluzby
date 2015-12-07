@@ -34,79 +34,217 @@ function heureka_xml_feed_zobrazeni() {
     $dodaci_doba = "";
     $description = "";
     $strom_kategorie = "";
+    $nazev_produkt_vlastnosti = "";
+    $vlastnosti_produkt = array();
+    $terms = array();
 
-    $produkt = new WC_Product( $product_id );
-
-    if ( $produkt->is_in_stock() ) {
-      $sku = $produkt->get_sku();
-      if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-        $ean = $sku;
-      }
+    $produkt = wc_get_product( $product_id );
     
-      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-        $dodaci_doba = "";
-      }
-      elseif ( isset( $global_dodaci_doba ) ) {
-        $dodaci_doba = $global_dodaci_doba;
+    $kategorie = get_the_terms( $product_id, 'product_cat' );
+    if ( $kategorie && ! is_wp_error( $kategorie ) ) {
+      $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+      if ( $heureka_kategorie ) {
+        $strom_kategorie = $heureka_kategorie;
       }
       else {
-        $dodaci_doba = "";
-      }
-
-      if ( ! empty ( $produkt->post->post_excerpt ) ) {
-        $description = $produkt->post->post_excerpt;
-      } else {
-        $description = $produkt->post->post_content;
-      }
-
-      $kategorie = get_the_terms( $product_id, 'product_cat' );
-      if ( $kategorie && ! is_wp_error( $kategorie ) ) {
-        $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-        if ( $heureka_kategorie ) {
-          $strom_kategorie = $heureka_kategorie;
+        $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
+        if ( ! empty ( $rodice_kategorie ) ) {
+          foreach ( $rodice_kategorie as $rodic ) {
+            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+          }
         }
-        else {
-          $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-          if ( ! empty ( $rodice_kategorie ) ) {
-            foreach ( $rodice_kategorie as $rodic ) {
-              $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-              $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+        $strom_kategorie .= $kategorie[0]->name;
+      }
+    }
+      
+    $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
+
+    $attributes_produkt = $produkt->get_attributes();
+    if ( $attributes_produkt ) {
+      $i = 0;
+      foreach ( $attributes_produkt as $attribute ) {
+        if ( $attribute['is_taxonomy'] ) {
+          if ( ! $attribute['is_variation'] ) {
+            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+            if ( $terms ) {
+              foreach ( $terms as $term ) {
+                $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
+                $vlastnosti_produkt[$i]['hodnota'] = $term;
+                if ( count( $terms ) == 1 ) {
+                  $nazev_produkt_vlastnosti .= " " . $term;
+                }
+                $i = $i + 1; 
+              }
             }
           }
-          $strom_kategorie .= $kategorie[0]->name;
+        } else {
+          if ( ! $attribute['is_variation'] ) {
+            $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
+            $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
+            $i = $i + 1;
+          }
         }
       }
-      
-      $nazev = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
+    }
 
-      $xmlWriter->startElement( 'SHOPITEM' );
-      $xmlWriter->writeElement( 'ITEM_ID', $product_id );
-      if ( ! empty ( $nazev ) ) {
-        $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev ) ); // Potřebujeme wp_strip_all_tags()?
-      } else {
-        $xmlWriter->startElement( 'PRODUCTNAME' );
-          $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title ) );
+    if ( $produkt->is_type( 'variable' ) ) {
+      foreach( $produkt->get_available_variations() as $variation ) {
+        $varianta = new WC_Product_Variation( $variation['variation_id'] );
+        if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $nazev_varianta = "";
+          $vlastnosti_varianta = array();
+
+          $sku = $varianta->get_sku();
+          if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
+            $ean = $sku;
+          }
+    
+          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+            $dodaci_doba = "";
+          }
+          elseif ( isset( $global_dodaci_doba ) ) {
+            $dodaci_doba = $global_dodaci_doba;
+          }
+          else {
+            $dodaci_doba = "";
+          }
+
+          if ( empty ( $varianta->get_variation_description() ) ) {
+            if ( ! empty ( $produkt->post->post_excerpt ) ) {
+            $description = $produkt->post->post_excerpt;
+            } else {
+              $description = $produkt->post->post_content;
+            }
+          } else {
+            $description = $varianta->get_variation_description();
+          }
+       
+          $attributes_varianta = $varianta->get_variation_attributes();
+          if ( $attributes_varianta ) {
+            $i = 0;
+            foreach ( $attributes_varianta as $nazev => $hodnota ) {
+              if ( strpos( $nazev, '_pa_' ) !== false ) {
+                $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
+                if ( $term ) {
+                  $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
+                  $vlastnosti_varianta[$i]['hodnota'] = $term->name;
+                  $nazev_varianta .= " " . $term->name;
+                }
+              } else {
+                $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
+                $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
+                $nazev_varianta .= " " . $hodnota;
+              }
+              $i = $i + 1;
+            }
+          }
+          if ( $vlastnosti_produkt ) {
+            $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
+          }
+
+          $xmlWriter->startElement( 'SHOPITEM' );
+          $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
+          if ( ! empty ( $nazev_produkt ) ) {
+            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt . $nazev_varianta ) );
+          } else {
+            $xmlWriter->startElement( 'PRODUCTNAME' );
+              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_varianta ) );
+            $xmlWriter->endElement();
+          }
+          if ( ! empty ( $description ) ) {
+            $xmlWriter->startElement( 'DESCRIPTION' );
+              $xmlWriter->text( wp_strip_all_tags( $description ) );
+            $xmlWriter->endElement();
+          }
+          if ( ! empty ( $strom_kategorie ) ) {
+            $xmlWriter->startElement( 'CATEGORYTEXT' );
+              $xmlWriter->text( $strom_kategorie );
+            $xmlWriter->endElement();
+          }
+          $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+          $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
+          $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
+          $xmlWriter->writeElement( 'PRICE_VAT', $varianta->price );
+
+          if ( $vlastnosti_varianta ) {
+            $xmlWriter->startElement( 'PARAM' );
+            foreach ( $vlastnosti_varianta as $vlastnost ) { 
+              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost['nazev'] );
+              $xmlWriter->writeElement( 'VAL', $vlastnost['hodnota'] );
+            }
+            $xmlWriter->endElement();
+            $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
+          }
+
+          if ( ! empty ( $ean ) ) {
+            $xmlWriter->writeElement( 'EAN', $ean );
+          }
+          $xmlWriter->endElement();
+        }
+      }
+    } elseif ( $produkt->is_type( 'simple' ) ) {
+      if ( $produkt->is_in_stock() ) {
+        $sku = $produkt->get_sku();
+        if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
+          $ean = $sku;
+        }
+    
+        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+          $dodaci_doba = "";
+        }
+        elseif ( isset( $global_dodaci_doba ) ) {
+          $dodaci_doba = $global_dodaci_doba;
+        }
+        else {
+          $dodaci_doba = "";
+        }
+
+        if ( ! empty ( $produkt->post->post_excerpt ) ) {
+          $description = $produkt->post->post_excerpt;
+        } else {
+          $description = $produkt->post->post_content;
+        }
+
+        $xmlWriter->startElement( 'SHOPITEM' );
+          $xmlWriter->writeElement( 'ITEM_ID', $product_id );
+          if ( ! empty ( $nazev_produkt ) ) {
+            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt ) ); // Potřebujeme wp_strip_all_tags()?
+          } else {
+            $xmlWriter->startElement( 'PRODUCTNAME' );
+              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_produkt_vlastnosti ) );
+            $xmlWriter->endElement();
+          }
+          if ( ! empty ( $description ) ) {
+            $xmlWriter->startElement( 'DESCRIPTION' );
+              $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
+            $xmlWriter->endElement();
+          }
+          if ( ! empty ( $strom_kategorie ) ) {
+            $xmlWriter->startElement( 'CATEGORYTEXT' );
+              $xmlWriter->text( $strom_kategorie );
+            $xmlWriter->endElement();
+          }
+          $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+          $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
+          $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
+          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+
+          if ( $vlastnosti_produkt ) {
+            $xmlWriter->startElement( 'PARAM' );
+            foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
+              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
+              $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+            }
+            $xmlWriter->endElement();
+          }
+
+          if ( ! empty ( $ean ) ) {
+            $xmlWriter->writeElement( 'EAN', $ean );
+          }
         $xmlWriter->endElement();
-      }
-      if ( ! empty ( $description ) ) {
-        $xmlWriter->startElement( 'DESCRIPTION' );
-          $xmlWriter->text( wp_strip_all_tags( $description ) ); // Může být omezeno...
-        $xmlWriter->endElement();
-      }
-      if ( ! empty ( $strom_kategorie ) ) {
-        $xmlWriter->startElement( 'CATEGORYTEXT' );
-          $xmlWriter->text( $strom_kategorie );
-        $xmlWriter->endElement();
-      }
-      $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
-      $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
-      $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-      $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
-      if ( ! empty ( $ean ) ) {
-        $xmlWriter->writeElement( 'EAN', $ean );
-      }
-      $xmlWriter->endElement();
       // http://narhinen.net/2011/01/15/Serving-large-xml-files.html
+      }
     }
   }
 

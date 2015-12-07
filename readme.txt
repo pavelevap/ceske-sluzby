@@ -20,7 +20,7 @@ Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzb
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
 
-Plugin sice bez problémů funguje na více než 300 různých webech, ale berte ho prosím stále jako testovací verzi.
+Plugin už sice bez problémů používá více než 300 různých webů, ale berte ho prosím stále jako testovací verzi.
 
 Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
