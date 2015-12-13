@@ -328,8 +328,14 @@ function heureka_xml_feed_aktualizace() {
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
+  $pocet_produkt = 0;
+  $prubezny_pocet = 0;
   
   foreach ( $products as $product_id ) {
+    if ( $prubezny_pocet > $limit ) {
+      break;
+    }
+    
     $ean = "";
     $dodaci_doba = "";
     $description = "";
@@ -482,6 +488,7 @@ function heureka_xml_feed_aktualizace() {
           }
           $xmlWriter->endElement();
         }
+        $prubezny_pocet = $prubezny_pocet + 1;
       }
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
@@ -544,7 +551,9 @@ function heureka_xml_feed_aktualizace() {
           }
         $xmlWriter->endElement();
       }
+      $prubezny_pocet = $prubezny_pocet + 1;
     }
+    $pocet_produkt = $pocet_produkt + 1;
   }
 
   $output = $xmlWriter->outputMemory();
@@ -558,7 +567,7 @@ function heureka_xml_feed_aktualizace() {
   file_put_contents( WP_CONTENT_DIR . '/heureka-tmp.xml', $output, FILE_APPEND );
   $xmlWriter->flush( true );
   
-  $offset = $offset + $limit;
+  $offset = $offset + $pocet_produkt;
   update_option( 'heureka_xml_progress', $offset );
   delete_option( $lock_name );
 }
