@@ -165,7 +165,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Heureka.cz (.sk)',
         'type' => 'title',
-        'desc' => 'Generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
+        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
       ),
       array(
