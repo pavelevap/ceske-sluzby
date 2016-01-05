@@ -50,6 +50,15 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
         )
       );
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_heureka_kategorie', 
+          'label' => 'Kategorie (<a href="http://www.' . HEUREKA_URL . '/direct/xml-export/shops/heureka-sekce.xml" target="_blank">přehled</a>)', 
+          'placeholder' => 'CATEGORYTEXT',
+          'desc_tip' => 'true',
+          'description' => 'Příklad: Elektronika | Počítače a kancelář | Software | Multimediální software' 
+        )
+      );
       echo '</div>';
     }
     
@@ -67,7 +76,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       );
       echo '</div>';
     }
-
     echo '</div>';
   }
 
@@ -76,6 +84,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
       if( ! empty( $heureka_productname ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
+      }
+    }
+    
+    if ( isset( $_POST['ceske_sluzby_xml_heureka_kategorie'] ) ) {
+      $heureka_kategorie = $_POST['ceske_sluzby_xml_heureka_kategorie'];
+      if( ! empty( $heureka_kategorie ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_kategorie', esc_attr( $heureka_kategorie ) );
       }
     }
     
