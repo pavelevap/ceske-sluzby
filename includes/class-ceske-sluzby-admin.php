@@ -13,12 +13,15 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     // Neduplikovat do budoucna tuto funkci...
     global $current_section;
     $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
-    $sections = array();
+    $aktivace_certifikatu = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace' );
+    $sections = array(
+      '' => 'Základní nastavení'
+    );
     if ( $aktivace_xml == "yes" ) {
-      $sections = array(
-        '' => 'Základní nastavení',
-        'xml-feed' => 'XML feed'
-      );
+      $sections['xml-feed'] = 'XML feed';
+    }
+    if ( $aktivace_certifikatu == "yes" ) {
+      $sections['certifikat-spokojenosti'] = 'Certifikát spokojenosti';
     }
     if ( empty( $sections ) ) {
       return;
@@ -75,6 +78,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>.',
         'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
         'css'   => 'width: 300px'
+      ),
+      array(
+        'title' => 'Aktivovat certifikát',
+        'type' => 'checkbox',
+        'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
+        'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace'
       ),
       array(
         'title' => 'Aktivovat XML feed',
@@ -154,6 +163,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       )
     );
     }
+
     if ( 'xml-feed' == $current_section ) {
         $settings = array(
       array(
@@ -239,6 +249,43 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
       )
+      );
+    }
+
+    if ( 'certifikat-spokojenosti' == $current_section ) {
+      $settings = array(
+        array(
+          'title' => 'Ověřeno zákazníky: Certifikát spokojenosti',
+          'type' => 'title',
+          'desc' => 'Nastavení pro zobrazování certifikátu spokojenosti na webu.',
+          'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_title'
+        ),
+        array(
+          'title' => 'Základní umístění',
+          'type' => 'radio',
+          'default' => 'vlevo',
+          'options' => array(
+            'vlevo' => 'Vlevo',
+            'vpravo' => 'Vpravo',
+				  ),
+          'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_umisteni'
+        ),
+        array(
+          'title' => 'Odsazení shora (px)',
+          'type' => 'number',
+          'default' => 60,
+          'desc' => 'Zadávejte hodnotu pro odsazení shora v pixelech.',
+          'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_odsazeni',
+          'css' => 'width: 50px',
+          'custom_attributes' => array(
+            'min' => 0,
+            'step' => 10
+          )
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_title'
+        )
       );
     }
     return $settings;

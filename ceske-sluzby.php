@@ -74,6 +74,41 @@ var _hrq = _hrq || [];
   }
 }
 
+function ceske_sluzby_heureka_certifikat_spokojenosti() {
+  $api = get_option( 'wc_ceske_sluzby_heureka_konverze-api' );
+  $certifikat = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace' );
+  if ( ! empty( $api ) && $certifikat == "yes" ) {
+    $umisteni = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_umisteni' );
+    $odsazeni = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_odsazeni' );
+    if ( ! empty( $umisteni ) ) {
+      if ( $umisteni == "vlevo" ) {
+        $umisteni = 21;
+      } else {
+        $umisteni = 21;
+      }
+    } else {
+      $umisteni = 21;
+    }
+    if ( empty( $odsazeni ) ) {
+      $odsazeni = 60;
+    }
+  ?>
+    
+<script type="text/javascript">
+//<![CDATA[
+var _hwq = _hwq || [];
+    _hwq.push(['setKey', '<?php echo $api; ?>']);_hwq.push(['setTopPos', '<?php echo $odsazeni; ?>']);_hwq.push(['showWidget', '<?php echo $umisteni; ?>']);(function() {
+    var ho = document.createElement('script'); ho.type = 'text/javascript'; ho.async = true;
+    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.<?php echo HEUREKA_URL; ?>/direct/i/gjs.php?n=wdgt&sak=<?php echo $api; ?>';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ho, s);
+})();
+//]]>
+</script>
+
+<?php
+  }
+}
+
 function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
   $konverze = get_option( 'wc_ceske_sluzby_sklik_konverze-objednavky' );
   if ( ! empty( $konverze ) ) { ?>
@@ -163,12 +198,15 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     if ( $aktivace_recenzi == "yes" ) {
       add_shortcode( 'heureka-recenze-obchodu', 'ceske_sluzby_heureka_recenze_obchodu' );
     }
+
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
     add_action( 'product_cat_edit_form_fields', 'ceske_sluzby_xml_kategorie_upravit_pole', 99 );
     add_action( 'created_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
     add_action( 'edit_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
     add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
+    
+    add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); //Pouze pro eshop?
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
