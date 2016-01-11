@@ -206,7 +206,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
     
-    add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); //Pouze pro eshop?
+    add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
 	}
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -300,12 +300,21 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
   if ( $chosen_shipping_method[0] == "ceske_sluzby_ulozenka" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
     $zeme = WC()->customer->get_shipping_country();
-    if ( $zeme == "CZ" ) { if ( empty( $settings['ulozenka_dobirka'] ) ) { return $amount; } else { return $settings['ulozenka_dobirka']; } }
-    if ( $zeme == "SK" ) { if ( empty( $settings['ulozenka_dobirka-slovensko'] ) ) { return $amount; } else { return $settings['ulozenka_dobirka-slovensko']; } }
+    if ( $zeme == "CZ" ) {
+      if ( ! empty( $settings['ulozenka_dobirka'] ) ) {
+        $amount = $settings['ulozenka_dobirka'];
+      } 
+    }
+    if ( $zeme == "SK" ) {
+      if ( ! empty( $settings['ulozenka_dobirka-slovensko'] ) ) {
+        $amount = $settings['ulozenka_dobirka-slovensko'];
+      }
+    }
+    if ( class_exists( 'WOOCS' ) ) {
+      $amount = apply_filters( 'woocs_exchange_value', $amount );
+    }
   }
-  else {
-    return $amount;
-  }
+  return $amount;
 }
 
 function ceske_sluzby_ulozenka_pobocka_email( $order ) {
@@ -404,12 +413,21 @@ function ceske_sluzby_dpd_parcelshop_dobirka_pay4pay( $amount ) {
   if ( $chosen_shipping_method[0] == "ceske_sluzby_dpd_parcelshop" ) {
     $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
     $zeme = WC()->customer->get_shipping_country();
-    if ( $zeme == "CZ" ) { if ( empty( $settings['dpd_parcelshop_dobirka'] ) ) { return $amount; } else { return $settings['dpd_parcelshop_dobirka']; } }
-    if ( $zeme == "SK" ) { if ( empty( $settings['dpd_parcelshop_dobirka-slovensko'] ) ) { return $amount; } else { return $settings['dpd_parcelshop_dobirka-slovensko']; } }
+    if ( $zeme == "CZ" ) {
+      if ( ! empty( $settings['dpd_parcelshop_dobirka'] ) ) {
+        $amount = $settings['dpd_parcelshop_dobirka'];
+      }
+    }
+    if ( $zeme == "SK" ) {
+      if ( ! empty( $settings['dpd_parcelshop_dobirka-slovensko'] ) ) {
+        $amount = $settings['dpd_parcelshop_dobirka-slovensko'];
+      }
+    }
+    if ( class_exists( 'WOOCS' ) ) {
+      $amount = apply_filters( 'woocs_exchange_value', $amount );
+    }
   }
-  else {
-    return $amount;
-  }
+  return $amount;
 }
 
 function ceske_sluzby_dpd_parcelshop_pobocka_email( $order ) {
