@@ -21,21 +21,36 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_product_tab_obsah() {
     // Zobrazit aktuální hodnoty v podobě ukázky XML
     // http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
+    global $post;
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
     echo '<div id="ceske_sluzby_tab_data" class="panel woocommerce_options_panel">';
     echo '<div class="options_group show_if_simple">';
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
 
-    woocommerce_wp_checkbox( 
-      array( 
-        'id' => 'ceske_sluzby_xml_vynechano', 
-        'wrapper_class' => '', // show_if_simple - pouze u jednoduchých produktů
-        'label' => 'Odebrat z XML', 
-        'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů'
-      ) 
-    );
-
+    $vynechane_kategorie = "";
+    $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
+    foreach ( $product_categories as $kategorie_produktu ) {
+      $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
+      if ( ! empty ( $vynechano ) ) {
+        if ( ! empty ( $vynechane_kategorie ) ) {
+          $vynechane_kategorie .= ", ";
+        }
+        $vynechane_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+      }
+    }
+    if ( ! empty ( $vynechane_kategorie ) ) {
+      echo '<p class="form-field"><label for="ceske_sluzby_xml_vynechano">Odebrat z XML</label>Není potřeba nic zadávat, protože jsou zcela ignorovány některé kategorie: ' . $vynechane_kategorie . '</p>';
+    } else {
+      woocommerce_wp_checkbox( 
+        array( 
+          'id' => 'ceske_sluzby_xml_vynechano', 
+          'wrapper_class' => '', // show_if_simple - pouze u jednoduchých produktů
+          'label' => 'Odebrat z XML', 
+          'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů'
+        ) 
+      );
+    }
     echo '</div>';
 
     if ( $xml_feed_heureka == "yes" ) {
@@ -50,6 +65,21 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
         )
       );
+      
+      $kategorie_heureka = "";
+      foreach ( $product_categories as $kategorie_produktu ) {
+        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+        if ( ! empty ( $kategorie ) ) {
+          if ( empty ( $kategorie_heureka ) ) {
+            $kategorie_heureka = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+            $nazev_kategorie = $kategorie;
+          }
+        }
+      }
+      if ( ! empty ( $kategorie_heureka ) ) {
+        echo '<p class="form-field"><label for="ceske_sluzby_xml_vynechano">Upozornění (!)</label>Nastavená hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie . '</code></p>';
+      }
+    
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_heureka_kategorie', 
