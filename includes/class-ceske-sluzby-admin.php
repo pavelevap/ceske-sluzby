@@ -196,11 +196,11 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         )
       ),
       array(
-        'title' => 'Podpora EAN kódů',
+        'title' => 'Podpora EAN',
         'type' => 'text',
-        'desc' => 'Pokud doplňujete EAN kód do pole SKU, tak zadejte hodnotu "SKU" (bez uvozovek). Podpora pro další možnosti zadávání EAN (uživatelská pole) bude doplněna.',
+        'desc' => 'Pokud doplňujete EAN kód do pole pro katalogové číslo, tak zadejte hodnotu SKU. Pokud máte své vlastní řešení pro doplňování EAN kódů, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena).',
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean',
-        'css' => 'width: 100px',
+        'css' => 'width: 250px',
       ),
       array(
         'type' => 'sectionend',

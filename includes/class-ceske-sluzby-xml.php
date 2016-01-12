@@ -100,9 +100,12 @@ function heureka_xml_feed_zobrazeni() {
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
-          $sku = $varianta->get_sku();
-          if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-            $ean = $sku;
+          if ( ! empty ( $podpora_ean ) ) {
+            if ( $podpora_ean == "SKU" ) {
+              $ean = $varianta->get_sku();
+            } else {
+              $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+            }
           }
     
           if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
@@ -190,9 +193,13 @@ function heureka_xml_feed_zobrazeni() {
       }
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
-        $sku = $produkt->get_sku();
-        if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-          $ean = $sku;
+
+        if ( ! empty ( $podpora_ean ) ) {
+          if ( $podpora_ean == "SKU" ) {
+            $ean = $produkt->get_sku();
+          } else {
+            $ean = get_post_meta( $product_id, $podpora_ean, true );
+          }
         }
     
         if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
@@ -411,9 +418,12 @@ function heureka_xml_feed_aktualizace() {
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
-          $sku = $varianta->get_sku();
-          if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-            $ean = $sku;
+          if ( ! empty ( $podpora_ean ) ) {
+            if ( $podpora_ean == "SKU" ) {
+              $ean = $varianta->get_sku();
+            } else {
+              $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+            }
           }
     
           if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
@@ -500,9 +510,13 @@ function heureka_xml_feed_aktualizace() {
       }
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
-        $sku = $produkt->get_sku();
-        if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-          $ean = $sku;
+
+        if ( ! empty ( $podpora_ean ) ) {
+          if ( $podpora_ean == "SKU" ) {
+            $ean = $produkt->get_sku();
+          } else {
+            $ean = get_post_meta( $product_id, $podpora_ean, true );
+          }
         }
     
         if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
@@ -667,9 +681,13 @@ function zbozi_xml_feed_zobrazeni() {
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
-          $sku = $varianta->get_sku();
-          if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-            $ean = $sku;
+
+          if ( ! empty ( $podpora_ean ) ) {
+            if ( $podpora_ean == "SKU" ) {
+              $ean = $varianta->get_sku();
+            } else {
+              $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+            }
           }
     
           if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
@@ -754,9 +772,13 @@ function zbozi_xml_feed_zobrazeni() {
       }
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {    
-        $sku = $produkt->get_sku();
-        if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-          $ean = $sku;
+
+        if ( ! empty ( $podpora_ean ) ) {
+          if ( $podpora_ean == "SKU" ) {
+            $ean = $produkt->get_sku();
+          } else {
+            $ean = get_post_meta( $product_id, $podpora_ean, true );
+          }
         }
 
         if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
@@ -964,9 +986,13 @@ function zbozi_xml_feed_aktualizace() {
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
-          $sku = $varianta->get_sku();
-          if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-            $ean = $sku;
+
+          if ( ! empty ( $podpora_ean ) ) {
+            if ( $podpora_ean == "SKU" ) {
+              $ean = $varianta->get_sku();
+            } else {
+              $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+            }
           }
     
           if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
@@ -1050,10 +1076,14 @@ function zbozi_xml_feed_aktualizace() {
         $prubezny_pocet = $prubezny_pocet + 1;
       }
     } elseif ( $produkt->is_type( 'simple' ) ) {
-      if ( $produkt->is_in_stock() ) {    
-        $sku = $produkt->get_sku();
-        if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-          $ean = $sku;
+      if ( $produkt->is_in_stock() ) {
+   
+        if ( ! empty ( $podpora_ean ) ) {
+          if ( $podpora_ean == "SKU" ) {
+            $ean = $produkt->get_sku();
+          } else {
+            $ean = get_post_meta( $product_id, $podpora_ean, true );
+          }
         }
 
         if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
@@ -1209,12 +1239,15 @@ function pricemania_xml_feed_aktualizace() {
     $strom_kategorie = "";
 
     $produkt = new WC_Product( $product_id );
- 
-    $sku = $produkt->get_sku();
-    if ( ! empty ( $podpora_ean ) && ( $podpora_ean == "SKU" ) ) {
-      $ean = $sku;
+
+    if ( ! empty ( $podpora_ean ) ) {
+      if ( $podpora_ean == "SKU" ) {
+        $ean = $produkt->get_sku();
+      } else {
+        $ean = get_post_meta( $product_id, $podpora_ean, true );
+      }
     }
-    
+
     if ( $produkt->is_in_stock() ) {
       if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
         $dodaci_doba = 50;
