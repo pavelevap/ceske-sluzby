@@ -25,8 +25,7 @@ class WC_Shipping_Ceske_Sluzby_DPD_ParcelShop extends WC_Shipping_Method {
     $rate = array(
       'id' => $this->id,
       'label' => $this->title,
-      'cost' => $cena,
-      'calc_tax' => 'per_item'
+      'cost' => $cena
     );
     $this->add_rate( $rate );
   }
