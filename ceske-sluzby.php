@@ -660,7 +660,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
 
 function ceske_sluzby_xml_kategorie_pridat_sloupec( $columns ) {
   $new_columns = array();
-  $new_columns['xml-heureka'] = 'XML Heureka';
+  $new_columns['xml-heureka'] = 'Nastavení XML';
   return array_merge( $columns, $new_columns );
 }
 
@@ -668,7 +668,11 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
   if ( 'xml-heureka' == $column ) {
     $heureka_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
     if ( $heureka_kategorie ) {
-      $columns .= '<a href="#" title="' . $heureka_kategorie . '">Ano</a>';
+      $columns .= '<a href="#" title="Heureka: ' . $heureka_kategorie . '">Kategorie</a>';
+    }
+    $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
+    if ( $kategorie_vynechano ) {
+      $columns .= '<span style="margin-left: 10px; color: red;">x</a>';
     }
   }
   return $columns;
