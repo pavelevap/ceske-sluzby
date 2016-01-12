@@ -1,4 +1,15 @@
 <?php
+function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
+  $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
+  foreach ( $product_categories as $kategorie_produktu ) {
+    $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
+    if ( ! empty ( $vynechano ) ) {
+      $vynechane_kategorie[] = $kategorie_produktu->term_id;
+    }
+  }
+  return $vynechane_kategorie;
+}
+
 function heureka_xml_feed_zobrazeni() {
   // http://codeinthehole.com/writing/creating-large-xml-files-with-php/
   $args = array(
@@ -14,6 +25,15 @@ function heureka_xml_feed_zobrazeni() {
       array(
         'key' => 'ceske_sluzby_xml_vynechano',
         'compare' => 'NOT EXISTS',
+      ),
+    ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
       ),
     ),
     'fields' => 'ids'
@@ -304,6 +324,15 @@ function heureka_xml_feed_aktualizace() {
       array(
         'key' => 'ceske_sluzby_xml_vynechano',
         'compare' => 'NOT EXISTS',
+      ),
+    ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
       ),
     ),
     'fields' => 'ids',
@@ -608,6 +637,15 @@ function zbozi_xml_feed_zobrazeni() {
         'compare' => 'NOT EXISTS',
       ),
     ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
+      ),
+    ),
     'fields' => 'ids'
   );
   $products = get_posts( $args );
@@ -879,6 +917,15 @@ function zbozi_xml_feed_aktualizace() {
       array(
         'key' => 'ceske_sluzby_xml_vynechano',
         'compare' => 'NOT EXISTS',
+      ),
+    ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
       ),
     ),
     'fields' => 'ids',
@@ -1188,9 +1235,26 @@ function pricemania_xml_feed_aktualizace() {
   $args = array(
     'post_type' => 'product',
     'post_status' => 'publish',
-    'meta_key' => '_visibility',
-    'meta_value' => 'hidden',
-    'meta_compare' => '!=',
+    'meta_query' => array(
+      array(
+        'key' => '_visibility',
+        'value' => 'hidden',
+        'compare' => '!=',
+      ),
+      array(
+        'key' => 'ceske_sluzby_xml_vynechano',
+        'compare' => 'NOT EXISTS',
+      ),
+    ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
+      ),
+    ),
     'fields' => 'ids',
     'posts_per_page' => $limit,
     'offset' => $offset
