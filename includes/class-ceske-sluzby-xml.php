@@ -173,7 +173,7 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-          $xmlWriter->writeElement( 'PRICE_VAT', $varianta->price );
+          $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
 
           if ( $vlastnosti_varianta ) {
             $xmlWriter->startElement( 'PARAM' );
@@ -240,7 +240,7 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
 
           if ( $vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
@@ -491,7 +491,7 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->price );
+            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             if ( $vlastnosti_varianta ) {
               $xmlWriter->startElement( 'PARAM' );
               foreach ( $vlastnosti_varianta as $vlastnost ) { 
@@ -557,7 +557,7 @@ function heureka_xml_feed_aktualizace() {
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           if ( $vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
             foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
@@ -754,7 +754,7 @@ function zbozi_xml_feed_zobrazeni() {
             $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->price );
+            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             if ( $vlastnosti_varianta ) {
               $xmlWriter->startElement( 'PARAM' );
               foreach ( $vlastnosti_varianta as $vlastnost ) { 
@@ -819,7 +819,7 @@ function zbozi_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           if ( $vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
             foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
@@ -1058,7 +1058,7 @@ function zbozi_xml_feed_aktualizace() {
             $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->price );
+            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             if ( $vlastnosti_varianta ) {
               $xmlWriter->startElement( 'PARAM' );
               foreach ( $vlastnosti_varianta as $vlastnost ) { 
@@ -1124,7 +1124,7 @@ function zbozi_xml_feed_aktualizace() {
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->price );
+          $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           if ( $vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
             foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
@@ -1301,7 +1301,7 @@ function pricemania_xml_feed_aktualizace() {
     if ( $postovne != "" ) {
       $xmlWriter->writeElement( 'shipping', $postovne );
     }
-    $xmlWriter->writeElement( 'price', $produkt->price );
+    $xmlWriter->writeElement( 'price', $produkt->get_price_including_tax() );
     if ( ! empty ( $ean ) ) {
       $xmlWriter->writeElement( 'ean', $ean );
     }
