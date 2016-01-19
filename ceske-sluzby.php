@@ -292,14 +292,18 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
 }
 
 function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
-  if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-    wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
+  if ( isset( $_POST["ulozenka_branches"] ) ) {
+    if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
+      wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
+    }
   }
 }
 
 function ceske_sluzby_ulozenka_overit_pobocku() {
-  if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-    wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
+  if ( isset( $_POST["ulozenka_branches"] ) ) {
+    if ( $_POST["ulozenka_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
+      wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Uloženky, zvolte prosím pobočku.', 'error' );
+    }
   }
 }
 
@@ -405,14 +409,18 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
 }
 
 function ceske_sluzby_dpd_parcelshop_ulozeni_pobocky( $order_id, $item_id ) {
-  if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
-    wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+  if ( isset( $_POST["dpd_parcelshop_branches"] ) ) {
+    if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+      wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+    }
   }
 }
 
 function ceske_sluzby_dpd_parcelshop_overit_pobocku() {
-  if ( $_POST["dpd_parcelshop_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
-    wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím DPD ParcelShop, zvolte prosím pobočku.', 'error' );
+  if ( isset( $_POST["dpd_parcelshop_branches"] ) ) {
+    if ( $_POST["dpd_parcelshop_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
+      wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím DPD ParcelShop, zvolte prosím pobočku.', 'error' );
+    }
   }
 }
 
