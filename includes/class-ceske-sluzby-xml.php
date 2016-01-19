@@ -138,7 +138,8 @@ function heureka_xml_feed_zobrazeni() {
             $dodaci_doba = "";
           }
 
-          if ( empty ( $varianta->get_variation_description() ) ) {
+          $varianta_description = $varianta->get_variation_description();
+          if ( empty ( $varianta_description ) ) {
             if ( ! empty ( $produkt->post->post_excerpt ) ) {
             $description = $produkt->post->post_excerpt;
             } else {
@@ -465,7 +466,8 @@ function heureka_xml_feed_aktualizace() {
             $dodaci_doba = "";
           }
 
-          if ( empty ( $varianta->get_variation_description() ) ) {
+          $varianta_description = $varianta->get_variation_description();
+          if ( empty ( $varianta_description ) ) {
             if ( ! empty ( $produkt->post->post_excerpt ) ) {
             $description = $produkt->post->post_excerpt;
             } else {
@@ -737,7 +739,9 @@ function zbozi_xml_feed_zobrazeni() {
           else {
             $dodaci_doba = "-1";
           }
-          if ( empty ( $varianta->get_variation_description() ) ) {
+
+          $varianta_description = $varianta->get_variation_description();
+          if ( empty ( $varianta_description ) ) {
             if ( ! empty ( $produkt->post->post_excerpt ) ) {
             $description = $produkt->post->post_excerpt;
             } else {
@@ -1051,7 +1055,9 @@ function zbozi_xml_feed_aktualizace() {
           else {
             $dodaci_doba = "-1";
           }
-          if ( empty ( $varianta->get_variation_description() ) ) {
+
+          $varianta_description = $varianta->get_variation_description();
+          if ( empty ( $varianta_description ) ) {
             if ( ! empty ( $produkt->post->post_excerpt ) ) {
             $description = $produkt->post->post_excerpt;
             } else {
