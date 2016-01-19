@@ -150,6 +150,17 @@ var _srt = _srt || [];
 <?php
   }
 }
+
+function ceske_sluzby_sledovani_zasilek_email( $email_classes ) {
+  require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek-email.php';
+	$email_classes['WC_Email_Ceske_Sluzby_Sledovani_Zasilek'] = new WC_Email_Ceske_Sluzby_Sledovani_Zasilek();
+	return $email_classes;
+}
+
+function ceske_sluzby_sledovani_zasilek_email_akce( $email_actions ) {
+  $email_actions[] = 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce';
+  return $email_actions;
+}
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
@@ -197,6 +208,12 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     $aktivace_recenzi = get_option( 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace' );
     if ( $aktivace_recenzi == "yes" ) {
       add_shortcode( 'heureka-recenze-obchodu', 'ceske_sluzby_heureka_recenze_obchodu' );
+    }
+
+    $sledovani_zasilek = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek' );
+    if ( $sledovani_zasilek == "yes" ) {
+      add_filter( 'woocommerce_email_classes', 'ceske_sluzby_sledovani_zasilek_email' );
+      add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
     }
 
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );

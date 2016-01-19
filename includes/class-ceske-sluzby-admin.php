@@ -142,7 +142,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Sledování zásilek',
         'type' => 'checkbox',
-        'desc' => 'Aktivovat možnost zadávání infromací pro sledování zásilek u každé objednávky.',
+        'desc' => 'Aktivovat možnost zadávání informací pro sledování zásilek u každé objednávky. Speciální notifikační email můžete nastavit <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=email&section=wc_email_ceske_sluzby_sledovani_zasilek">zde</a>.',
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
       ),
       array(
