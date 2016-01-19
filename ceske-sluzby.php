@@ -84,7 +84,7 @@ function ceske_sluzby_heureka_certifikat_spokojenosti() {
       if ( $umisteni == "vlevo" ) {
         $umisteni = 21;
       } else {
-        $umisteni = 21;
+        $umisteni = 22;
       }
     } else {
       $umisteni = 21;
