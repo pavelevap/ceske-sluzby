@@ -153,8 +153,8 @@ var _srt = _srt || [];
 
 function ceske_sluzby_sledovani_zasilek_email( $email_classes ) {
   require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek-email.php';
-	$email_classes['WC_Email_Ceske_Sluzby_Sledovani_Zasilek'] = new WC_Email_Ceske_Sluzby_Sledovani_Zasilek();
-	return $email_classes;
+  $email_classes['WC_Email_Ceske_Sluzby_Sledovani_Zasilek'] = new WC_Email_Ceske_Sluzby_Sledovani_Zasilek();
+  return $email_classes;
 }
 
 function ceske_sluzby_sledovani_zasilek_email_akce( $email_actions ) {
@@ -224,7 +224,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
     
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
-	}
+  }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
 

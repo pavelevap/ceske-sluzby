@@ -118,6 +118,7 @@ function heureka_xml_feed_zobrazeni() {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
+          $url_varianta = "";
           $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
@@ -153,17 +154,24 @@ function heureka_xml_feed_zobrazeni() {
           if ( $attributes_varianta ) {
             $i = 0;
             foreach ( $attributes_varianta as $nazev => $hodnota ) {
+              if ( $i == 0 ) {
+                $url_varianta .= '?';
+              } else {
+                $url_varianta .= '&';
+              }
               if ( strpos( $nazev, '_pa_' ) !== false ) {
                 $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
                 if ( $term ) {
                   $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
                   $vlastnosti_varianta[$i]['hodnota'] = $term->name;
                   $nazev_varianta .= " " . $term->name;
+                  $url_varianta .= str_replace( 'attribute_pa_', '', $nazev ) . '=' . $term->slug;
                 }
               } else {
                 $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
                 $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
                 $nazev_varianta .= " " . $hodnota;
+                $url_varianta .= str_replace( 'attribute_', '', $nazev ). '=' . $hodnota;
               }
               $i = $i + 1;
             }
@@ -191,7 +199,7 @@ function heureka_xml_feed_zobrazeni() {
               $xmlWriter->text( $strom_kategorie );
             $xmlWriter->endElement();
           }
-          $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+          $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
           $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
@@ -446,6 +454,7 @@ function heureka_xml_feed_aktualizace() {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
+          $url_varianta = "";
           $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
@@ -481,17 +490,24 @@ function heureka_xml_feed_aktualizace() {
           if ( $attributes_varianta ) {
             $i = 0;
             foreach ( $attributes_varianta as $nazev => $hodnota ) {
+              if ( $i == 0 ) {
+                $url_varianta .= '?';
+              } else {
+                $url_varianta .= '&';
+              }
               if ( strpos( $nazev, '_pa_' ) !== false ) {
                 $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
                 if ( $term ) {
                   $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
                   $vlastnosti_varianta[$i]['hodnota'] = $term->name;
                   $nazev_varianta .= " " . $term->name;
+                  $url_varianta .= str_replace( 'attribute_pa_', '', $nazev ) . '=' . $term->slug;
                 }
               } else {
                 $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
                 $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
                 $nazev_varianta .= " " . $hodnota;
+                $url_varianta .= str_replace( 'attribute_', '', $nazev ). '=' . $hodnota;
               }
               $i = $i + 1;
             }
@@ -519,7 +535,7 @@ function heureka_xml_feed_aktualizace() {
                 $xmlWriter->text( $strom_kategorie );
               $xmlWriter->endElement();
             }
-            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
@@ -720,6 +736,7 @@ function zbozi_xml_feed_zobrazeni() {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
+          $url_varianta = "";
           $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
@@ -755,17 +772,24 @@ function zbozi_xml_feed_zobrazeni() {
           if ( $attributes_varianta ) {
             $i = 0;
             foreach ( $attributes_varianta as $nazev => $hodnota ) {
+              if ( $i == 0 ) {
+                $url_varianta .= '?';
+              } else {
+                $url_varianta .= '&';
+              }
               if ( strpos( $nazev, '_pa_' ) !== false ) {
                 $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
                 if ( $term ) {
                   $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
                   $vlastnosti_varianta[$i]['hodnota'] = $term->name;
                   $nazev_varianta .= " " . $term->name;
+                  $url_varianta .= str_replace( 'attribute_pa_', '', $nazev ) . '=' . $term->slug;
                 }
               } else {
                 $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
                 $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
                 $nazev_varianta .= " " . $hodnota;
+                $url_varianta .= str_replace( 'attribute_', '', $nazev ). '=' . $hodnota;
               }
               $i = $i + 1;
             }
@@ -793,7 +817,7 @@ function zbozi_xml_feed_zobrazeni() {
                 $xmlWriter->text( $strom_kategorie );
               $xmlWriter->endElement();
             }
-            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
@@ -1036,6 +1060,7 @@ function zbozi_xml_feed_aktualizace() {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
           $nazev_varianta = "";
+          $url_varianta = "";
           $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
@@ -1071,17 +1096,24 @@ function zbozi_xml_feed_aktualizace() {
           if ( $attributes_varianta ) {
             $i = 0;
             foreach ( $attributes_varianta as $nazev => $hodnota ) {
+              if ( $i == 0 ) {
+                $url_varianta .= '?';
+              } else {
+                $url_varianta .= '&';
+              }
               if ( strpos( $nazev, '_pa_' ) !== false ) {
                 $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
                 if ( $term ) {
                   $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
                   $vlastnosti_varianta[$i]['hodnota'] = $term->name;
                   $nazev_varianta .= " " . $term->name;
+                  $url_varianta .= str_replace( 'attribute_pa_', '', $nazev ) . '=' . $term->slug;
                 }
               } else {
                 $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
                 $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
                 $nazev_varianta .= " " . $hodnota;
+                $url_varianta .= str_replace( 'attribute_', '', $nazev ). '=' . $hodnota;
               }
               $i = $i + 1;
             }
@@ -1108,7 +1140,7 @@ function zbozi_xml_feed_aktualizace() {
                 $xmlWriter->text( $strom_kategorie );
               $xmlWriter->endElement();
             }
-            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
+            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
