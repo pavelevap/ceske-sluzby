@@ -835,8 +835,8 @@ function zbozi_xml_feed_zobrazeni() {
                 $xmlWriter->text( $strom_kategorie );
               $xmlWriter->endElement();
             }
-            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
-            $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
+            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . str_replace( array( '%3F', '%3D', '%26' ), array ( '?', '=', '&' ), urlencode( $url_varianta ) ) );
+            $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             if ( $vlastnosti_varianta ) {
@@ -901,7 +901,7 @@ function zbozi_xml_feed_zobrazeni() {
             $xmlWriter->endElement();
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
-          $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
+          $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           if ( $vlastnosti_produkt ) {
@@ -1164,8 +1164,8 @@ function zbozi_xml_feed_aktualizace() {
                 $xmlWriter->text( $strom_kategorie );
               $xmlWriter->endElement();
             }
-            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . $url_varianta );
-            $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
+            $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) . str_replace( array( '%3F', '%3D', '%26' ), array ( '?', '=', '&' ), urlencode( $url_varianta ) ) );
+            $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             if ( $vlastnosti_varianta ) {
@@ -1231,7 +1231,7 @@ function zbozi_xml_feed_aktualizace() {
             $xmlWriter->endElement();
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
-          $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
+          $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           if ( $vlastnosti_produkt ) {
