@@ -124,8 +124,14 @@ function heureka_xml_feed_zobrazeni() {
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
               $ean = $varianta->get_sku();
+              if ( empty ( $ean ) ) {
+                $ean = $produkt->get_sku();
+              }
             } else {
               $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+              if ( empty ( $ean ) ) {
+                $ean = get_post_meta( $product_id, $podpora_ean, true );
+              }
             }
           }
     
@@ -460,8 +466,14 @@ function heureka_xml_feed_aktualizace() {
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
               $ean = $varianta->get_sku();
+              if ( empty ( $ean ) ) {
+                $ean = $produkt->get_sku();
+              }
             } else {
               $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+              if ( empty ( $ean ) ) {
+                $ean = get_post_meta( $product_id, $podpora_ean, true );
+              }
             }
           }
     
@@ -742,8 +754,14 @@ function zbozi_xml_feed_zobrazeni() {
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
               $ean = $varianta->get_sku();
+              if ( empty ( $ean ) ) {
+                $ean = $produkt->get_sku();
+              }
             } else {
               $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+              if ( empty ( $ean ) ) {
+                $ean = get_post_meta( $product_id, $podpora_ean, true );
+              }
             }
           }
     
@@ -1066,8 +1084,14 @@ function zbozi_xml_feed_aktualizace() {
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
               $ean = $varianta->get_sku();
+              if ( empty ( $ean ) ) {
+                $ean = $produkt->get_sku();
+              }
             } else {
               $ean = get_post_meta( $variation['variation_id'], $podpora_ean, true );
+              if ( empty ( $ean ) ) {
+                $ean = get_post_meta( $product_id, $podpora_ean, true );
+              }
             }
           }
     
