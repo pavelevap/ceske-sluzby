@@ -12,8 +12,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_product_tab( $product_tabs ) {
     $product_tabs['ceske_sluzby'] = array(
       'label' => 'České služby',
-      'target' => 'ceske_sluzby_tab_data',
-      'class' => array( 'show_if_simple' ),
+      'target' => 'ceske_sluzby_tab_data'
     );
     return $product_tabs;
   }
@@ -25,7 +24,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
     echo '<div id="ceske_sluzby_tab_data" class="panel woocommerce_options_panel">';
-    echo '<div class="options_group show_if_simple">';
+    echo '<div class="options_group">';
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
 
     $vynechane_kategorie = "";
@@ -54,7 +53,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     echo '</div>';
 
     if ( $xml_feed_heureka == "yes" ) {
-      echo '<div class="options_group show_if_simple">'; // hide_if_grouped - skrýt u seskupených produktů
+      echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
       echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>)</div>';
       woocommerce_wp_text_input(
         array( 
@@ -93,7 +92,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     }
     
     if ( $xml_feed_zbozi == "yes" ) {
-      echo '<div class="options_group show_if_simple">';
+      echo '<div class="options_group">';
       echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
       woocommerce_wp_text_input(
         array( 
