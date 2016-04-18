@@ -2,7 +2,7 @@
 Donate link: http://www.separatista.net
 Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz, Pricemania.cz
 Requires at least: 4.0
-Tested up to: 4.3.1
+Tested up to: 4.5
 Stable tag: 0.4
 
 Implementace různých českých služeb do WordPressu
@@ -20,7 +20,7 @@ Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzb
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
 
-Plugin už sice bez problémů používá více než 300 různých webů, ale berte ho prosím stále jako testovací verzi.
+Plugin už sice bez problémů používá více než 700 různých webů, ale berte ho prosím stále jako testovací verzi.
 
 Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
