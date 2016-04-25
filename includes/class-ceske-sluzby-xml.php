@@ -41,6 +41,7 @@ function heureka_xml_feed_zobrazeni() {
   $products = get_posts( $args );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+  $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
 
   $xmlWriter = new XMLWriter();
@@ -117,6 +118,9 @@ function heureka_xml_feed_zobrazeni() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $ean = "";
+          $dodaci_doba = "";
+          $description = "";
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
@@ -133,15 +137,20 @@ function heureka_xml_feed_zobrazeni() {
               }
             }
           }
-    
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "";
+
+          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+            if ( is_numeric( $vlastni_dodaci_doba ) ) {
+              $dodaci_doba = $vlastni_dodaci_doba;
+            }
           }
-          elseif ( isset( $global_dodaci_doba ) ) {
-            $dodaci_doba = $global_dodaci_doba;
-          }
-          else {
-            $dodaci_doba = "";
+          if ( empty( $dodaci_doba ) ) {
+            if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+              $dodaci_doba = "";
+            }
+            elseif ( isset( $global_dodaci_doba ) ) {
+              $dodaci_doba = $global_dodaci_doba;
+            }
           }
 
           $varianta_description = $varianta->get_variation_description();
@@ -228,15 +237,20 @@ function heureka_xml_feed_zobrazeni() {
             $ean = get_post_meta( $product_id, $podpora_ean, true );
           }
         }
-    
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "";
+
+        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
+          if ( is_numeric( $vlastni_dodaci_doba ) ) {
+            $dodaci_doba = $vlastni_dodaci_doba;
+          }
         }
-        elseif ( isset( $global_dodaci_doba ) ) {
-          $dodaci_doba = $global_dodaci_doba;
-        }
-        else {
-          $dodaci_doba = "";
+        if ( empty( $dodaci_doba ) ) {
+          if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+            $dodaci_doba = "";
+          }
+          elseif ( isset( $global_dodaci_doba ) ) {
+            $dodaci_doba = $global_dodaci_doba;
+          }
         }
 
         if ( ! empty ( $produkt->post->post_excerpt ) ) {
@@ -375,6 +389,7 @@ function heureka_xml_feed_aktualizace() {
   wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_heureka_aktualizace_xml_batch' );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+  $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   $pocet_produkt = 0;
   $prubezny_pocet = 0;
@@ -451,6 +466,9 @@ function heureka_xml_feed_aktualizace() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $ean = "";
+          $dodaci_doba = "";
+          $description = "";
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
@@ -467,15 +485,20 @@ function heureka_xml_feed_aktualizace() {
               }
             }
           }
-    
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "";
+
+          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+            if ( is_numeric( $vlastni_dodaci_doba ) ) {
+              $dodaci_doba = $vlastni_dodaci_doba;
+            }
           }
-          elseif ( isset( $global_dodaci_doba ) ) {
-            $dodaci_doba = $global_dodaci_doba;
-          }
-          else {
-            $dodaci_doba = "";
+          if ( empty( $dodaci_doba ) ) {
+            if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+              $dodaci_doba = "";
+            }
+            elseif ( isset( $global_dodaci_doba ) ) {
+              $dodaci_doba = $global_dodaci_doba;
+            }
           }
 
           $varianta_description = $varianta->get_variation_description();
@@ -561,15 +584,20 @@ function heureka_xml_feed_aktualizace() {
             $ean = get_post_meta( $product_id, $podpora_ean, true );
           }
         }
-    
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "";
+
+        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
+          if ( is_numeric( $vlastni_dodaci_doba ) ) {
+            $dodaci_doba = $vlastni_dodaci_doba;
+          }
         }
-        elseif ( isset( $global_dodaci_doba ) ) {
-          $dodaci_doba = $global_dodaci_doba;
-        }
-        else {
-          $dodaci_doba = "";
+        if ( empty( $dodaci_doba ) ) {
+          if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+            $dodaci_doba = "";
+          }
+          elseif ( isset( $global_dodaci_doba ) ) {
+            $dodaci_doba = $global_dodaci_doba;
+          }
         }
 
         if ( ! empty ( $produkt->post->post_excerpt ) ) {
@@ -665,6 +693,7 @@ function zbozi_xml_feed_zobrazeni() {
   $products = get_posts( $args );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+  $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
 
   $xmlWriter = new XMLWriter();
@@ -731,6 +760,9 @@ function zbozi_xml_feed_zobrazeni() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $ean = "";
+          $dodaci_doba = "";
+          $description = "";
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
@@ -747,15 +779,23 @@ function zbozi_xml_feed_zobrazeni() {
               }
             }
           }
-    
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "-1";
+
+          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+            if ( is_numeric( $vlastni_dodaci_doba ) ) {
+              $dodaci_doba = $vlastni_dodaci_doba;
+            }
           }
-          elseif ( isset( $global_dodaci_doba ) ) {
-            $dodaci_doba = $global_dodaci_doba;
-          }
-          else {
-            $dodaci_doba = "-1";
+          if ( empty( $dodaci_doba ) ) {
+            if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+              $dodaci_doba = "-1";
+            }
+            elseif ( isset( $global_dodaci_doba ) ) {
+              $dodaci_doba = $global_dodaci_doba;
+            }
+            else {
+              $dodaci_doba = "-1";
+            }
           }
 
           $varianta_description = $varianta->get_variation_description();
@@ -841,16 +881,24 @@ function zbozi_xml_feed_zobrazeni() {
           }
         }
 
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = -1;
+        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
+          if ( is_numeric( $vlastni_dodaci_doba ) ) {
+            $dodaci_doba = $vlastni_dodaci_doba;
+          }
         }
-        elseif ( isset( $global_dodaci_doba ) ) {
-          $dodaci_doba = $global_dodaci_doba;
+        if ( empty( $dodaci_doba ) ) {
+          if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+            $dodaci_doba = "-1";
+          }
+          elseif ( isset( $global_dodaci_doba ) ) {
+            $dodaci_doba = $global_dodaci_doba;
+          }
+          else {
+            $dodaci_doba = "-1";
+          }
         }
-        else {
-          $dodaci_doba = -1;
-        }
-    
+
         if ( ! empty ( $produkt->post->post_excerpt ) ) {
           $description = $produkt->post->post_excerpt;
         } else {
@@ -988,6 +1036,7 @@ function zbozi_xml_feed_aktualizace() {
   $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+  $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   $pocet_produkt = 0;
   $prubezny_pocet = 0;
@@ -1053,6 +1102,9 @@ function zbozi_xml_feed_aktualizace() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $ean = "";
+          $dodaci_doba = "";
+          $description = "";
           $nazev_varianta = "";
           $vlastnosti_varianta = array();
 
@@ -1069,15 +1121,23 @@ function zbozi_xml_feed_aktualizace() {
               }
             }
           }
-    
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "-1";
+
+          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+            if ( is_numeric( $vlastni_dodaci_doba ) ) {
+              $dodaci_doba = $vlastni_dodaci_doba;
+            }
           }
-          elseif ( isset( $global_dodaci_doba ) ) {
-            $dodaci_doba = $global_dodaci_doba;
-          }
-          else {
-            $dodaci_doba = "-1";
+          if ( empty( $dodaci_doba ) ) {
+            if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+              $dodaci_doba = "-1";
+            }
+            elseif ( isset( $global_dodaci_doba ) ) {
+              $dodaci_doba = $global_dodaci_doba;
+            }
+            else {
+              $dodaci_doba = "-1";
+            }
           }
 
           $varianta_description = $varianta->get_variation_description();
@@ -1163,14 +1223,22 @@ function zbozi_xml_feed_aktualizace() {
           }
         }
 
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = -1;
+        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
+          if ( is_numeric( $vlastni_dodaci_doba ) ) {
+            $dodaci_doba = $vlastni_dodaci_doba;
+          }
         }
-        elseif ( isset( $global_dodaci_doba ) ) {
-          $dodaci_doba = $global_dodaci_doba;
-        }
-        else {
-          $dodaci_doba = -1;
+        if ( empty( $dodaci_doba ) ) {
+          if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
+            $dodaci_doba = "-1";
+          }
+          elseif ( isset( $global_dodaci_doba ) ) {
+            $dodaci_doba = $global_dodaci_doba;
+          }
+          else {
+            $dodaci_doba = "-1";
+          }
         }
 
         if ( ! empty ( $produkt->post->post_excerpt ) ) {
@@ -1323,6 +1391,7 @@ function pricemania_xml_feed_aktualizace() {
   wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
   
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+  $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   $postovne = get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' );
 
@@ -1343,11 +1412,19 @@ function pricemania_xml_feed_aktualizace() {
     }
 
     if ( $produkt->is_in_stock() ) {
-      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-        $dodaci_doba = 50;
+      if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+        $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+        if ( is_numeric( $vlastni_dodaci_doba ) ) {
+          $dodaci_doba = $vlastni_dodaci_doba;
+        }
       }
-      elseif ( isset( $global_dodaci_doba ) ) {
-        $dodaci_doba = $global_dodaci_doba;
+      if ( empty( $dodaci_doba ) ) {
+        if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+          $dodaci_doba = 50;
+        }
+        elseif ( isset( $global_dodaci_doba ) ) {
+          $dodaci_doba = $global_dodaci_doba;
+        }
       }
     }
     else {
