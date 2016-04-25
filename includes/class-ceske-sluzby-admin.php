@@ -14,6 +14,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     global $current_section;
     $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
     $aktivace_certifikatu = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace' );
+    $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
     $sections = array(
       '' => 'Základní nastavení'
     );
@@ -22,6 +23,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
     if ( $aktivace_certifikatu == "yes" ) {
       $sections['certifikat-spokojenosti'] = 'Certifikát spokojenosti';
+    }
+    if ( $aktivace_dodaci_doby == "yes" ) {
+      $sections['dodaci-doba'] = 'Dodací doba';
     }
     if ( empty( $sections ) ) {
       return;
@@ -144,6 +148,11 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'type' => 'checkbox',
         'desc' => 'Aktivovat možnost zadávání informací pro sledování zásilek u každé objednávky. Speciální notifikační email můžete nastavit <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=email&section=wc_email_ceske_sluzby_sledovani_zasilek">zde</a>.',
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
+      ),
+      array(
+        'title' => 'Dodací doba',
+        'type' => 'checkbox',
+        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace'
       ),
       array(
         'title' => 'Možnost změny objednávek pro dobírku',
@@ -285,6 +294,27 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_title'
+        )
+      );
+    }
+    
+    if ( 'dodaci-doba' == $current_section ) {
+      $settings = array(
+        array(
+          'title' => 'Dodací doba',
+          'type' => 'title',
+          'desc' => 'Nastavení pro zobrazování dodací doby u jednotlivých produktů.',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_title'
+        ),
+        array(
+          'type' => 'textarea',
+          'desc_tip' => 'Na každém řádku musí být uvedena hodnota (počet dnů) oddělená zobrazovaným textem.',
+          'default' => sprintf( '0|Skladem%1$s1|Do 1 dne%1$s2|Do 2 dnů', PHP_EOL ),
+          'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_title'
         )
       );
     }
