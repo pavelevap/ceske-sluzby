@@ -213,6 +213,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'css' => 'width: 250px',
       ),
       array(
+        'title' => 'Podpora výrobců',
+        'type' => 'text',
+        'desc' => 'Pokud už doplňujete výrobce (<code>MANUFACTURER</code>), tak zadejte název příslušné taxonomie.',
+        'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
+        'css' => 'width: 250px',
+      ),
+      array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
       ),
