@@ -152,6 +152,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'title' => 'Dodací doba',
         'type' => 'checkbox',
+        'desc' => 'Možnost podrobného nastavení dodací doby bude po aktivaci dostupná <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">zde</a>.',
         'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace'
       ),
       array(
@@ -307,9 +308,11 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dodaci_doba_title'
         ),
         array(
+          'title' => 'Intervaly pro dodací dobu',
           'type' => 'textarea',
           'desc_tip' => 'Na každém řádku musí být uvedena hodnota (počet dnů) oddělená zobrazovaným textem.',
           'default' => sprintf( '0|Skladem%1$s1|Do 1 dne%1$s2|Do 2 dnů', PHP_EOL ),
+          'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
         ),
         array(
