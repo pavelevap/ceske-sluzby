@@ -1462,13 +1462,13 @@ function pricemania_xml_feed_aktualizace() {
 
     if ( $produkt->is_in_stock() ) {
       if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-        $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
+        $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
         if ( is_numeric( $vlastni_dodaci_doba ) ) {
           $dodaci_doba = $vlastni_dodaci_doba;
         }
       }
       if ( empty( $dodaci_doba ) ) {
-        if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
+        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
           $dodaci_doba = 50;
         }
         elseif ( isset( $global_dodaci_doba ) ) {
