@@ -1,5 +1,6 @@
 <?php
 function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
+  $vynechane_kategorie = array();
   $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
   foreach ( $product_categories as $kategorie_produktu ) {
     $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
