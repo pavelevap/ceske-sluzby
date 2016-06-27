@@ -703,6 +703,7 @@ function zbozi_xml_feed_zobrazeni() {
   $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   $podpora_vyrobcu = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' );
+  $custom_label_0 = get_option( 'wc_ceske_sluzby_xml_feed_custom_label_0' );
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
@@ -717,6 +718,7 @@ function zbozi_xml_feed_zobrazeni() {
     $description = "";
     $strom_kategorie = "";
     $nazev_produkt_vlastnosti = "";
+    $dodatecne_oznaceni_0 = "";
     $vlastnosti_produkt = array();
     $terms = array();
 
@@ -760,6 +762,15 @@ function zbozi_xml_feed_zobrazeni() {
               $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
               $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
               $i = $i + 1;
+            }
+          }
+        } else {
+          if ( $attribute['is_taxonomy'] && str_replace( 'pa_', '', $attribute['name'] ) == $custom_label_0 ) {
+            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+            if ( $terms ) {
+              foreach ( $terms as $term ) {
+                $dodatecne_oznaceni_0 = $term;
+              }
             }
           }
         }
@@ -876,6 +887,9 @@ function zbozi_xml_feed_zobrazeni() {
             if ( ! empty ( $ean ) ) {
               $xmlWriter->writeElement( 'EAN', $ean );
             }
+            if ( ! empty ( $dodatecne_oznaceni_0 ) ) {
+              $xmlWriter->writeElement( 'CUSTOM_LABEL_0', $dodatecne_oznaceni_0 );
+            }
           $xmlWriter->endElement();
         }
       }
@@ -942,6 +956,9 @@ function zbozi_xml_feed_zobrazeni() {
           }
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
+          }
+          if ( ! empty ( $dodatecne_oznaceni_0 ) ) {
+            $xmlWriter->writeElement( 'CUSTOM_LABEL_0', $dodatecne_oznaceni_0 );
           }
         $xmlWriter->endElement();
       }

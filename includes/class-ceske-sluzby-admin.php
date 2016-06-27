@@ -59,7 +59,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     if ( $vlastnosti ) {
       foreach ( $vlastnosti as $vlastnost ) {
         if ( $vlastnost->attribute_public == 0 ) {
-          $neverejne_vlastnosti[ $vlastnost->attribute_id ] = $vlastnost->attribute_label;
+          $neverejne_vlastnosti[ $vlastnost->attribute_name ] = $vlastnost->attribute_label;
         }
       }
     }
