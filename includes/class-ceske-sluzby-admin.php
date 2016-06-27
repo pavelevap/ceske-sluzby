@@ -70,236 +70,236 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     global $current_section;
 
     if ( '' == $current_section ) {
-    $settings = array(
-      array(
-        'title' => 'Služby pro WordPress',
-        'type' => 'title',
-        'desc' => 'Pokud nebude konkrétní hodnota vyplněna, tak se nebude příslušná služba vůbec spouštět.',
-        'id' => 'wc_ceske_sluzby_title'
-      ),
-      array(
-        'title' => 'Heureka.cz (.sk)',
-        'type' => 'title',
-        'desc' => '',
-        'id' => 'wc_ceske_sluzby_heureka_title'
-      ),
-      array(
-        'title' => 'API klíč: Ověřeno zákazníky',
-        'type' => 'text',
-        'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
-        'id' => 'wc_ceske_sluzby_heureka_overeno-api',
-        'css' => 'width: 300px'
-      ),
-      array(
-        'title' => 'API klíč: Měření konverzí',
-        'type' => 'text',
-        'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>.',
-        'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
-        'css'   => 'width: 300px'
-      ),
-      array(
-        'title' => 'Aktivovat certifikát',
-        'type' => 'checkbox',
-        'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
-        'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace'
-      ),
-      array(
-        'title' => 'Aktivovat XML feed',
-        'type' => 'checkbox',
-        'desc' => 'Nastavení pro XML feed bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">zde</a>.',
-        'id' => 'wc_ceske_sluzby_heureka_xml_feed-aktivace'
-      ),
-      array(
-        'title' => 'Aktivovat zobrazení recenzí',
-        'type' => 'checkbox',
-        'desc' => 'Po aktivaci můžete zobrazit aktuální recenze pomocí zkráceného zápisu (shortcode): <code>[heureka-recenze-obchodu]</code>.',
-        'id' => 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace'
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_heureka_title'
-      ),
-      array(
-        'title' => 'Sklik.cz',
-        'type' => 'title',
-        'desc' => '',
-        'id' => 'wc_ceske_sluzby_sklik_title'
-      ),
-      array(
-        'title' => 'ID konverzního kódu',
-        'type' => 'text',
-        'desc' => 'ID získaného kódu pro měření konverzí naleznete <a href="https://www.sklik.cz/seznam-konverzi">zde</a>. Je třeba vytvořit konverzní kód typu "vytvoření objednávky" a z něho získat potřebné ID.',
-        'id' => 'wc_ceske_sluzby_sklik_konverze-objednavky'
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_sklik_title'
-      ),
-      array(
-        'title' => 'Srovnáme.cz',
-        'type' => 'title',
-        'desc' => '',
-        'id' => 'wc_ceske_sluzby_srovname_title'
-      ),
-      array(
-        'title' => 'Identifikační klíč',
-        'type' => 'text',
-        'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="http://www.srovname.cz/muj-obchod">zde</a>.',
-        'id' => 'wc_ceske_sluzby_srovname_konverze-objednavky'
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_srovname_title'
-      ),
-      array(
-        'title' => 'Další nastavení',
-        'type' => 'title',
-        'desc' => '',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
-      ),
-      array(
-        'title' => 'Sledování zásilek',
-        'type' => 'checkbox',
-        'desc' => 'Aktivovat možnost zadávání informací pro sledování zásilek u každé objednávky. Speciální notifikační email můžete nastavit <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=email&section=wc_email_ceske_sluzby_sledovani_zasilek">zde</a>.',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
-      ),
-      array(
-        'title' => 'Dodací doba',
-        'type' => 'checkbox',
-        'desc' => 'Aktivovat možnost podrobného nastavení dodací doby, které bude dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">zde</a>.',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace'
-      ),
-      array(
-        'title' => 'Možnost změny objednávek pro dobírku',
-        'type' => 'checkbox',
-        'desc' => 'Povolí možnost změny objednávek, které jsou provedené prostřednictvím dobírky.',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
-      ),
-      array(
-        'title' => 'Pouze doprava zdarma',
-        'type' => 'checkbox',
-        'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
-      )
-    );
+      $settings = array(
+        array(
+          'title' => 'Služby pro WordPress',
+          'type' => 'title',
+          'desc' => 'Pokud nebude konkrétní hodnota vyplněna, tak se nebude příslušná služba vůbec spouštět.',
+          'id' => 'wc_ceske_sluzby_title'
+        ),
+        array(
+          'title' => 'Heureka.cz (.sk)',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_heureka_title'
+        ),
+        array(
+          'title' => 'API klíč: Ověřeno zákazníky',
+          'type' => 'text',
+          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
+          'id' => 'wc_ceske_sluzby_heureka_overeno-api',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'API klíč: Měření konverzí',
+          'type' => 'text',
+          'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>.',
+          'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
+          'css'   => 'width: 300px'
+        ),
+        array(
+          'title' => 'Aktivovat certifikát',
+          'type' => 'checkbox',
+          'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
+          'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace'
+        ),
+        array(
+          'title' => 'Aktivovat XML feed',
+          'type' => 'checkbox',
+          'desc' => 'Nastavení pro XML feed bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">zde</a>.',
+          'id' => 'wc_ceske_sluzby_heureka_xml_feed-aktivace'
+        ),
+        array(
+          'title' => 'Aktivovat zobrazení recenzí',
+          'type' => 'checkbox',
+          'desc' => 'Po aktivaci můžete zobrazit aktuální recenze pomocí zkráceného zápisu (shortcode): <code>[heureka-recenze-obchodu]</code>.',
+          'id' => 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_heureka_title'
+        ),
+        array(
+          'title' => 'Sklik.cz',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_sklik_title'
+        ),
+        array(
+          'title' => 'ID konverzního kódu',
+          'type' => 'text',
+          'desc' => 'ID získaného kódu pro měření konverzí naleznete <a href="https://www.sklik.cz/seznam-konverzi">zde</a>. Je třeba vytvořit konverzní kód typu "vytvoření objednávky" a z něho získat potřebné ID.',
+          'id' => 'wc_ceske_sluzby_sklik_konverze-objednavky'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_sklik_title'
+        ),
+        array(
+          'title' => 'Srovnáme.cz',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_srovname_title'
+        ),
+        array(
+          'title' => 'Identifikační klíč',
+          'type' => 'text',
+          'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="http://www.srovname.cz/muj-obchod">zde</a>.',
+          'id' => 'wc_ceske_sluzby_srovname_konverze-objednavky'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_srovname_title'
+        ),
+        array(
+          'title' => 'Další nastavení',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
+        ),
+        array(
+          'title' => 'Sledování zásilek',
+          'type' => 'checkbox',
+          'desc' => 'Aktivovat možnost zadávání informací pro sledování zásilek u každé objednávky. Speciální notifikační email můžete nastavit <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=email&section=wc_email_ceske_sluzby_sledovani_zasilek">zde</a>.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
+        ),
+        array(
+          'title' => 'Dodací doba',
+          'type' => 'checkbox',
+          'desc' => 'Aktivovat možnost podrobného nastavení dodací doby, které bude dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">zde</a>.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace'
+        ),
+        array(
+          'title' => 'Možnost změny objednávek pro dobírku',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost změny objednávek, které jsou provedené prostřednictvím dobírky.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
+        ),
+        array(
+          'title' => 'Pouze doprava zdarma',
+          'type' => 'checkbox',
+          'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
+        )
+      );
     }
 
     if ( 'xml-feed' == $current_section ) {
-        $settings = array(
-      array(
-        'title' => 'XML feed',
-        'type' => 'title',
-        'desc' => 'Zde budou postupně přidávána další nastavení.',
-        'id' => 'wc_ceske_sluzby_xml_feed_title'
-      ),
-      array(
-        'title' => 'Heureka.cz (.sk)',
-        'type' => 'title',
-        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
-      ),
-      array(
-        'title' => 'Aktivovat feed',
-        'type' => 'checkbox',
-        'desc' => 'Povolí možnost postupného generování .xml souboru pro Heureka.cz (.sk) a zobrazí příslušná nastavení v administraci.',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka-aktivace'
-      ),
-      array(
-        'title' => 'Dodací doba',
-        'type' => 'number',
-        'desc' => 'Zboží může být skladem (0), dostupné do tří dnů (1 - 3), do týdne (4 - 7), do dvou týdnů (8 - 14), do měsíce (15 - 30) či více než měsíc (31 a více).',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba',
-        'css' => 'width: 50px',
-        'custom_attributes' => array(
-          'min' => 0,
-          'step' => 1
-        )
-      ),
-      array(
-        'title' => 'Podpora EAN',
-        'type' => 'text',
-        'desc' => 'Pokud doplňujete EAN kód do pole pro katalogové číslo, tak zadejte hodnotu SKU. Pokud máte své vlastní řešení pro doplňování EAN kódů, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena).',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean',
-        'css' => 'width: 250px',
-      ),
-      array(
-        'title' => 'Podpora výrobců',
-        'type' => 'text',
-        'desc' => 'Pokud už doplňujete výrobce (<code>MANUFACTURER</code>), tak zadejte název příslušné taxonomie.',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
-        'css' => 'width: 250px',
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
-      ),
-      array(
-        'title' => 'Zbozi.cz',
-        'type' => 'title',
-        'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
-        'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
-      ),
-      array(
-        'title' => 'Aktivovat feed',
-        'type' => 'checkbox',
-        'desc' => 'Povolí možnost postupného generování .xml souboru pro Zbozi.cz a zobrazí příslušná nastavení v administraci.',
-        'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
-      ),
-      array(
-        'title' => 'Pricemania.cz (.sk)',
-        'type' => 'title',
-        'desc' => 'Generovaný feed je dostupný v podobě .xml <a href="' . WP_CONTENT_URL . '/pricemania.xml">souboru</a>. Aktualizace probíhá automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
-        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
-      ),
-      array(
-        'title' => 'Aktivovat feed',
-        'type' => 'checkbox',
-        'desc' => 'Povolí možnost postupného generování .xml souboru pro Pricemania.cz (.sk) a zobrazí příslušná nastavení v administraci.',
-        'id' => 'wc_ceske_sluzby_xml_feed_pricemania-aktivace'
-      ),
-      array(
-        'title' => 'Poštovné',
-        'type' => 'number',
-        'desc' => 'Uvedeno může být nejnižší základní poštovné (zadávejte konkrétní číslo, pokud je poštovné zdarma tak nulu).',
-        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_postovne',
-        'css' => 'width: 50px',
-        'custom_attributes' => array(
-          'min' => 0,
-          'step' => 1
-        )
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
-      ),
-      array(
-        'title' => 'Dodatečné označení produktů',
-        'type' => 'title',
-        'desc' => 'Produkty můžete rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.',
-        'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
-      ),
-      array(
-        'title' => 'Skupina 1',
-        'type' => 'select',
-        'desc' => 'Nastavit můžete libovolnou z neveřejných vlastností.',
-        'desc_tip' => 'CUSTOM_LABEL_0 pro Zboží.cz nebo g:custom_label_0 pro Google',
-        'id' => 'wc_ceske_sluzby_xml_feed_custom_label_0',
-        'default' => '',
-        'class' => 'wc-enhanced-select',
-        'options' => self::ziskat_neverejne_vlastnosti(),
-      ),
-      array(
-        'type' => 'sectionend',
-        'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
-      ),
+      $settings = array(
+        array(
+          'title' => 'XML feed',
+          'type' => 'title',
+          'desc' => 'Zde budou postupně přidávána další nastavení.',
+          'id' => 'wc_ceske_sluzby_xml_feed_title'
+        ),
+        array(
+          'title' => 'Heureka.cz (.sk)',
+          'type' => 'title',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+        ),
+        array(
+          'title' => 'Aktivovat feed',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost postupného generování .xml souboru pro Heureka.cz (.sk) a zobrazí příslušná nastavení v administraci.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka-aktivace'
+        ),
+        array(
+          'title' => 'Dodací doba',
+          'type' => 'number',
+          'desc' => 'Zboží může být skladem (0), dostupné do tří dnů (1 - 3), do týdne (4 - 7), do dvou týdnů (8 - 14), do měsíce (15 - 30) či více než měsíc (31 a více).',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba',
+          'css' => 'width: 50px',
+          'custom_attributes' => array(
+            'min' => 0,
+            'step' => 1
+          )
+        ),
+        array(
+          'title' => 'Podpora EAN',
+          'type' => 'text',
+          'desc' => 'Pokud doplňujete EAN kód do pole pro katalogové číslo, tak zadejte hodnotu SKU. Pokud máte své vlastní řešení pro doplňování EAN kódů, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena).',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean',
+          'css' => 'width: 250px',
+        ),
+        array(
+          'title' => 'Podpora výrobců',
+          'type' => 'text',
+          'desc' => 'Pokud už doplňujete výrobce (<code>MANUFACTURER</code>), tak zadejte název příslušné taxonomie.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
+          'css' => 'width: 250px',
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+        ),
+        array(
+          'title' => 'Zbozi.cz',
+          'type' => 'title',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
+        ),
+        array(
+          'title' => 'Aktivovat feed',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost postupného generování .xml souboru pro Zbozi.cz a zobrazí příslušná nastavení v administraci.',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
+        ),
+        array(
+          'title' => 'Pricemania.cz (.sk)',
+          'type' => 'title',
+          'desc' => 'Generovaný feed je dostupný v podobě .xml <a href="' . WP_CONTENT_URL . '/pricemania.xml">souboru</a>. Aktualizace probíhá automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://files.pricemania.sk/pricemania-struktura-xml-feedu.pdf">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+          'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
+        ),
+        array(
+          'title' => 'Aktivovat feed',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost postupného generování .xml souboru pro Pricemania.cz (.sk) a zobrazí příslušná nastavení v administraci.',
+          'id' => 'wc_ceske_sluzby_xml_feed_pricemania-aktivace'
+        ),
+        array(
+          'title' => 'Poštovné',
+          'type' => 'number',
+          'desc' => 'Uvedeno může být nejnižší základní poštovné (zadávejte konkrétní číslo, pokud je poštovné zdarma tak nulu).',
+          'id' => 'wc_ceske_sluzby_xml_feed_pricemania_postovne',
+          'css' => 'width: 50px',
+          'custom_attributes' => array(
+            'min' => 0,
+            'step' => 1
+          )
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
+        ),
+        array(
+          'title' => 'Dodatečné označení produktů',
+          'type' => 'title',
+          'desc' => 'Produkty můžete rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.',
+          'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
+        ),
+        array(
+          'title' => 'Skupina 1',
+          'type' => 'select',
+          'desc' => 'Nastavit můžete libovolnou z neveřejných vlastností.',
+          'desc_tip' => 'CUSTOM_LABEL_0 pro Zboží.cz nebo g:custom_label_0 pro Google',
+          'id' => 'wc_ceske_sluzby_xml_feed_custom_label_0',
+          'default' => '',
+          'class' => 'wc-enhanced-select',
+          'options' => self::ziskat_neverejne_vlastnosti(),
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
+        ),
       );
     }
 
