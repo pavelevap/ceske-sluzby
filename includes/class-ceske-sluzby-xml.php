@@ -92,25 +92,27 @@ function heureka_xml_feed_zobrazeni() {
     if ( $attributes_produkt ) {
       $i = 0;
       foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_taxonomy'] ) {
-          if ( ! $attribute['is_variation'] ) {
-            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-            if ( $terms ) {
-              foreach ( $terms as $term ) {
-                $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                $vlastnosti_produkt[$i]['hodnota'] = $term;
-                if ( count( $terms ) == 1 ) {
-                  $nazev_produkt_vlastnosti .= " " . $term;
+        if ( $attribute['is_visible'] ) {
+          if ( $attribute['is_taxonomy'] ) {
+            if ( ! $attribute['is_variation'] ) {
+              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+              if ( $terms ) {
+                foreach ( $terms as $term ) {
+                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
+                  $vlastnosti_produkt[$i]['hodnota'] = $term;
+                  if ( count( $terms ) == 1 ) {
+                    $nazev_produkt_vlastnosti .= " " . $term;
+                  }
+                  $i = $i + 1; 
                 }
-                $i = $i + 1; 
               }
             }
-          }
-        } else {
-          if ( ! $attribute['is_variation'] ) {
-            $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-            $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-            $i = $i + 1;
+          } else {
+            if ( ! $attribute['is_variation'] ) {
+              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
+              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
+              $i = $i + 1;
+            }
           }
         }
       }
@@ -441,25 +443,27 @@ function heureka_xml_feed_aktualizace() {
     if ( $attributes_produkt ) {
       $i = 0;
       foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_taxonomy'] ) {
-          if ( ! $attribute['is_variation'] ) {
-            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-            if ( $terms ) {
-              foreach ( $terms as $term ) {
-                $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                $vlastnosti_produkt[$i]['hodnota'] = $term;
-                if ( count( $terms ) == 1 ) {
-                  $nazev_produkt_vlastnosti .= " " . $term;
+        if ( $attribute['is_visible'] ) {
+          if ( $attribute['is_taxonomy'] ) {
+            if ( ! $attribute['is_variation'] ) {
+              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+              if ( $terms ) {
+                foreach ( $terms as $term ) {
+                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
+                  $vlastnosti_produkt[$i]['hodnota'] = $term;
+                  if ( count( $terms ) == 1 ) {
+                    $nazev_produkt_vlastnosti .= " " . $term;
+                  }
+                  $i = $i + 1; 
                 }
-                $i = $i + 1; 
               }
             }
-          }
-        } else {
-          if ( ! $attribute['is_variation'] ) {
-            $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-            $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-            $i = $i + 1;
+          } else {
+            if ( ! $attribute['is_variation'] ) {
+              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
+              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
+              $i = $i + 1;
+            }
           }
         }
       }
@@ -736,25 +740,27 @@ function zbozi_xml_feed_zobrazeni() {
     if ( $attributes_produkt ) {
       $i = 0;
       foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_taxonomy'] ) {
-          if ( ! $attribute['is_variation'] ) {
-            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-            if ( $terms ) {
-              foreach ( $terms as $term ) {
-                $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                $vlastnosti_produkt[$i]['hodnota'] = $term;
-                if ( count( $terms ) == 1 ) {
-                  $nazev_produkt_vlastnosti .= " " . $term;
+        if ( $attribute['is_visible'] ) {
+          if ( $attribute['is_taxonomy'] ) {
+            if ( ! $attribute['is_variation'] ) {
+              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+              if ( $terms ) {
+                foreach ( $terms as $term ) {
+                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
+                  $vlastnosti_produkt[$i]['hodnota'] = $term;
+                  if ( count( $terms ) == 1 ) {
+                    $nazev_produkt_vlastnosti .= " " . $term;
+                  }
+                  $i = $i + 1; 
                 }
-                $i = $i + 1; 
               }
             }
-          }
-        } else {
-          if ( ! $attribute['is_variation'] ) {
-            $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-            $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-            $i = $i + 1;
+          } else {
+            if ( ! $attribute['is_variation'] ) {
+              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
+              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
+              $i = $i + 1;
+            }
           }
         }
       }
@@ -1073,25 +1079,27 @@ function zbozi_xml_feed_aktualizace() {
     if ( $attributes_produkt ) {
       $i = 0;
       foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_taxonomy'] ) {
-          if ( ! $attribute['is_variation'] ) {
-            $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-            if ( $terms ) {
-              foreach ( $terms as $term ) {
-                $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                $vlastnosti_produkt[$i]['hodnota'] = $term;
-                if ( count( $terms ) == 1 ) {
-                  $nazev_produkt_vlastnosti .= " " . $term;
+        if ( $attribute['is_visible'] ) {
+          if ( $attribute['is_taxonomy'] ) {
+            if ( ! $attribute['is_variation'] ) {
+              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+              if ( $terms ) {
+                foreach ( $terms as $term ) {
+                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
+                  $vlastnosti_produkt[$i]['hodnota'] = $term;
+                  if ( count( $terms ) == 1 ) {
+                    $nazev_produkt_vlastnosti .= " " . $term;
+                  }
+                  $i = $i + 1; 
                 }
-                $i = $i + 1; 
               }
             }
-          }
-        } else {
-          if ( ! $attribute['is_variation'] ) {
-            $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-            $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-            $i = $i + 1;
+          } else {
+            if ( ! $attribute['is_variation'] ) {
+              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
+              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
+              $i = $i + 1;
+            }
           }
         }
       }
