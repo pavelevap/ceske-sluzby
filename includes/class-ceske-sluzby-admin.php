@@ -51,6 +51,20 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     global $current_section;
     woocommerce_update_options( self::get_settings( $current_section ) );
   }
+  
+  public static function ziskat_neverejne_vlastnosti() {
+    $vlastnosti = array();
+    $neverejne_vlastnosti[''] = "Zvolte vlastnost";
+    $vlastnosti = wc_get_attribute_taxonomies();
+    if ( $vlastnosti ) {
+      foreach ( $vlastnosti as $vlastnost ) {
+        if ( $vlastnost->attribute_public == 0 ) {
+          $neverejne_vlastnosti[ $vlastnost->attribute_id ] = $vlastnost->attribute_label;
+        }
+      }
+    }
+    return $neverejne_vlastnosti;
+  }
 
   public static function get_settings( $current_section = '' ) {
     global $current_section;
@@ -265,7 +279,27 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       array(
         'type' => 'sectionend',
         'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
-      )
+      ),
+      array(
+        'title' => 'Dodatečné označení produktů',
+        'type' => 'title',
+        'desc' => 'Produkty můžete rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.',
+        'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
+      ),
+      array(
+        'title' => 'Skupina 1',
+        'type' => 'select',
+        'desc' => 'Nastavit můžete libovolnou z neveřejných vlastností.',
+        'desc_tip' => 'CUSTOM_LABEL_0 pro Zboží.cz nebo g:custom_label_0 pro Google',
+        'id' => 'wc_ceske_sluzby_xml_feed_custom_label_0',
+        'default' => '',
+        'class' => 'wc-enhanced-select',
+        'options' => self::ziskat_neverejne_vlastnosti(),
+      ),
+      array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
+      ),
       );
     }
 
