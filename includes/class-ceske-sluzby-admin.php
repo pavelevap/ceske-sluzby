@@ -51,6 +51,33 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     global $current_section;
     woocommerce_update_options( self::get_settings( $current_section ) );
   }
+
+  public static function zobrazit_dostupne_taxonomie( $druh ) {
+    $dostupne_taxonomie = "";
+    $taxonomies = get_object_taxonomies( 'product', 'objects' );
+    foreach ( $taxonomies as $name => $taxonomy ) {
+      if ( $druh == "vlastnosti" ) {
+        if ( taxonomy_is_product_attribute( $name ) ) {
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+          else {
+            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+        }
+      } elseif ( $druh == "obecne" ) {
+        if ( ! taxonomy_is_product_attribute( $name ) ) {
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+          else {
+            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+        }
+      }
+    }
+    return $dostupne_taxonomie;
+  }
   
   public static function ziskat_neverejne_vlastnosti() {
     $vlastnosti = array();
@@ -283,18 +310,18 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
-          'desc' => 'Produkty můžete rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.',
+          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.
+                     Dostupné taxonomie: ' . self::zobrazit_dostupne_taxonomie( 'obecne' ) . '
+                     Dostupné vlastnosti v podobě taxonomií: ' . self::zobrazit_dostupne_taxonomie( 'vlastnosti' ) . '
+                     Podporovány jsou také názvy jednoduchých vlastností nebo uživatelských polí.',
           'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
         ),
         array(
-          'title' => 'Skupina 1',
-          'type' => 'select',
-          'desc' => 'Nastavit můžete libovolnou z neveřejných vlastností.',
-          'desc_tip' => 'CUSTOM_LABEL_0 pro Zboží.cz nebo g:custom_label_0 pro Google',
-          'id' => 'wc_ceske_sluzby_xml_feed_custom_label_0',
-          'default' => '',
-          'class' => 'wc-enhanced-select',
-          'options' => self::ziskat_neverejne_vlastnosti(),
+          'title' => 'Definice skupin',
+          'type' => 'textarea',
+          'desc_tip' => 'Na každém řádku musí být samostatné uveden konkrétní název, kterým bude skupina definována.',
+          'css' => 'width: 30%; height: 105px;',
+          'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni'
         ),
         array(
           'type' => 'sectionend',
