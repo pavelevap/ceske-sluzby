@@ -78,20 +78,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
     return $dostupne_taxonomie;
   }
-  
-  public static function ziskat_neverejne_vlastnosti() {
-    $vlastnosti = array();
-    $neverejne_vlastnosti[''] = "Zvolte vlastnost";
-    $vlastnosti = wc_get_attribute_taxonomies();
-    if ( $vlastnosti ) {
-      foreach ( $vlastnosti as $vlastnost ) {
-        if ( $vlastnost->attribute_public == 0 ) {
-          $neverejne_vlastnosti[ $vlastnost->attribute_name ] = $vlastnost->attribute_label;
-        }
-      }
-    }
-    return $neverejne_vlastnosti;
-  }
 
   public static function get_settings( $current_section = '' ) {
     global $current_section;
