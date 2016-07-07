@@ -46,16 +46,50 @@ function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_p
   return $vlastnosti_produkt;
 }
 
-function ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $product_id, $vlastnosti_produkt ) {
+function ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt ) {
   $nazev_produkt_vlastnosti = "";
   if ( ! empty ( $vlastnosti_produkt ) ) {
     foreach ( $vlastnosti_produkt as $vlastnost ) {
-      if ( taxonomy_is_product_attribute( $vlastnost['nazev'] ) && ! isset ( $vlastnost['duplicita'] ) && $vlastnost['viditelnost'] ) {
+      if ( taxonomy_is_product_attribute( $vlastnost['slug'] ) && ! isset ( $vlastnost['duplicita'] ) && $vlastnost['viditelnost'] ) {
         $nazev_produkt_vlastnosti .= " " . $vlastnost['hodnota'];
       }
     }
   }
   return $nazev_produkt_vlastnosti;
+}
+
+function ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt ) {
+  if ( $attributes_varianta ) {
+    $i = 0;
+    foreach ( $attributes_varianta as $nazev => $hodnota ) {
+      if ( strpos( $nazev, '_pa_' ) !== false ) {
+        $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
+        if ( $term ) {
+          $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
+          $vlastnosti_varianta[$i]['hodnota'] = $term->name;
+          $vlastnosti_varianta[$i]['slug'] = str_replace( 'attribute_', '', $nazev );
+          $vlastnosti_varianta[$i]['viditelnost'] = 1;
+        }
+      } else {
+        $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
+        $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
+        $vlastnosti_varianta[$i]['slug'] = str_replace( 'attribute_', '', $nazev );
+        $vlastnosti_varianta[$i]['viditelnost'] = 1;
+      }
+      $i = $i + 1;
+    }
+  }
+  return $vlastnosti_varianta;
+}
+
+function ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta ) {
+  $nazev_varianta_vlastnosti = "";
+  if ( ! empty ( $vlastnosti_varianta ) ) {
+    foreach ( $vlastnosti_varianta as $vlastnost ) {
+        $nazev_varianta_vlastnosti .= " " . $vlastnost['hodnota'];
+    }
+  }
+  return $nazev_varianta_vlastnosti;
 }
 
 function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $data ) {
@@ -844,7 +878,7 @@ function zbozi_xml_feed_zobrazeni() {
 
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
-    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $product_id, $vlastnosti_produkt );
+    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -896,28 +930,8 @@ function zbozi_xml_feed_zobrazeni() {
           }
           
           $attributes_varianta = $varianta->get_variation_attributes();
-          if ( $attributes_varianta ) {
-            $i = 0;
-            foreach ( $attributes_varianta as $nazev => $hodnota ) {
-              if ( strpos( $nazev, '_pa_' ) !== false ) {
-                $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
-                if ( $term ) {
-                  $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
-                  $vlastnosti_varianta[$i]['hodnota'] = $term->name;
-                  $vlastnosti_varianta[$i]['slug'] = str_replace( 'attribute_', '', $nazev );
-                  $vlastnosti_varianta[$i]['viditelnost'] = 1;
-                  $nazev_varianta .= " " . $term->name;
-                }
-              } else {
-                $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
-                $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
-                $vlastnosti_varianta[$i]['slug'] = str_replace( 'attribute_', '', $nazev );
-                $vlastnosti_varianta[$i]['viditelnost'] = 1;
-                $nazev_varianta .= " " . $hodnota;
-              }
-              $i = $i + 1;
-            }
-          }
+          $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
