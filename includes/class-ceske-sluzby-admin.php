@@ -296,7 +296,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
-          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd.
+          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a>).
                      Dostupné taxonomie: ' . self::zobrazit_dostupne_taxonomie( 'obecne' ) . '
                      Dostupné vlastnosti v podobě taxonomií: ' . self::zobrazit_dostupne_taxonomie( 'vlastnosti' ) . '
                      Podporovány jsou také názvy jednoduchých vlastností nebo uživatelských polí.',
