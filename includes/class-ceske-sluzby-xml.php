@@ -343,12 +343,12 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
           $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
           if ( $viditelne_vlastnosti_varianta ) {
-            $xmlWriter->startElement( 'PARAM' );
-            foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+            foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
+              $xmlWriter->startElement( 'PARAM' ); 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+              $xmlWriter->endElement();
             }
-            $xmlWriter->endElement();
             $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
           }
 
@@ -413,12 +413,12 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
-            $xmlWriter->startElement( 'PARAM' );
-            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
+              $xmlWriter->startElement( 'PARAM' ); 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+              $xmlWriter->endElement();
             }
-            $xmlWriter->endElement();
           }
 
           if ( ! empty ( $ean ) ) {
@@ -652,12 +652,12 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
             if ( $viditelne_vlastnosti_varianta ) {
-              $xmlWriter->startElement( 'PARAM' );
-              foreach ( $viditelne_vlastnosti_varianta as $vlastnost ) { 
-                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
-                $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+              foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
+                $xmlWriter->startElement( 'PARAM' ); 
+                  $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+                  $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+                $xmlWriter->endElement();
               }
-              $xmlWriter->endElement();
               $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
             }
             if ( ! empty ( $ean ) ) {
@@ -722,12 +722,12 @@ function heureka_xml_feed_aktualizace() {
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
-            $xmlWriter->startElement( 'PARAM' );
-            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
+              $xmlWriter->startElement( 'PARAM' ); 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+              $xmlWriter->endElement();
             }
-            $xmlWriter->endElement();
           }
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
@@ -908,12 +908,12 @@ function zbozi_xml_feed_zobrazeni() {
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
             if ( $viditelne_vlastnosti_varianta ) {
-              $xmlWriter->startElement( 'PARAM' );
-              foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {  
-                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
-                $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+              foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
+                $xmlWriter->startElement( 'PARAM' );  
+                  $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+                  $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+                $xmlWriter->endElement();
               }
-              $xmlWriter->endElement();
               $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
             }
             if ( ! empty ( $vyrobce ) ) {
@@ -987,12 +987,12 @@ function zbozi_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
-            $xmlWriter->startElement( 'PARAM' );
-            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
+              $xmlWriter->startElement( 'PARAM' ); 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+              $xmlWriter->endElement();
             }
-            $xmlWriter->endElement();
           }
           if ( ! empty ( $vyrobce ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce[0] );
@@ -1228,12 +1228,12 @@ function zbozi_xml_feed_aktualizace() {
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
             if ( $viditelne_vlastnosti_varianta ) {
-              $xmlWriter->startElement( 'PARAM' );
-              foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {  
-                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
-                $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+              foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
+                $xmlWriter->startElement( 'PARAM' );  
+                  $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+                  $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
+                $xmlWriter->endElement();
               }
-              $xmlWriter->endElement();
               $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
             }
             if ( ! empty ( $vyrobce ) ) {
@@ -1308,12 +1308,12 @@ function zbozi_xml_feed_aktualizace() {
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
-            $xmlWriter->startElement( 'PARAM' );
-            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
+              $xmlWriter->startElement( 'PARAM' ); 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
+              $xmlWriter->endElement();
             }
-            $xmlWriter->endElement();
           }
           if ( ! empty ( $vyrobce ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce[0] );
