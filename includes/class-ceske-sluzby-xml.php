@@ -256,34 +256,8 @@ function heureka_xml_feed_zobrazeni() {
     $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
     $attributes_produkt = $produkt->get_attributes();
-    if ( $attributes_produkt ) {
-      $i = 0;
-      foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_visible'] ) {
-          if ( $attribute['is_taxonomy'] ) {
-            if ( ! $attribute['is_variation'] ) {
-              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-              if ( $terms ) {
-                foreach ( $terms as $term ) {
-                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                  $vlastnosti_produkt[$i]['hodnota'] = $term;
-                  if ( count( $terms ) == 1 ) {
-                    $nazev_produkt_vlastnosti .= " " . $term;
-                  }
-                  $i = $i + 1; 
-                }
-              }
-            }
-          } else {
-            if ( ! $attribute['is_variation'] ) {
-              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-              $i = $i + 1;
-            }
-          }
-        }
-      }
-    }
+    $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
+    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -333,26 +307,10 @@ function heureka_xml_feed_zobrazeni() {
           } else {
             $description = $varianta->get_variation_description();
           }
-       
+
           $attributes_varianta = $varianta->get_variation_attributes();
-          if ( $attributes_varianta ) {
-            $i = 0;
-            foreach ( $attributes_varianta as $nazev => $hodnota ) {
-              if ( strpos( $nazev, '_pa_' ) !== false ) {
-                $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
-                if ( $term ) {
-                  $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
-                  $vlastnosti_varianta[$i]['hodnota'] = $term->name;
-                  $nazev_varianta .= " " . $term->name;
-                }
-              } else {
-                $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
-                $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
-                $nazev_varianta .= " " . $hodnota;
-              }
-              $i = $i + 1;
-            }
-          }
+          $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
@@ -383,12 +341,12 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
           $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
-
-          if ( $vlastnosti_varianta ) {
+          $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+          if ( $viditelne_vlastnosti_varianta ) {
             $xmlWriter->startElement( 'PARAM' );
-            foreach ( $vlastnosti_varianta as $vlastnost ) { 
-              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost['nazev'] );
-              $xmlWriter->writeElement( 'VAL', $vlastnost['hodnota'] );
+            foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) { 
+              $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+              $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
             }
             $xmlWriter->endElement();
             $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
@@ -453,10 +411,10 @@ function heureka_xml_feed_zobrazeni() {
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
-
-          if ( $vlastnosti_produkt ) {
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          if ( $viditelne_vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
-            foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
               $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
               $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
             }
@@ -607,34 +565,8 @@ function heureka_xml_feed_aktualizace() {
     $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
     $attributes_produkt = $produkt->get_attributes();
-    if ( $attributes_produkt ) {
-      $i = 0;
-      foreach ( $attributes_produkt as $attribute ) {
-        if ( $attribute['is_visible'] ) {
-          if ( $attribute['is_taxonomy'] ) {
-            if ( ! $attribute['is_variation'] ) {
-              $terms = wc_get_product_terms( $product_id, $attribute['name'] );
-              if ( $terms ) {
-                foreach ( $terms as $term ) {
-                  $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
-                  $vlastnosti_produkt[$i]['hodnota'] = $term;
-                  if ( count( $terms ) == 1 ) {
-                    $nazev_produkt_vlastnosti .= " " . $term;
-                  }
-                  $i = $i + 1; 
-                }
-              }
-            }
-          } else {
-            if ( ! $attribute['is_variation'] ) {
-              $vlastnosti_produkt[$i]['nazev'] = $attribute['name'];
-              $vlastnosti_produkt[$i]['hodnota'] = $attribute['value'];
-              $i = $i + 1;
-            }
-          }
-        }
-      }
-    }
+    $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
+    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -684,26 +616,10 @@ function heureka_xml_feed_aktualizace() {
           } else {
             $description = $varianta->get_variation_description();
           }
-       
+
           $attributes_varianta = $varianta->get_variation_attributes();
-          if ( $attributes_varianta ) {
-            $i = 0;
-            foreach ( $attributes_varianta as $nazev => $hodnota ) {
-              if ( strpos( $nazev, '_pa_' ) !== false ) {
-                $term = get_term_by( 'slug', $hodnota, esc_attr( str_replace( 'attribute_', '', $nazev ) ) );
-                if ( $term ) {
-                  $vlastnosti_varianta[$i]['nazev'] = wc_attribute_label( str_replace( 'attribute_', '', $nazev ) ); 
-                  $vlastnosti_varianta[$i]['hodnota'] = $term->name;
-                  $nazev_varianta .= " " . $term->name;
-                }
-              } else {
-                $vlastnosti_varianta[$i]['nazev'] = $attributes_produkt[str_replace( 'attribute_', '', $nazev )]['name'];
-                $vlastnosti_varianta[$i]['hodnota'] = $hodnota;
-                $nazev_varianta .= " " . $hodnota;
-              }
-              $i = $i + 1;
-            }
-          }
+          $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
@@ -734,11 +650,12 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
-            if ( $vlastnosti_varianta ) {
+            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+            if ( $viditelne_vlastnosti_varianta ) {
               $xmlWriter->startElement( 'PARAM' );
-              foreach ( $vlastnosti_varianta as $vlastnost ) { 
-                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost['nazev'] );
-                $xmlWriter->writeElement( 'VAL', $vlastnost['hodnota'] );
+              foreach ( $viditelne_vlastnosti_varianta as $vlastnost ) { 
+                $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_varianta['nazev'] );
+                $xmlWriter->writeElement( 'VAL', $vlastnost_varianta['hodnota'] );
               }
               $xmlWriter->endElement();
               $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
@@ -803,9 +720,10 @@ function heureka_xml_feed_aktualizace() {
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
-          if ( $vlastnosti_produkt ) {
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          if ( $viditelne_vlastnosti_produkt ) {
             $xmlWriter->startElement( 'PARAM' );
-            foreach ( $vlastnosti_produkt as $vlastnost_produkt ) { 
+            foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) { 
               $xmlWriter->writeElement( 'PARAM_NAME', $vlastnost_produkt['nazev'] );
               $xmlWriter->writeElement( 'VAL', $vlastnost_produkt['hodnota'] );
             }
