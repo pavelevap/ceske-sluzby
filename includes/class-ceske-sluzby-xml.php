@@ -13,6 +13,33 @@ function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
   return $vynechane_kategorie;
 }
 
+function ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id ) {
+  $strom_kategorie = "";
+  $kategorie_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_kategorie', true );
+  if ( $kategorie_produkt ) {
+    $strom_kategorie = $kategorie_produkt;
+  } else {
+    $dostupne_kategorie = get_the_terms( $product_id, 'product_cat' );
+    if ( $dostupne_kategorie && ! is_wp_error( $dostupne_kategorie ) ) {
+      $heureka_kategorie = get_woocommerce_term_meta( $dostupne_kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+      if ( $heureka_kategorie ) {
+        $strom_kategorie = $heureka_kategorie;
+      }
+      else {
+        $rodice_kategorie = get_ancestors( $dostupne_kategorie[0]->term_id, 'product_cat' );
+        if ( ! empty ( $rodice_kategorie ) ) {
+          foreach ( $rodice_kategorie as $rodic ) {
+            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+          }
+        }
+        $strom_kategorie .= $dostupne_kategorie[0]->name;
+      }
+    }
+  } 
+  return $strom_kategorie;
+}
+
 function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt ) {
   $vlastnosti_produkt = array();
   if ( ! empty ( $attributes_produkt ) ) {
@@ -46,6 +73,27 @@ function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_p
   return $vlastnosti_produkt;
 }
 
+function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $doplneny_nazev_produkt, $vlastnosti, $nazev_prispevku ) {
+  $nazev = "";
+  if ( $druh == 'varianta' ) {
+    $nazev_varianta_vlastnosti = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti );
+    if ( ! empty ( $doplneny_nazev_produkt ) ) {
+      $nazev = $doplneny_nazev_produkt . $nazev_varianta_vlastnosti;
+    } else {
+      $nazev = $nazev_prispevku . $nazev_varianta_vlastnosti;
+    }
+  }
+  if ( $druh == 'produkt' ) {
+    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti );
+    if ( ! empty ( $doplneny_nazev_produkt ) ) {
+      $nazev = $doplneny_nazev_produkt;
+    } else {
+      $nazev = $nazev_prispevku . $nazev_produkt_vlastnosti;
+    }
+  }    
+  return wp_strip_all_tags( $nazev ); // Potřebujeme wp_strip_all_tags()?
+}
+
 function ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt ) {
   $nazev_produkt_vlastnosti = "";
   if ( ! empty ( $vlastnosti_produkt ) ) {
@@ -59,6 +107,7 @@ function ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt 
 }
 
 function ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt ) {
+  $vlastnosti_varianta = array();
   if ( $attributes_varianta ) {
     $i = 0;
     foreach ( $attributes_varianta as $nazev => $hodnota ) {
@@ -223,41 +272,14 @@ function heureka_xml_feed_zobrazeni() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $strom_kategorie = "";
-    $nazev_produkt_vlastnosti = "";
-    $vlastnosti_produkt = array();
-    $terms = array();
 
     $produkt = wc_get_product( $product_id );
-    
-    $kategorie_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_kategorie', true );
-    if ( $kategorie_produkt ) {
-      $strom_kategorie = $kategorie_produkt;
-    } else {
-      $kategorie = get_the_terms( $product_id, 'product_cat' );
-      if ( $kategorie && ! is_wp_error( $kategorie ) ) {
-        $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-        if ( $heureka_kategorie ) {
-          $strom_kategorie = $heureka_kategorie;
-        }
-        else {
-          $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-          if ( ! empty ( $rodice_kategorie ) ) {
-            foreach ( $rodice_kategorie as $rodic ) {
-              $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-              $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-            }
-          }
-          $strom_kategorie .= $kategorie[0]->name;
-        }
-      }
-    }
- 
-    $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id );
+    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
-    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -270,8 +292,6 @@ function heureka_xml_feed_zobrazeni() {
           $ean = "";
           $dodaci_doba = $global_dodaci_doba;
           $description = "";
-          $nazev_varianta = "";
-          $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
@@ -310,18 +330,16 @@ function heureka_xml_feed_zobrazeni() {
 
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $doplneny_nazev_produkt, $vlastnosti_varianta, $produkt->post->post_title );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
 
           $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
-          if ( ! empty ( $nazev_produkt ) ) {
-            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt . $nazev_varianta ) );
-          } else {
+          if ( ! empty ( $nazev_varianta ) ) {
             $xmlWriter->startElement( 'PRODUCTNAME' );
-              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_varianta ) );
+              $xmlWriter->text( $nazev_varianta );
             $xmlWriter->endElement();
           }
           if ( ! empty ( $description ) ) {
@@ -388,10 +406,8 @@ function heureka_xml_feed_zobrazeni() {
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
           if ( ! empty ( $nazev_produkt ) ) {
-            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt ) ); // Potřebujeme wp_strip_all_tags()?
-          } else {
             $xmlWriter->startElement( 'PRODUCTNAME' );
-              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_produkt_vlastnosti ) );
+              $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
           }
           if ( ! empty ( $description ) ) {
@@ -532,41 +548,15 @@ function heureka_xml_feed_aktualizace() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $strom_kategorie = "";
-    $nazev_produkt_vlastnosti = "";
-    $vlastnosti_produkt = array();
-    $terms = array();
 
     $produkt = wc_get_product( $product_id );
-    
-    $kategorie_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_kategorie', true );
-    if ( $kategorie_produkt ) {
-      $strom_kategorie = $kategorie_produkt;
-    } else {
-      $kategorie = get_the_terms( $product_id, 'product_cat' );
-      if ( $kategorie && ! is_wp_error( $kategorie ) ) {
-        $heureka_kategorie = get_woocommerce_term_meta( $kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-        if ( $heureka_kategorie ) {
-          $strom_kategorie = $heureka_kategorie;
-        }
-        else {
-          $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-          if ( ! empty ( $rodice_kategorie ) ) {
-            foreach ( $rodice_kategorie as $rodic ) {
-              $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-              $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-            }
-          }
-          $strom_kategorie .= $kategorie[0]->name;
-        }
-      }
-    }
-      
-    $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
+
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id );
+    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
-    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -579,8 +569,6 @@ function heureka_xml_feed_aktualizace() {
           $ean = "";
           $dodaci_doba = $global_dodaci_doba;
           $description = "";
-          $nazev_varianta = "";
-          $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
@@ -619,18 +607,16 @@ function heureka_xml_feed_aktualizace() {
 
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $doplneny_nazev_produkt, $vlastnosti_varianta, $produkt->post->post_title );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
 
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
-            if ( ! empty ( $nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt . $nazev_varianta ) );
-            } else {
+            if ( ! empty ( $nazev_varianta ) ) {
               $xmlWriter->startElement( 'PRODUCTNAME' );
-                $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_varianta ) );
+                $xmlWriter->text( $nazev_varianta );
               $xmlWriter->endElement();
             }
             if ( ! empty ( $description ) ) {
@@ -697,10 +683,8 @@ function heureka_xml_feed_aktualizace() {
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
           if ( ! empty ( $nazev_produkt ) ) {
-            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt ) ); // Potřebujeme wp_strip_all_tags()?
-          } else {
             $xmlWriter->startElement( 'PRODUCTNAME' );
-              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_produkt_vlastnosti ) );
+              $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
           }
           if ( ! empty ( $description ) ) {
