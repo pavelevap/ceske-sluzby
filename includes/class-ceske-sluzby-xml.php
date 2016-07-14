@@ -13,30 +13,36 @@ function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
   return $vynechane_kategorie;
 }
 
-function ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id ) {
+function ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, $postmeta_produkt, $termmeta_kategorie, $separator ) {
   $strom_kategorie = "";
-  $kategorie_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_kategorie', true );
+  $kategorie_produkt = "";
+  $doplnena_kategorie = "";
+  if ( $postmeta_produkt ) {
+    $kategorie_produkt = get_post_meta( $product_id, $postmeta_produkt, true );
+  }
   if ( $kategorie_produkt ) {
     $strom_kategorie = $kategorie_produkt;
   } else {
     $dostupne_kategorie = get_the_terms( $product_id, 'product_cat' );
     if ( $dostupne_kategorie && ! is_wp_error( $dostupne_kategorie ) ) {
-      $heureka_kategorie = get_woocommerce_term_meta( $dostupne_kategorie[0]->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-      if ( $heureka_kategorie ) {
-        $strom_kategorie = $heureka_kategorie;
+      if ( $termmeta_kategorie ) {
+        $doplnena_kategorie = get_woocommerce_term_meta( $dostupne_kategorie[0]->term_id, $termmeta_kategorie, true );
+      }
+      if ( $doplnena_kategorie ) {
+        $strom_kategorie = $doplnena_kategorie;
       }
       else {
         $rodice_kategorie = get_ancestors( $dostupne_kategorie[0]->term_id, 'product_cat' );
         if ( ! empty ( $rodice_kategorie ) ) {
           foreach ( $rodice_kategorie as $rodic ) {
             $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-            $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
+            $strom_kategorie = $nazev_kategorie->name . ' ' . $separator . ' ' . $strom_kategorie;
           }
         }
         $strom_kategorie .= $dostupne_kategorie[0]->name;
       }
     }
-  } 
+  }
   return $strom_kategorie;
 }
 
@@ -275,7 +281,7 @@ function heureka_xml_feed_zobrazeni() {
 
     $produkt = wc_get_product( $product_id );
 
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_heureka_kategorie', 'ceske-sluzby-xml-heureka-kategorie', '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
@@ -551,7 +557,7 @@ function heureka_xml_feed_aktualizace() {
 
     $produkt = wc_get_product( $product_id );
 
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_heureka_kategorie', 'ceske-sluzby-xml-heureka-kategorie', '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
 
     $attributes_produkt = $produkt->get_attributes();
@@ -786,27 +792,14 @@ function zbozi_xml_feed_zobrazeni() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $strom_kategorie = "";
     $nazev_produkt_vlastnosti = "";
     $vlastnosti_produkt = array();
     $terms = array();
 
     $produkt = wc_get_product( $product_id );
 
-    $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
-      $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-      if ( ! empty ( $rodice_kategorie ) ) {
-        foreach ( $rodice_kategorie as $rodic ) {
-          $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-          $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-        }
-      }
-      $strom_kategorie .= $kategorie[0]->name;
-    }
-
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
     $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
-
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
@@ -1107,27 +1100,14 @@ function zbozi_xml_feed_aktualizace() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $strom_kategorie = "";
     $nazev_produkt_vlastnosti = "";
     $vlastnosti_produkt = array();
     $terms = array();
 
     $produkt = wc_get_product( $product_id );
 
-    $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
-      $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-      if ( ! empty ( $rodice_kategorie ) ) {
-        foreach ( $rodice_kategorie as $rodic ) {
-          $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-          $strom_kategorie = $nazev_kategorie->name . ' | ' . $strom_kategorie;
-        }
-      }
-      $strom_kategorie .= $kategorie[0]->name;
-    }
-
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
     $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
-
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
@@ -1434,7 +1414,6 @@ function pricemania_xml_feed_aktualizace() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $strom_kategorie = "";
 
     $produkt = new WC_Product( $product_id );
 
@@ -1471,17 +1450,7 @@ function pricemania_xml_feed_aktualizace() {
       $description = $produkt->post->post_content;
     }
 
-    $kategorie = get_the_terms( $product_id, 'product_cat' );
-    if ( $kategorie && ! is_wp_error( $kategorie ) ) { 
-      $rodice_kategorie = get_ancestors( $kategorie[0]->term_id, 'product_cat' );
-      if ( ! empty ( $rodice_kategorie ) ) {
-        foreach ( $rodice_kategorie as $rodic ) {
-          $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
-          $strom_kategorie = $nazev_kategorie->name . ' > ' . $strom_kategorie;
-        }
-      }
-      $strom_kategorie .= $kategorie[0]->name;
-    }
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '>' );
 
     $xmlWriter->startElement( 'product' );
     $xmlWriter->writeElement( 'id', $product_id );
