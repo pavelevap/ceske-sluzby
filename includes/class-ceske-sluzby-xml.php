@@ -792,17 +792,14 @@ function zbozi_xml_feed_zobrazeni() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $nazev_produkt_vlastnosti = "";
-    $vlastnosti_produkt = array();
-    $terms = array();
 
     $produkt = wc_get_product( $product_id );
 
     $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
-    $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
+    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
-    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -815,8 +812,6 @@ function zbozi_xml_feed_zobrazeni() {
           $ean = "";
           $dodaci_doba = $global_dodaci_doba;
           $description = "";
-          $nazev_varianta = "";
-          $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
@@ -855,18 +850,16 @@ function zbozi_xml_feed_zobrazeni() {
           
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $doplneny_nazev_produkt, $vlastnosti_varianta, $produkt->post->post_title );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
 
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
-            if ( ! empty ( $nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt . $nazev_varianta ) );
-            } else {
+            if ( ! empty ( $nazev_varianta ) ) {
               $xmlWriter->startElement( 'PRODUCTNAME' );
-                $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_varianta ) );
+                $xmlWriter->text( $nazev_varianta );
               $xmlWriter->endElement();
             }
             if ( ! empty ( $description ) ) {
@@ -942,10 +935,8 @@ function zbozi_xml_feed_zobrazeni() {
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
           if ( ! empty ( $nazev_produkt ) ) {
-            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt ) );
-          } else {
             $xmlWriter->startElement( 'PRODUCTNAME' );
-              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_produkt_vlastnosti ) );
+              $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
           }
           if ( ! empty ( $description ) ) {
@@ -1100,17 +1091,14 @@ function zbozi_xml_feed_aktualizace() {
     $ean = "";
     $dodaci_doba = $global_dodaci_doba;
     $description = "";
-    $nazev_produkt_vlastnosti = "";
-    $vlastnosti_produkt = array();
-    $terms = array();
 
     $produkt = wc_get_product( $product_id );
 
     $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
-    $nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
+    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
-    $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
 
     if ( ! empty ( $podpora_vyrobcu ) ) {
       $vyrobce = wp_get_post_terms( $product_id, $podpora_vyrobcu, array( 'fields' => 'names' ) );
@@ -1123,8 +1111,6 @@ function zbozi_xml_feed_aktualizace() {
           $ean = "";
           $dodaci_doba = $global_dodaci_doba;
           $description = "";
-          $nazev_varianta = "";
-          $vlastnosti_varianta = array();
 
           if ( ! empty ( $podpora_ean ) ) {
             if ( $podpora_ean == "SKU" ) {
@@ -1163,17 +1149,15 @@ function zbozi_xml_feed_aktualizace() {
        
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $doplneny_nazev_produkt, $vlastnosti_varianta, $produkt->post->post_title );
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
-            if ( ! empty ( $nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt . $nazev_varianta ) );
-            } else {
+            if ( ! empty ( $nazev_varianta ) ) {
               $xmlWriter->startElement( 'PRODUCTNAME' );
-                $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_varianta ) );
+                $xmlWriter->text( $nazev_varianta );
               $xmlWriter->endElement();
             }
             if ( ! empty ( $description ) ) {
@@ -1250,10 +1234,8 @@ function zbozi_xml_feed_aktualizace() {
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
           if ( ! empty ( $nazev_produkt ) ) {
-            $xmlWriter->writeElement( 'PRODUCTNAME', wp_strip_all_tags ( $nazev_produkt ) );
-          } else {
             $xmlWriter->startElement( 'PRODUCTNAME' );
-              $xmlWriter->text( wp_strip_all_tags( $produkt->post->post_title . $nazev_produkt_vlastnosti ) );
+              $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
           }
           if ( ! empty ( $description ) ) {
