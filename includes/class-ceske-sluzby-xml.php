@@ -138,6 +138,20 @@ function ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produ
   return $ean;      
 }
 
+function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $sprava_skladu, $predbezna_objednavka, $neni_skladem ) {
+  $dodaci_doba = $global_dodaci_doba;
+  if ( $sprava_skladu && $predbezna_objednavka ) {
+    $dodaci_doba = $neni_skladem;
+  }
+  if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+    $vlastni_dodaci_doba = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
+    if ( is_numeric( $vlastni_dodaci_doba ) ) {
+      $dodaci_doba = $vlastni_dodaci_doba;
+    }
+  }
+  return $dodaci_doba;      
+}
+
 function ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt ) {
   $nazev_produkt_vlastnosti = "";
   if ( ! empty ( $vlastnosti_produkt ) ) {
@@ -313,7 +327,6 @@ function heureka_xml_feed_zobrazeni() {
   $xmlWriter->startElement( 'SHOP' );
   
   foreach ( $products as $product_id ) {
-    $dodaci_doba = $global_dodaci_doba;
 
     $produkt = wc_get_product( $product_id );
 
@@ -332,18 +345,8 @@ function heureka_xml_feed_zobrazeni() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
-          $dodaci_doba = $global_dodaci_doba;
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
-
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "";
-          }
-          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
-            if ( is_numeric( $vlastni_dodaci_doba ) ) {
-              $dodaci_doba = $vlastni_dodaci_doba;
-            }
-          }
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $variation['variation_id'], $varianta->managing_stock(), $varianta->backorders_allowed(), '' );
 
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
@@ -397,16 +400,7 @@ function heureka_xml_feed_zobrazeni() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), false, false );
-
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "";
-        }
-        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
-          if ( is_numeric( $vlastni_dodaci_doba ) ) {
-            $dodaci_doba = $vlastni_dodaci_doba;
-          }
-        }
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $product_id, $produkt->managing_stock(), $produkt->backorders_allowed(), '' );
 
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
@@ -549,7 +543,6 @@ function heureka_xml_feed_aktualizace() {
     if ( $prubezny_pocet > $limit ) {
       break;
     }
-    $dodaci_doba = $global_dodaci_doba;
 
     $produkt = wc_get_product( $product_id );
 
@@ -568,18 +561,8 @@ function heureka_xml_feed_aktualizace() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
-          $dodaci_doba = $global_dodaci_doba;
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
-
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "";
-          }
-          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
-            if ( is_numeric( $vlastni_dodaci_doba ) ) {
-              $dodaci_doba = $vlastni_dodaci_doba;
-            }
-          }
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $variation['variation_id'], $varianta->managing_stock(), $varianta->backorders_allowed(), '' );
 
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
@@ -633,16 +616,7 @@ function heureka_xml_feed_aktualizace() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), false, false );
-
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "";
-        }
-        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
-          if ( is_numeric( $vlastni_dodaci_doba ) ) {
-            $dodaci_doba = $vlastni_dodaci_doba;
-          }
-        }
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $product_id, $produkt->managing_stock(), $produkt->backorders_allowed(), '' );
 
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
@@ -747,7 +721,6 @@ function zbozi_xml_feed_zobrazeni() {
   $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
   
   foreach ( $products as $product_id ) {
-    $dodaci_doba = $global_dodaci_doba;
 
     $produkt = wc_get_product( $product_id );
 
@@ -766,18 +739,8 @@ function zbozi_xml_feed_zobrazeni() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
-          $dodaci_doba = $global_dodaci_doba;
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
-
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "-1";
-          }
-          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
-            if ( is_numeric( $vlastni_dodaci_doba ) ) {
-              $dodaci_doba = $vlastni_dodaci_doba;
-            }
-          }
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $variation['variation_id'], $varianta->managing_stock(), $varianta->backorders_allowed(), '-1' );
 
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
@@ -840,16 +803,7 @@ function zbozi_xml_feed_zobrazeni() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), false, false );
-
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "-1";
-        }
-        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
-          if ( is_numeric( $vlastni_dodaci_doba ) ) {
-            $dodaci_doba = $vlastni_dodaci_doba;
-          }
-        }
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $product_id, $produkt->managing_stock(), $produkt->backorders_allowed(), '-1' );
 
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
@@ -1006,7 +960,6 @@ function zbozi_xml_feed_aktualizace() {
     if ( $prubezny_pocet > $limit ) {
       break;
     }
-    $dodaci_doba = $global_dodaci_doba;
 
     $produkt = wc_get_product( $product_id );
 
@@ -1025,19 +978,9 @@ function zbozi_xml_feed_aktualizace() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
-          $dodaci_doba = $global_dodaci_doba;
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $variation['variation_id'], $varianta->managing_stock(), $varianta->backorders_allowed(), '-1' );
 
-          if ( $varianta->managing_stock() && $varianta->backorders_allowed() ) {
-            $dodaci_doba = "-1";
-          }
-          if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-            $vlastni_dodaci_doba = get_post_meta( $variation['variation_id'], $dodaci_doba_vlastni_reseni, true );
-            if ( is_numeric( $vlastni_dodaci_doba ) ) {
-              $dodaci_doba = $vlastni_dodaci_doba;
-            }
-          }
-       
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
           $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $doplneny_nazev_produkt, $vlastnosti_varianta, $produkt->post->post_title );
@@ -1045,6 +988,7 @@ function zbozi_xml_feed_aktualizace() {
           if ( $vlastnosti_produkt ) {
             $vlastnosti_varianta = array_merge( $vlastnosti_varianta, $vlastnosti_produkt );
           }
+
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
             if ( ! empty ( $nazev_varianta ) ) {
@@ -1099,16 +1043,7 @@ function zbozi_xml_feed_aktualizace() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produkt->get_sku(), false, false );
-
-        if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-          $dodaci_doba = "-1";
-        }
-        if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-          $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
-          if ( is_numeric( $vlastni_dodaci_doba ) ) {
-            $dodaci_doba = $vlastni_dodaci_doba;
-          }
-        }
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $product_id, $produkt->managing_stock(), $produkt->backorders_allowed(), '-1' );
 
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
@@ -1272,7 +1207,6 @@ function pricemania_xml_feed_aktualizace() {
   $postovne = get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' );
 
   foreach ( $products as $product_id ) {
-    $dodaci_doba = $global_dodaci_doba;
 
     $produkt = new WC_Product( $product_id );
 
@@ -1283,15 +1217,7 @@ function pricemania_xml_feed_aktualizace() {
     }
 
     if ( $produkt->is_in_stock() ) {
-      if ( $produkt->managing_stock() && $produkt->backorders_allowed() ) {
-        $dodaci_doba = 50;
-      }
-      if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-        $vlastni_dodaci_doba = get_post_meta( $product_id, $dodaci_doba_vlastni_reseni, true );
-        if ( is_numeric( $vlastni_dodaci_doba ) ) {
-          $dodaci_doba = $vlastni_dodaci_doba;
-        }
-      }
+      $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $product_id, $produkt->managing_stock(), $produkt->backorders_allowed(), '50' );
     }
     else {
       $dodaci_doba = 100;
