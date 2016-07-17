@@ -1,4 +1,40 @@
 <?php
+function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
+  $args = array(
+    'nopaging' => true,
+    'post_type' => 'product',
+    'post_status' => 'publish',
+    'meta_query' => array(
+      array(
+        'key' => '_visibility',
+        'value' => 'hidden',
+        'compare' => '!=',
+      ),
+      array(
+        'key' => 'ceske_sluzby_xml_vynechano',
+        'compare' => 'NOT EXISTS',
+      ),
+    ),
+    'tax_query' => array(
+      array(
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
+        'include_children' => false,
+        'operator' => 'NOT IN',
+      ),
+    ),
+    'fields' => 'ids'
+  );
+  if ( $limit ) {
+    $args['posts_per_page'] = $limit;
+  }
+  if ( $offset ) {
+    $args['offset'] = $offset;
+  }
+  return $args;
+}
+
 function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
   $vynechane_kategorie = array();
   $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
@@ -307,34 +343,9 @@ function ceske_sluzby_xml_ziskat_dostupna_postmeta() {
 
 function heureka_xml_feed_zobrazeni() {
   // http://codeinthehole.com/writing/creating-large-xml-files-with-php/
-  $args = array(
-    'nopaging' => true,
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids'
-  );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
   $products = get_posts( $args );
-  
+
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
@@ -345,7 +356,7 @@ function heureka_xml_feed_zobrazeni() {
   $xmlWriter->setIndent( true );
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
-  
+
   foreach ( $products as $product_id ) {
 
     $produkt = wc_get_product( $product_id );
@@ -489,43 +500,17 @@ function heureka_xml_feed_aktualizace() {
   if ( ! empty ( $progress ) ) {
     $offset = $progress;
   }
-  
+
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
 
-  $args = array(
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids',
-    'posts_per_page' => $limit,
-    'offset' => $offset
-  );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
- 
+
   if ( ! $products ) {
     if ( wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml_batch' ) ) {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml_batch' );
@@ -692,34 +677,9 @@ function heureka_xml_feed_aktualizace() {
 }
 
 function zbozi_xml_feed_zobrazeni() {
-  $args = array(
-    'nopaging' => true,
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids'
-  );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
   $products = get_posts( $args );
-  
+
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
@@ -733,7 +693,7 @@ function zbozi_xml_feed_zobrazeni() {
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
   $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
-  
+
   foreach ( $products as $product_id ) {
 
     $produkt = wc_get_product( $product_id );
@@ -893,43 +853,17 @@ function zbozi_xml_feed_aktualizace() {
   if ( ! empty ( $progress ) ) {
     $offset = $progress;
   }
-  
+
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
 
-  $args = array(
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids',
-    'posts_per_page' => $limit,
-    'offset' => $offset
-  );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'SHOP' );
- 
+
   if ( ! $products ) {
     if ( wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml_batch' ) ) {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml_batch' );
@@ -1124,34 +1058,9 @@ function zbozi_xml_feed_aktualizace() {
 }
 
 function google_xml_feed_zobrazeni() {
-  $args = array(
-    'nopaging' => true,
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids'
-  );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
   $products = get_posts( $args );
-  
+
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
@@ -1169,7 +1078,7 @@ function google_xml_feed_zobrazeni() {
   $xmlWriter->writeElement( 'title', get_bloginfo() );
   $xmlWriter->writeElement( 'link', get_bloginfo( 'description' ) );
   $xmlWriter->writeElement( 'description', get_bloginfo( 'url' ) );
-  
+
   foreach ( $products as $product_id ) {
 
     $produkt = wc_get_product( $product_id );
@@ -1325,43 +1234,17 @@ function pricemania_xml_feed_aktualizace() {
   if ( ! empty ( $progress ) ) {
     $offset = $progress;
   }
-  
+
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
-  
-  $args = array(
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'meta_query' => array(
-      array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
-        'key' => 'ceske_sluzby_xml_vynechano',
-        'compare' => 'NOT EXISTS',
-      ),
-    ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      ),
-    ),
-    'fields' => 'ids',
-    'posts_per_page' => $limit,
-    'offset' => $offset
-  );
+
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );
   $xmlWriter->startElement( 'products' );
- 
+
   if ( ! $products ) {
     if ( wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml_batch' ) ) {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
@@ -1389,7 +1272,7 @@ function pricemania_xml_feed_aktualizace() {
   }
 
   wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
-  
+
   $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
   $dodaci_doba_vlastni_reseni = get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' );
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
