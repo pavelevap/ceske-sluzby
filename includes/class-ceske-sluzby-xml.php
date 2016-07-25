@@ -255,7 +255,7 @@ function ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_varianta
   return $nazev_varianta_vlastnosti;
 }
 
-function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $data ) {
+function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $data, $zobrazit_nazev ) {
   $value = "";
   if ( taxonomy_exists( $data ) ) {
     $polozky_taxonomie = array();
@@ -284,7 +284,7 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
   }
   // Kontrola dostupných textových vlastností u konkrétního produktu (hodnota postmeta _product_attributes).
   // Nelze snadno zjistit, zda se vlastnost nevyskytuje u nějakého jiného produktu a jde tedy vůbec o vlastnost.
-  // Pokud tedy konkrétní produkt vlastnost neobsahuje, tak bude zobrazen název vlastnosti.
+  // Pokud tedy konkrétní produkt vlastnost neobsahuje, tak bude zobrazen název vlastnosti na základě vlastnosti $zobrazit_nazev.
   if ( ! empty( $vlastnosti_produkt ) ) {
     foreach ( $vlastnosti_produkt as $vlastnost ) {
       if ( $vlastnost['nazev'] == $data ) {
@@ -299,7 +299,9 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
       return $value;
     }
   }
-  return $data;
+  if ( $zobrazit_nazev ) {
+    return $data;
+  }
 }
 
 function ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt ) {
@@ -761,7 +763,7 @@ function zbozi_xml_feed_zobrazeni() {
             if ( ! empty ( $custom_labels_array ) ) {
               $a = 0;
               foreach ( $custom_labels_array as $custom_label ) {
-                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label );
+                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label, false );
                 if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
                   $xmlWriter->writeElement( 'CUSTOM_LABEL_' . $a, $custom_label_hodnota );
                 }
@@ -815,7 +817,7 @@ function zbozi_xml_feed_zobrazeni() {
           if ( ! empty ( $custom_labels_array ) ) {
             $a = 0;
             foreach ( $custom_labels_array as $custom_label ) {
-              $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label );
+              $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label, false );
               if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
                 $xmlWriter->writeElement( 'CUSTOM_LABEL_' . $a, $custom_label_hodnota );
               }
@@ -971,7 +973,7 @@ function zbozi_xml_feed_aktualizace() {
             if ( ! empty ( $custom_labels_array ) ) {
               $a = 0;
               foreach ( $custom_labels_array as $custom_label ) {
-                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label );
+                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label, false );
                 if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
                   $xmlWriter->writeElement( 'CUSTOM_LABEL_' . $a, $custom_label_hodnota );
                 }
@@ -1026,7 +1028,7 @@ function zbozi_xml_feed_aktualizace() {
           if ( ! empty ( $custom_labels_array ) ) {
             $a = 0;
             foreach ( $custom_labels_array as $custom_label ) {
-              $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label );
+              $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label, false );
               if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
                 $xmlWriter->writeElement( 'CUSTOM_LABEL_' . $a, $custom_label_hodnota );
               }
@@ -1076,8 +1078,8 @@ function google_xml_feed_zobrazeni() {
   $xmlWriter->startElement( 'channel' );
   $xmlWriter->writeAttribute( 'xmlns:g', 'http://base.google.com/ns/1.0' );
   $xmlWriter->writeElement( 'title', get_bloginfo() );
-  $xmlWriter->writeElement( 'link', get_bloginfo( 'description' ) );
-  $xmlWriter->writeElement( 'description', get_bloginfo( 'url' ) );
+  $xmlWriter->writeElement( 'link', get_bloginfo( 'url' ) );
+  $xmlWriter->writeElement( 'description', get_bloginfo( 'description' ) );
 
   foreach ( $products as $product_id ) {
 
@@ -1138,14 +1140,14 @@ function google_xml_feed_zobrazeni() {
             if ( ! empty ( $ean ) ) {
               $xmlWriter->writeElement( 'g:gtin', $ean );
             }
-            if ( ! empty ( $podpora_ean ) && $podpora_ean != 'SKU' && ! empty ( $varianta->get_sku() ) ) {
+            if ( $podpora_ean != 'SKU' && ! empty ( $varianta->get_sku() ) ) {
               $xmlWriter->writeElement( 'g:mpn', $varianta->get_sku() );
             }
             if ( ! empty ( $custom_labels_array ) ) {
               $a = 0;
               foreach ( $custom_labels_array as $custom_label ) {
-                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label );
-                if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
+                $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $custom_label, false );
+                if ( ! empty ( $custom_label_hodnota ) && $a <= 4 ) {
                   $xmlWriter->writeElement( 'g:custom_label_' . $a, $custom_label_hodnota );
                 }
                 $a = $a + 1;
@@ -1191,14 +1193,14 @@ function google_xml_feed_zobrazeni() {
         if ( ! empty ( $ean ) ) {
           $xmlWriter->writeElement( 'g:gtin', $ean );
         }
-        if ( ! empty ( $podpora_ean ) && $podpora_ean != 'SKU' && ! empty ( $produkt->get_sku() ) ) {
+        if ( $podpora_ean != 'SKU' && ! empty ( $produkt->get_sku() ) ) {
           $xmlWriter->writeElement( 'g:mpn', $produkt->get_sku() );
         }
         if ( ! empty ( $custom_labels_array ) ) {
           $a = 0;
           foreach ( $custom_labels_array as $custom_label ) {
-            $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label );
-            if ( ! empty ( $custom_label_hodnota ) && $a <= 1 ) {
+            $custom_label_hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $custom_label, false );
+            if ( ! empty ( $custom_label_hodnota ) && $a <= 4 ) {
               $xmlWriter->writeElement( 'g:custom_label_' . $a, $custom_label_hodnota );
             }
             $a = $a + 1;

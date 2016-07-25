@@ -12,7 +12,7 @@
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
-  define( "GOOGLE_MENA", "SVK" );
+  define( "GOOGLE_MENA", "EUR" );
 }
 else {
   define( "HEUREKA_URL", "heureka.cz" );
