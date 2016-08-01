@@ -12,9 +12,11 @@
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
+  define( "GOOGLE_MENA", "EUR" );
 }
 else {
   define( "HEUREKA_URL", "heureka.cz" );
+  define( "GOOGLE_MENA", "CZK" );
 }
 
 function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
@@ -480,6 +482,7 @@ function ceske_sluzby_aktivace_xml_feed() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
     add_feed( 'heureka', 'heureka_xml_feed_zobrazeni' );
     add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
+    add_feed( 'google', 'google_xml_feed_zobrazeni' );
 
     $heureka_xml = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     if ( $heureka_xml == "yes" ) {

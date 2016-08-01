@@ -76,6 +76,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         }
       }
     }
+    if ( empty( $dostupne_taxonomie ) && ( $druh == "vlastnosti" ) ) {
+      $dostupne_taxonomie = 'Zatím žádné, ale snadno můžete nějaké <a href="' . admin_url(). 'edit.php?post_type=product&page=product_attributes">vytvořit</a>.';
+    }
     return $dostupne_taxonomie;
   }
 
@@ -294,9 +297,20 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
         ),
         array(
+          'title' => 'Google.cz (.sk)',
+          'type' => 'title',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=google">zde</a>.
+                     Automaticky je použito nastavení z ostatních feedů.',
+          'id' => 'wc_ceske_sluzby_xml_feed_google_title'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_google_title'
+        ),
+        array(
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
-          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a>).
+          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
                      Dostupné taxonomie: ' . self::zobrazit_dostupne_taxonomie( 'obecne' ) . '
                      Dostupné vlastnosti v podobě taxonomií: ' . self::zobrazit_dostupne_taxonomie( 'vlastnosti' ) . '
                      Podporovány jsou také názvy jednoduchých textových vlastností nebo uživatelských polí.',
