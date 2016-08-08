@@ -585,23 +585,34 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
     }
 
     $recenze_xml = simplexml_load_string( $source_xml, 'SimpleXMLElement', LIBXML_NOCDATA );
+    $atributy = shortcode_atts( array( 'limit' => 30 ), $atts );
+    $limit = $atributy['limit'];
+    $i = 0;
 
     $output = '<div class="recenze-zakazniku">';
-    foreach( $recenze_xml as $recenze ) {
-      if ( ! empty ( $recenze->summary ) ) {
-        $output .= '<ul>';
-        $output .= '<li>';
-        $output .= '<strong>' . $recenze->summary . '</strong><br />';
-        if ( ! empty ( $recenze->total_rating ) ) {
-          $output .= 'Hodnocení: ' . $recenze->total_rating . '/5 | ';
+    if ( ! empty( $recenze_xml ) && ! is_scalar( $recenze_xml ) ) {
+      foreach( $recenze_xml as $recenze ) {
+        if ( $i < $limit ) {
+          if ( ! empty ( $recenze->summary ) ) {
+            $i = $i + 1;
+            $output .= '<ul>';
+            $output .= '<li>';
+            $output .= '<strong>' . $recenze->summary . '</strong><br />';
+            if ( ! empty ( $recenze->total_rating ) ) {
+              $output .= 'Hodnocení: ' . $recenze->total_rating . '/5 | ';
+            }
+            $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
+            if ( ! empty ( $recenze->name ) ) {
+              $output .= ' | Autor: ' . $recenze->name;
+            } 
+            $output .= '</li>';
+            $output .= '</ul>';
+          }
         }
-        $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
-        if ( ! empty ( $recenze->name ) ) {
-          $output .= ' | Autor: ' . $recenze->name;
-        } 
-        $output .= '</li>';
-        $output .= '</ul>';
       }
+    }
+    else {
+      $output .= 'Zatím žádné hodnocení.';
     }
     $output .= '</div>';
   }
