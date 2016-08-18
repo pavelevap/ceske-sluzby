@@ -585,14 +585,14 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
     }
 
     $recenze_xml = simplexml_load_string( $source_xml, 'SimpleXMLElement', LIBXML_NOCDATA );
-    $atributy = shortcode_atts( array( 'limit' => 30 ), $atts );
+    $atributy = shortcode_atts( array( 'limit' => null ), $atts );
     $limit = $atributy['limit'];
     $i = 0;
 
     $output = '<div class="recenze-zakazniku">';
     if ( ! empty( $recenze_xml ) && ! is_scalar( $recenze_xml ) ) {
       foreach( $recenze_xml as $recenze ) {
-        if ( $i < $limit ) {
+        if ( ( ! empty ( $limit ) && $i < $limit ) || empty ( $limit ) ) {
           if ( ! empty ( $recenze->summary ) ) {
             $i = $i + 1;
             $output .= '<ul>';
@@ -608,6 +608,9 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
             $output .= '</li>';
             $output .= '</ul>';
           }
+        }
+        else {
+          break;
         }
       }
     }
