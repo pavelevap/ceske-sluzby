@@ -166,6 +166,7 @@ function ceske_sluzby_sledovani_zasilek_email_akce( $email_actions ) {
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/ceske-sluzby-functions.php';
     if ( is_admin() ) {
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-admin.php';
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek.php';

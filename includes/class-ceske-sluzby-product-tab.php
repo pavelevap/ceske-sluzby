@@ -6,6 +6,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       add_filter( 'woocommerce_product_data_tabs', array( $this, 'ceske_sluzby_product_tab' ) );
       add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
       add_action( 'woocommerce_process_product_meta', array( $this, 'ceske_sluzby_product_tab_ulozeni' ) );
+      add_action( 'woocommerce_product_options_stock_status', array( $this, 'ceske_sluzby_zobrazit_nastaveni_dodaci_doby' ) );
     }
   }
 
@@ -107,6 +108,21 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     }
     echo '</div>';
   }
+  
+  public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
+    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+    if ( ! empty ( $dodaci_doba ) ) {
+      $dodaci_doba = array_merge( array( '' => '- Vyberte -' ), $dodaci_doba );
+      woocommerce_wp_select(
+        array( 
+          'id' => 'ceske_sluzby_dodaci_doba', 
+          'label' => 'Dodací doba',
+          'description' => 'Zvolte dodací dobu pro konkrétní produkt.',
+          'options' => $dodaci_doba
+        )
+      );
+    }
+  }
 
   public function ceske_sluzby_product_tab_ulozeni( $post_id ) {
     if ( isset( $_POST['ceske_sluzby_xml_heureka_productname'] ) ) {
@@ -115,14 +131,14 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
       }
     }
-    
+
     if ( isset( $_POST['ceske_sluzby_xml_heureka_kategorie'] ) ) {
       $heureka_kategorie = $_POST['ceske_sluzby_xml_heureka_kategorie'];
       if( ! empty( $heureka_kategorie ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_kategorie', esc_attr( $heureka_kategorie ) );
       }
     }
-    
+
     if ( isset( $_POST['ceske_sluzby_xml_zbozi_productname'] ) ) {
       $zbozi_productname = $_POST['ceske_sluzby_xml_zbozi_productname'];
       if( ! empty( $zbozi_productname ) ) {
@@ -138,6 +154,14 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
         delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );  
+    }
+
+    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
+    $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
+    if ( ! empty ( $_POST['ceske_sluzby_dodaci_doba'] ) || $dodaci_doba === '0' ) {
+      update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+    } elseif ( isset( $dodaci_doba_ulozeno ) ) {
+      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );  
     }
   }
 }
