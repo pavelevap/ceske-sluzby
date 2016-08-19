@@ -1,7 +1,6 @@
 <?php
 function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
   $args = array(
-    'nopaging' => true,
     'post_type' => 'product',
     'post_status' => 'publish',
     'meta_query' => array(
@@ -28,6 +27,8 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
   );
   if ( $limit ) {
     $args['posts_per_page'] = $limit;
+  } else {
+    $args['nopaging'] = true;
   }
   if ( $offset ) {
     $args['offset'] = $offset;
