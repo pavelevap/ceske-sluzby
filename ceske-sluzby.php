@@ -728,12 +728,20 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
 
 function ceske_sluzby_zobrazit_dodaci_dobu( $availability, $product ) {
   $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
-  if ( ! empty ( $dodaci_doba ) ) {
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() ) {
     $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
     if ( ! empty ( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
       if ( array_key_exists( $dodaci_doba_produkt, $dodaci_doba ) ) {
         $availability = $dodaci_doba[ $dodaci_doba_produkt ];
       }
+    }
+    else {
+      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+      if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
+        if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
+          $availability = $dodaci_doba[ $global_dodaci_doba ];
+        }
+      }  
     }
   }
   return $availability;

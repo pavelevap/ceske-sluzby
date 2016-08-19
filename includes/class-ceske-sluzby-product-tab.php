@@ -110,14 +110,23 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   }
   
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
+    $global_dodaci_doba_text = '';
     $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
     if ( ! empty ( $dodaci_doba ) ) {
+      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+      if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
+        if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
+          $global_dodaci_doba_text = ' Globálně máte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaveno</a>: <strong>' . $dodaci_doba[ $global_dodaci_doba ] . '</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.').';
+        } else {
+          $global_dodaci_doba_text = ' Pro globální dodací dobu (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.') nemáte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaven</a> žádný text.';
+        }
+      }
       $dodaci_doba = array ( '' => '- Vyberte -') + $dodaci_doba;
       woocommerce_wp_select(
         array( 
           'id' => 'ceske_sluzby_dodaci_doba', 
           'label' => 'Dodací doba',
-          'description' => 'Zvolte dodací dobu pro konkrétní produkt.',
+          'description' => 'Zvolte dodací dobu pro konkrétní produkt.' . $global_dodaci_doba_text,
           'options' => $dodaci_doba
         )
       );

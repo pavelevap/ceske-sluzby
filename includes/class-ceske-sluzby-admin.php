@@ -386,8 +386,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Hodnoty pro dodací dobu',
           'type' => 'textarea',
-          'desc_tip' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená zobrazovaným textem.',
-          'default' => sprintf( '1|Do 1 dne%1$s2|Do 2 dnů%1$s7|Do týdne', PHP_EOL ),
+          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.',
+          'default' => sprintf( '1|Skladem zítra%1$s3|Dostupné do 3 dnů%1$s7|Na objednávku do týdne', PHP_EOL ),
           'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_hodnoty'
         ),
