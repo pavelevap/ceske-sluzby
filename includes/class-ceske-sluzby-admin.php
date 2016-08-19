@@ -373,23 +373,29 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Dodací doba',
           'type' => 'title',
-          'desc' => 'Možnost nastavení dodací doby u jednotlivých produktů. Zvolené hodnoty se budou automaticky zobrazovat na webu i v XML feedech.',
+          'desc' => 'Možnost nastavení dodací doby u jednotlivých produktů. Zvolené hodnoty se budou automaticky zobrazovat v XML feedech.',
           'id' => 'wc_ceske_sluzby_dodaci_doba_title'
         ),
         array(
           'title' => 'Vlastní řešení',
           'type' => 'text',
-          'desc' => 'Pokud používáte své vlastní řešení (např. nějaký plugin) pro nastavení dodací doby, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena).',
+          'desc' => 'Pokud používáte své vlastní řešení (např. nějaký plugin) pro nastavení dodací doby, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena), odkud se budou načítat data pro XML feed.',
           'id' => 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni',
           'css' => 'width: 250px',
         ),
         array(
-          'title' => 'Intervaly pro dodací dobu',
+          'title' => 'Hodnoty pro dodací dobu',
           'type' => 'textarea',
-          'desc_tip' => 'Na každém řádku musí být uvedena hodnota (počet dnů) oddělená zobrazovaným textem.',
-          'default' => sprintf( '0|Skladem%1$s1|Do 1 dne%1$s2|Do 2 dnů', PHP_EOL ),
+          'desc_tip' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená zobrazovaným textem.',
+          'default' => sprintf( '1|Do 1 dne%1$s2|Do 2 dnů%1$s7|Do týdne', PHP_EOL ),
           'css' => 'width: 40%; height: 85px;',
-          'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
+          'id' => 'wc_ceske_sluzby_dodaci_doba_hodnoty'
+        ),
+        array(
+          'title' => 'Zobrazovat na webu',
+          'type' => 'checkbox',
+          'desc' => 'Podle zadaných hodnot se bude na webu také zobrazovat příslušný text.',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_zobrazovani'
         ),
         array(
           'type' => 'sectionend',

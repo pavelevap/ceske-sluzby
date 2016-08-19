@@ -112,7 +112,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
     $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
     if ( ! empty ( $dodaci_doba ) ) {
-      $dodaci_doba = array_merge( array( '' => '- Vyberte -' ), $dodaci_doba );
+      $dodaci_doba = array ( '' => '- Vyberte -') + $dodaci_doba;
       woocommerce_wp_select(
         array( 
           'id' => 'ceske_sluzby_dodaci_doba', 
@@ -158,7 +158,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
     $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
-    if ( ! empty ( $_POST['ceske_sluzby_dodaci_doba'] ) || $dodaci_doba === '0' ) {
+    if ( ! empty ( $dodaci_doba ) || $dodaci_doba === '0' ) {
       update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
     } elseif ( isset( $dodaci_doba_ulozeno ) ) {
       delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );  

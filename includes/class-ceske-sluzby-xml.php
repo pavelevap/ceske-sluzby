@@ -174,22 +174,36 @@ function ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produ
   return $ean;      
 }
 
-function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $predbezna_objednavka, $neni_skladem ) {
+function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
   $dodaci_doba = $global_dodaci_doba;
-  if ( $item->managing_stock() && $item->backorders_allowed() ) {
-    $dodaci_doba = $predbezna_objednavka;
+  if ( $item->is_on_backorder( 1 ) ) {
+    $dodaci_doba = $global_predbezna_objednavka;
   }
-  if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-    $vlastni_dodaci_doba = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
-    if ( is_numeric( $vlastni_dodaci_doba ) ) {
-      $dodaci_doba = $vlastni_dodaci_doba;
+
+  $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+  if ( $aktivace_dodaci_doby == "yes" ) {
+    if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+      $dodaci_doba_item = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
+      if ( ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) && is_numeric( $dodaci_doba_item ) ) {
+        $dodaci_doba = $dodaci_doba_item;
+      }
+    } else {
+      $dodaci_doba_nastaveni = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+      if ( ! empty ( $dodaci_doba_nastaveni ) ) {
+        $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
+        if ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) {
+          $dodaci_doba = $dodaci_doba_item;
+        }
+      }
     }
   }
-  if ( is_numeric( $dodaci_doba ) && $predbezna_objednavka == 'preorder' ) {
+
+  if ( is_numeric( $dodaci_doba ) && $global_predbezna_objednavka == 'preorder' ) {
     $dodaci_doba = 'in stock';
   }
-  if ( $neni_skladem && ! $item->is_in_stock() ) {
-    $dodaci_doba = $neni_skladem;
+
+  if ( $global_neni_skladem && ! $item->is_in_stock() ) {
+    $dodaci_doba = $global_neni_skladem;
   }
   return $dodaci_doba;      
 }
