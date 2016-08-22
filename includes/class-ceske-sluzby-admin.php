@@ -214,6 +214,16 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_title'
         ),
         array(
+          'title' => 'Aktivovat shortcodes',
+          'type' => 'checkbox',
+          'desc' => 'Možnost spouštění zkrácených zápisů (shortcode). V základním nastavení jsou zcela ignorovány, ale pokud obsahují informace potřebné pro popis produktů, tak je můžete nechat zobrazovat.',
+          'id' => 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_title'
+        ),
+        array(
           'title' => 'Heureka.cz (.sk)',
           'type' => 'title',
           'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
