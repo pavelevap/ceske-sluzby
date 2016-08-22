@@ -187,6 +187,27 @@ function ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produ
   return $ean;      
 }
 
+function ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $new, $bazar ) {
+  $aktualni_stav = "";
+  $stav_produktu = get_post_meta( $product_id, 'ceske_sluzby_xml_stav_produktu', true );
+  if ( empty ( $stav_produktu ) ) {
+    if ( ! empty ( $new ) ) {
+      $aktualni_stav = $new;
+    }
+  } else {
+    if ( empty ( $bazar ) ) {
+      $aktualni_stav = "hide";
+    }
+    elseif ( $bazar == 'value' ) {
+      $aktualni_stav = $stav_produktu;
+    }
+    else {
+      $aktualni_stav = $bazar;
+    }
+  }
+  return $aktualni_stav;      
+}
+
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $predbezna_objednavka, $neni_skladem ) {
   $dodaci_doba = $global_dodaci_doba;
   if ( $item->managing_stock() && $item->backorders_allowed() ) {
@@ -384,6 +405,7 @@ function heureka_xml_feed_zobrazeni() {
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce = ceske_sluzby_xml_ziskat_vyrobce_produktu( $podpora_vyrobcu, $product_id, false );
+    $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, false, 'bazar' );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -411,6 +433,9 @@ function heureka_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'DESCRIPTION' );
               $xmlWriter->text( $popis_varianta );
             $xmlWriter->endElement();
+          }
+          if ( ! empty ( $stav_produkt ) ) {
+            $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
           }
           if ( ! empty ( $vyrobce ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce );
@@ -457,6 +482,9 @@ function heureka_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'DESCRIPTION' );
               $xmlWriter->text( $popis_produkt );
             $xmlWriter->endElement();
+          }
+          if ( ! empty ( $stav_produkt ) ) {
+            $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
           }
           if ( ! empty ( $vyrobce ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce );
@@ -572,6 +600,7 @@ function heureka_xml_feed_aktualizace() {
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce = ceske_sluzby_xml_ziskat_vyrobce_produktu( $podpora_vyrobcu, $product_id, false );
+    $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, false, 'bazar' );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -599,6 +628,9 @@ function heureka_xml_feed_aktualizace() {
               $xmlWriter->startElement( 'DESCRIPTION' );
                 $xmlWriter->text( $popis_varianta );
               $xmlWriter->endElement();
+            }
+            if ( ! empty ( $stav_produkt ) ) {
+            $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
             }
             if ( ! empty ( $vyrobce ) ) {
               $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce );
@@ -645,6 +677,9 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->startElement( 'DESCRIPTION' );
               $xmlWriter->text( $popis_produkt );
             $xmlWriter->endElement();
+          }
+          if ( ! empty ( $stav_produkt ) ) {
+            $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
           }
           if ( ! empty ( $vyrobce ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce );
@@ -723,6 +758,7 @@ function zbozi_xml_feed_zobrazeni() {
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce = ceske_sluzby_xml_ziskat_vyrobce_produktu( $podpora_vyrobcu, $product_id, false );
+    $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, false, false );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -750,6 +786,9 @@ function zbozi_xml_feed_zobrazeni() {
               $xmlWriter->startElement( 'DESCRIPTION' );
                 $xmlWriter->text( $popis_varianta );
               $xmlWriter->endElement();
+            }
+            if ( $stav_produkt == 'hide' ) {
+              $xmlWriter->writeElement( 'VISIBILITY', 0 );
             }
             if ( ! empty ( $strom_kategorie ) ) {
               $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -805,6 +844,9 @@ function zbozi_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'DESCRIPTION' );
               $xmlWriter->text( $popis_produkt );
             $xmlWriter->endElement();
+          }
+          if ( $stav_produkt == 'hide' ) {
+            $xmlWriter->writeElement( 'VISIBILITY', 0 );
           }
           if ( ! empty ( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -934,6 +976,7 @@ function zbozi_xml_feed_aktualizace() {
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce = ceske_sluzby_xml_ziskat_vyrobce_produktu( $podpora_vyrobcu, $product_id, false );
+    $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, false, false );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -961,6 +1004,9 @@ function zbozi_xml_feed_aktualizace() {
               $xmlWriter->startElement( 'DESCRIPTION' );
                 $xmlWriter->text( $popis_varianta );
               $xmlWriter->endElement();
+            }
+            if ( $stav_produkt == 'hide' ) {
+              $xmlWriter->writeElement( 'VISIBILITY', 0 );
             }
             if ( ! empty ( $strom_kategorie ) ) {
               $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -1017,6 +1063,9 @@ function zbozi_xml_feed_aktualizace() {
             $xmlWriter->startElement( 'DESCRIPTION' );
               $xmlWriter->text( $popis_produkt );
             $xmlWriter->endElement();
+          }
+          if ( $stav_produkt == 'hide' ) {
+            $xmlWriter->writeElement( 'VISIBILITY', 0 );
           }
           if ( ! empty ( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -1109,6 +1158,7 @@ function google_xml_feed_zobrazeni() {
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, false, $vlastnosti_produkt, $produkt->post->post_title );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce = ceske_sluzby_xml_ziskat_vyrobce_produktu( $podpora_vyrobcu, $product_id, true );
+    $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, 'new', 'value' );
     $sku_produkt = $produkt->get_sku();
 
     if ( $produkt->is_type( 'variable' ) ) {
@@ -1138,6 +1188,9 @@ function google_xml_feed_zobrazeni() {
               $xmlWriter->startElement( 'g:description' );
                 $xmlWriter->text( $popis_varianta );
               $xmlWriter->endElement();
+            }
+            if ( ! empty ( $stav_produkt ) ) {
+              $xmlWriter->writeElement( 'g:condition', $stav_produkt );
             }
             if ( ! empty ( $strom_kategorie ) ) {
               $xmlWriter->startElement( 'g:product_type' );
@@ -1191,6 +1244,9 @@ function google_xml_feed_zobrazeni() {
           $xmlWriter->startElement( 'g:description' );
             $xmlWriter->text( $popis_produkt );
           $xmlWriter->endElement();
+        }
+        if ( ! empty ( $stav_produkt ) ) {
+          $xmlWriter->writeElement( 'g:condition', $stav_produkt );
         }
         if ( ! empty ( $strom_kategorie ) ) {
           $xmlWriter->startElement( 'g:product_type' );

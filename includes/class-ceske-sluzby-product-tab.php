@@ -50,6 +50,19 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
         ) 
       );
     }
+    
+    woocommerce_wp_select(
+      array( 
+        'id' => 'ceske_sluzby_xml_stav_produktu', 
+        'label' => 'Stav produktu',
+        'description' => 'Zvolte stav produktu (element <code>ITEM_TYPE</code>), pokud není nový.',
+        'options' => array(
+          '' => '- Vyberte -',
+          'used' => 'Použité (bazar)',
+          'refurbished' => 'Repasované'
+        )
+      )
+    );
     echo '</div>';
 
     if ( $xml_feed_heureka == "yes" ) {
@@ -138,6 +151,14 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
         delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );  
+    }
+    
+    $stav_produktu = $_POST['ceske_sluzby_xml_stav_produktu'];
+    $stav_produktu_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', true );
+    if ( ! empty ( $stav_produktu ) ) {
+      update_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', $stav_produktu );
+    } elseif ( ! empty ( $stav_produktu_ulozeno ) ) {
+      delete_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu' );  
     }
   }
 }
