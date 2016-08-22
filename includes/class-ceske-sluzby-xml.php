@@ -145,7 +145,11 @@ function ceske_sluzby_xml_ziskat_popis_produktu( $post_excerpt, $post_content, $
     $produkt_description = $post_content;
   }
   if ( $varianta ) {
-    $varianta_description = $varianta->get_variation_description();
+    if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.4', '>=' ) ) {
+      $varianta_description = $varianta->get_variation_description();
+    } else {
+      $varianta_description = get_post_meta( $varianta->variation_id, '_variation_description', true );
+    }
     if ( empty ( $varianta_description ) ) {
       $varianta_description = $produkt_description;
     }
