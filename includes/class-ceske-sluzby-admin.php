@@ -256,7 +256,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Podpora výrobců',
           'type' => 'text',
-          'desc' => 'Pokud už doplňujete výrobce (<code>MANUFACTURER</code>), tak zadejte název příslušné taxonomie.',
+          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
           'css' => 'width: 250px',
         ),
