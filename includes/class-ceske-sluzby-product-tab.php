@@ -12,7 +12,8 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_product_tab( $product_tabs ) {
     $product_tabs['ceske_sluzby'] = array(
       'label' => 'České služby',
-      'target' => 'ceske_sluzby_tab_data'
+      'target' => 'ceske_sluzby_tab_data',
+      'class' => array()
     );
     return $product_tabs;
   }
