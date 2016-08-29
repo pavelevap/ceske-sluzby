@@ -261,6 +261,18 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 250px',
         ),
         array(
+          'title' => 'Stav produktů',
+          'type' => 'select',
+          'desc_tip' => 'Zvolte stav produktů, který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu).',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            '' => '- Vyberte -',
+            'used' => 'Použité (bazar)',
+            'refurbished' => 'Repasované'
+          ),
+        ),
+        array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
         ),

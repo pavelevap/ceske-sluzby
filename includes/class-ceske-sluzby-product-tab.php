@@ -23,19 +23,40 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     global $post;
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+    $global_stav_produktu = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' );
+    if ( ! empty ( $global_stav_produktu ) ) {
+      if ( $global_stav_produktu == 'used' ) {
+        $global_stav_produktu_hodnota = 'Použité (bazar)';
+      } else {
+        $global_stav_produktu_hodnota = 'Repasované';
+      }
+    }
     echo '<div id="ceske_sluzby_tab_data" class="panel woocommerce_options_panel">';
     echo '<div class="options_group">';
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
 
     $vynechane_kategorie = "";
+    $stav_produktu_kategorie = "";
     $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
     foreach ( $product_categories as $kategorie_produktu ) {
       $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
+      $stav_produktu = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
       if ( ! empty ( $vynechano ) ) {
         if ( ! empty ( $vynechane_kategorie ) ) {
           $vynechane_kategorie .= ", ";
         }
         $vynechane_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+      }
+      if ( ! empty ( $stav_produktu ) ) {
+        if ( $stav_produktu == 'used' ) {
+          $stav_produktu_hodnota = 'Použité (bazar)';
+        } else {
+          $stav_produktu_hodnota = 'Repasované';
+        }
+        if ( ! empty ( $stav_produktu_kategorie ) ) {
+          $stav_produktu_kategorie .= ", ";
+        }
+        $stav_produktu_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>: <strong>' . $stav_produktu_hodnota . '</strong>';
       }
     }
     if ( ! empty ( $vynechane_kategorie ) ) {
@@ -50,12 +71,24 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
         ) 
       );
     }
-    
+
+    if ( ! empty ( $global_stav_produktu ) ) {
+      $stav_produktu_text = 'Není potřeba nic zadávat, protože je na úrovni celého webu <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> hodnota <strong>' . $global_stav_produktu_hodnota . '</strong>.';
+      if ( ! empty ( $stav_produktu_kategorie ) ) {
+        $stav_produktu_text .= ' Dále je nastaveno na úrovni kategorie ' . $stav_produktu_kategorie . '.';
+      }
+      $stav_produktu_text .= ' Případná změna na úrovni produktu však bude mít přednost.';
+    }
+    elseif ( ! empty ( $stav_produktu_kategorie ) ) {
+      $stav_produktu_text = 'Není potřeba nic zadávat, protože je nastaveno na úrovni kategorie ' . $stav_produktu_kategorie . '. Případná změna na úrovni produktu však bude mít přednost.';
+    } else {
+      $stav_produktu_text = 'Zvolte stav produktu (pokud není nový).';
+    }
     woocommerce_wp_select(
       array( 
         'id' => 'ceske_sluzby_xml_stav_produktu', 
         'label' => 'Stav produktu',
-        'description' => 'Zvolte stav produktu (element <code>ITEM_TYPE</code>), pokud není nový.',
+        'description' => $stav_produktu_text,
         'options' => array(
           '' => '- Vyberte -',
           'used' => 'Použité (bazar)',
