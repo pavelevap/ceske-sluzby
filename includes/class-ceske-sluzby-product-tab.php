@@ -65,7 +65,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
         )
       );
-      
+
       $kategorie_heureka = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
@@ -110,8 +110,17 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   }
   
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
+    global $thepostid;
     $global_dodaci_doba_text = '';
     $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+    $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+
+    if ( ! empty ( $dodaci_doba ) || $predobjednavka == "yes" ) {
+      echo '</div>';
+      echo '<div class="options_group">';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>České služby</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastavení dodací doby</a>)</div>';
+    }
+
     if ( ! empty ( $dodaci_doba ) ) {
       $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
       if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
@@ -130,6 +139,19 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'options' => $dodaci_doba
         )
       );
+    }
+
+    if ( $predobjednavka == "yes" ) {
+      $datum_predobjednavky = "";
+      $datum = get_post_meta( $thepostid, 'ceske_sluzby_xml_preorder_datum', true );
+      if ( ! empty ( $datum ) ) {
+        $datum_predobjednavky = date_i18n( 'Y-m-d', $datum );
+      }
+      echo '<p class="form-field">
+              <label for="ceske_sluzby_xml_preorder_datum">Předobjednávka</label>
+              <input type="text" class="short" name="ceske_sluzby_xml_preorder_datum" id="ceske_sluzby_xml_preorder_datum" value="' . esc_attr( $datum_predobjednavky ) . '" placeholder="Požadovaný formát: YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />' .
+              wc_help_tip( 'Zadejte datum, kdy bude možné dodat produkt zákazníkovi.' ) . '
+            </p>';
     }
   }
 
@@ -171,6 +193,16 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
     } elseif ( isset( $dodaci_doba_ulozeno ) ) {
       delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );  
+    }
+    
+    $datum_predobjednavky_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', true );
+    if ( isset( $_POST['ceske_sluzby_xml_preorder_datum'] ) ) {
+      $datum_predobjednavky = $_POST['ceske_sluzby_xml_preorder_datum'];
+      if( ! empty( $datum_predobjednavky ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', strtotime( $datum_predobjednavky ) );
+      } elseif ( ! empty( $datum_predobjednavky_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' ); 
+      }
     }
   }
 }

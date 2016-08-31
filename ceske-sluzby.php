@@ -738,17 +738,24 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
 
 function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
   $dostupnost = array();
+  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
+    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+      $availability_predobjednavka = 'Předobjednávka: ' . date_i18n( 'j.n.Y', $predobjednavka );
+      $availability = $availability_predobjednavka;
+    }
+  }
   $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
-  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() ) {
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $availability_predobjednavka ) ) {
     $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
     if ( empty ( $dostupnost ) ) {
       $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
       $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
     }
-  }
-  if ( ! empty ( $dostupnost ) ) {
-    $availability = $dostupnost['text'];
+    if ( ! empty ( $dostupnost ) ) {
+      $availability = $dostupnost['text'];
+    }
   }
   return $availability;
 }
@@ -757,17 +764,23 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
   global $product;
   $format = "";
   $dostupnost = array();
+  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
+    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+      $format = ceske_sluzby_ziskat_format_predobjednavky( $predobjednavka );
+    }
+  }
   $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
-  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() ) {
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $format ) )  {
     $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
     if ( empty ( $dostupnost ) ) {
       $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
       $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
     }
+    if ( ! empty ( $dostupnost ) ) {
+      $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+    }
   }
-  if ( ! empty ( $dostupnost ) ) {
-    $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
-    echo $format;
-  }
+  echo $format;
 }

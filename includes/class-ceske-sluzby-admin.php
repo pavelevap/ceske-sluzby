@@ -84,7 +84,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function admin_settings_sanitize_option( $value, $option, $raw_value ) {
-    if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] ) {
+    if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_preorder_format_zobrazeni' == $option['id'] ) {
       $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
     }
     return $value; 
@@ -395,7 +395,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Zobrazování na webu',
           'type' => 'multiselect',
-          'desc' => 'Dodací dobu je možné zobrazovat na různých místech webu.',
+          'desc' => 'Dodací dobu (případně datum předobjednávky) je možné zobrazovat na různých místech webu.',
           'id' => 'wc_ceske_sluzby_dodaci_doba_zobrazovani',
           'class' => 'wc-enhanced-select',
           'options' => array(
@@ -415,9 +415,22 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 500px'
         ),
         array(
+          'title' => 'Předobjednávky',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost zadávat a zobrazovat datum předobjednávky u jednotlivých produktů.',
+          'id' => 'wc_ceske_sluzby_preorder-aktivace'
+        ),
+        array(
+          'title' => 'Formát zobrazení',
+          'type' => 'text',
+          'desc' => 'Na webu můžete přesně definovat libovolný text (včetně HTML) s použitím zadaného data pro předobjednávku <code>{DATUM}</code>. Pokud není nic vyplněno, tak je použit jednoduchý odstavec s třídou <code>predobjednavka</code>.',
+          'id' => 'wc_ceske_sluzby_preorder_format_zobrazeni',
+          'css' => 'width: 500px'
+        ),
+        array(
           'title' => 'Vlastní řešení',
           'type' => 'text',
-          'desc' => 'Pokud používáte své vlastní řešení (např. nějaký plugin) pro nastavení dodací doby, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena), odkud se budou načítat data pro XML feed.',
+          'desc' => 'Pokud používáte své vlastní řešení pro nastavení dodací doby (např. nějaký plugin), tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena), odkud se budou načítat data pro XML feed.',
           'id' => 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni',
           'css' => 'width: 250px',
         ),

@@ -36,7 +36,21 @@ function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
       $format = str_replace( '{' . $key . '}', $value, $format );
     }
   } else {
-    $format = '<p class=dodaci-doba">' . $availability['text'] . '</p>' ;
+    $format = '<p class=dodaci-doba">' . $availability['text'] . '</p>';
+  }
+  return $format;
+}
+
+function ceske_sluzby_ziskat_format_predobjednavky( $availability ) {
+  $format = get_option( 'wc_ceske_sluzby_preorder_format_zobrazeni' );
+  $availability = date_i18n( 'j.n.Y', $availability );
+  if ( ! empty ( $format ) ) {
+    $variables = array( 'DATUM' => $availability );
+    foreach( $variables as $key => $value ) {
+      $format = str_replace( '{' . $key . '}', $value, $format );
+    }
+  } else {
+    $format = '<p class=predobjednavka">Předobjednávka: ' . $availability . '</p>';
   }
   return $format;
 }
