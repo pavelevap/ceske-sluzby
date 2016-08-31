@@ -16,3 +16,27 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu() {
   }
   return $dodaci_doba_array;
 }
+
+function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
+  $availability = array();
+  if ( ! empty ( $actual_dodaci_doba ) || $actual_dodaci_doba === '0' ) {
+    if ( array_key_exists( $actual_dodaci_doba, $dodaci_doba ) ) {
+      $availability['value'] = $actual_dodaci_doba;
+      $availability['text'] = $dodaci_doba[ $actual_dodaci_doba ];
+    }
+  }
+  return $availability;
+}
+
+function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
+  $format = get_option( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' );
+  if ( ! empty ( $format ) ) {
+    $variables = array( 'VALUE' => $availability['value'], 'TEXT' => $availability['text'] );
+    foreach( $variables as $key => $value ) {
+      $format = str_replace( '{' . $key . '}', $value, $format );
+    }
+  } else {
+    $format = '<p class=dodaci-doba">' . $availability['text'] . '</p>' ;
+  }
+  return $format;
+}

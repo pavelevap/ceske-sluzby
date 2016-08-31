@@ -7,6 +7,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_action( 'woocommerce_settings_tabs_ceske-sluzby', __CLASS__ . '::settings_tab' );
     add_action( 'woocommerce_update_options_ceske-sluzby', __CLASS__ . '::update_settings' );
     add_action( 'woocommerce_sections_ceske-sluzby', __CLASS__ . '::output_sections' );
+    add_filter( 'woocommerce_admin_settings_sanitize_option', __CLASS__ . '::admin_settings_sanitize_option', 10, 3 );
   }
   
   public static function output_sections() {
@@ -80,6 +81,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $dostupne_taxonomie = 'Zatím žádné, ale snadno můžete nějaké <a href="' . admin_url(). 'edit.php?post_type=product&page=product_attributes">vytvořit</a>.';
     }
     return $dostupne_taxonomie;
+  }
+
+  public static function admin_settings_sanitize_option( $value, $option, $raw_value ) {
+    if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] ) {
+      $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
+    }
+    return $value; 
   }
 
   public static function get_settings( $current_section = '' ) {
@@ -377,13 +385,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dodaci_doba_title'
         ),
         array(
-          'title' => 'Vlastní řešení',
-          'type' => 'text',
-          'desc' => 'Pokud používáte své vlastní řešení (např. nějaký plugin) pro nastavení dodací doby, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena), odkud se budou načítat data pro XML feed.',
-          'id' => 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni',
-          'css' => 'width: 250px',
-        ),
-        array(
           'title' => 'Hodnoty pro dodací dobu',
           'type' => 'textarea',
           'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.',
@@ -392,10 +393,33 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dodaci_doba_hodnoty'
         ),
         array(
-          'title' => 'Zobrazovat na webu',
-          'type' => 'checkbox',
-          'desc' => 'Podle zadaných hodnot se bude na webu také zobrazovat příslušný text.',
-          'id' => 'wc_ceske_sluzby_dodaci_doba_zobrazovani'
+          'title' => 'Zobrazování na webu',
+          'type' => 'multiselect',
+          'desc' => 'Dodací dobu je možné zobrazovat na různých místech webu.',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_zobrazovani',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            'get_availability_text' => 'Detail produktu (náhrada textu pro sklad)',
+            'before_add_to_cart_form' => 'Detail produktu (pod textem pro sklad)',
+            'after_shop_loop_item' => 'Archiv'
+          ),
+          'custom_attributes' => array(
+            'data-placeholder' => 'Zobrazování dodací doby'
+          )
+        ),
+        array(
+          'title' => 'Formát zobrazení',
+          'type' => 'text',
+          'desc' => 'Na webu můžete přesně definovat libovolný text (včetně HTML) s použitím výše zadaných hodnot <code>{VALUE}</code> (počet dní) nebo <code>{TEXT}</code> (příslušný text). Pokud není nic vyplněno, tak je použit jednoduchý odstavec s třídou <code>dodaci-doba</code>.',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni',
+          'css' => 'width: 500px'
+        ),
+        array(
+          'title' => 'Vlastní řešení',
+          'type' => 'text',
+          'desc' => 'Pokud používáte své vlastní řešení (např. nějaký plugin) pro nastavení dodací doby, tak zadejte název příslušného uživatelského pole (pozor na malá a velká písmena), odkud se budou načítat data pro XML feed.',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni',
+          'css' => 'width: 250px',
         ),
         array(
           'type' => 'sectionend',

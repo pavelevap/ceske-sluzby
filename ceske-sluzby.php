@@ -220,8 +220,18 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     }
 
     $dodaci_doba = get_option( 'wc_ceske_sluzby_dodaci_doba_zobrazovani' );
-    if ( $dodaci_doba == "yes" ) {
-      add_filter( 'woocommerce_get_availability_text', 'ceske_sluzby_zobrazit_dodaci_dobu', 10, 2 );
+    if ( ! empty ( $dodaci_doba ) ) {
+      foreach ( $dodaci_doba as $zobrazeni ) {
+        if ( $zobrazeni == 'get_availability_text' ) {
+          add_filter( 'woocommerce_get_availability_text', 'ceske_sluzby_zobrazit_dodaci_dobu_filtr', 10, 2 );
+        }
+        if ( $zobrazeni == 'before_add_to_cart_form' ) {
+          add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
+        }
+        if ( $zobrazeni == 'after_shop_loop_item' ) {
+          add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
+        }
+      }
     }
 
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
@@ -726,23 +736,38 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
   return $columns;
 }
 
-function ceske_sluzby_zobrazit_dodaci_dobu( $availability, $product ) {
+function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
+  $dostupnost = array();
   $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
   if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() ) {
     $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
-    if ( ! empty ( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
-      if ( array_key_exists( $dodaci_doba_produkt, $dodaci_doba ) ) {
-        $availability = $dodaci_doba[ $dodaci_doba_produkt ];
-      }
-    }
-    else {
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
+    if ( empty ( $dostupnost ) ) {
       $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-      if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
-        if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
-          $availability = $dodaci_doba[ $global_dodaci_doba ];
-        }
-      }  
+      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
     }
   }
+  if ( ! empty ( $dostupnost ) ) {
+    $availability = $dostupnost['text'];
+  }
   return $availability;
+}
+
+function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
+  global $product;
+  $format = "";
+  $dostupnost = array();
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() ) {
+    $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
+    if ( empty ( $dostupnost ) ) {
+      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
+    }
+  }
+  if ( ! empty ( $dostupnost ) ) {
+    $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+    echo $format;
+  }
 }
