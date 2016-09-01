@@ -197,16 +197,15 @@ function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dod
         }
       }
     }
-  }
-
-  $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
-  if ( $aktivace_predobjednavek == "yes" ) {
-    $datum_predobjednavky = get_post_meta( $item_id, 'ceske_sluzby_xml_preorder_datum', true );
-    if ( ! empty ( $datum_predobjednavky ) ) {
-      if ( $global_predbezna_objednavka == 'preorder' ) {
-        $dodaci_doba = date_i18n( 'c', $datum_predobjednavky );
-      } else {
-        $dodaci_doba = date_i18n( 'Y-m-d', $datum_predobjednavky );
+    $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+    if ( $aktivace_predobjednavek == "yes" ) {
+      $datum_predobjednavky = get_post_meta( $item_id, 'ceske_sluzby_xml_preorder_datum', true );
+      if ( ! empty ( $datum_predobjednavky ) ) {
+        if ( $global_predbezna_objednavka == 'preorder' ) {
+          $dodaci_doba = date_i18n( 'c', $datum_predobjednavky );
+        } else {
+          $dodaci_doba = date_i18n( 'Y-m-d', $datum_predobjednavky );
+        }
       }
     }
   }

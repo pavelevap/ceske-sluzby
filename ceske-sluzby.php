@@ -221,24 +221,26 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
     }
 
-    $dodaci_doba = get_option( 'wc_ceske_sluzby_dodaci_doba_zobrazovani' );
-    if ( ! empty ( $dodaci_doba ) ) {
-      foreach ( $dodaci_doba as $zobrazeni ) {
-        if ( $zobrazeni == 'get_availability_text' ) {
-          add_filter( 'woocommerce_get_availability_text', 'ceske_sluzby_zobrazit_dodaci_dobu_filtr', 10, 2 );
-        }
-        if ( $zobrazeni == 'before_add_to_cart_form' ) {
-          add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
-        }
-        if ( $zobrazeni == 'after_shop_loop_item' ) {
-          add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
+    $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+    if ( $aktivace_dodaci_doby == "yes" ) {
+      $dodaci_doba = get_option( 'wc_ceske_sluzby_dodaci_doba_zobrazovani' );
+      if ( ! empty ( $dodaci_doba ) ) {
+        foreach ( $dodaci_doba as $zobrazeni ) {
+          if ( $zobrazeni == 'get_availability_text' ) {
+            add_filter( 'woocommerce_get_availability_text', 'ceske_sluzby_zobrazit_dodaci_dobu_filtr', 10, 2 );
+          }
+          if ( $zobrazeni == 'before_add_to_cart_form' ) {
+            add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
+          }
+          if ( $zobrazeni == 'after_shop_loop_item' ) {
+            add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
+          }
         }
       }
-    }
-
-    $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
-    if ( $predobjednavka == "yes" ) {
-      add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
+      $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+      if ( $predobjednavka == "yes" ) {
+        add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
+      }
     }
 
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
@@ -794,7 +796,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
 
 function ceske_sluzby_load_admin_scripts() {
   $screen = get_current_screen();
-	$screen_id = $screen ? $screen->id : '';
+  $screen_id = $screen ? $screen->id : '';
   if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
     wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );

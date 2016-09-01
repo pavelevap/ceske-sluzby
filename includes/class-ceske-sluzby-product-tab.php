@@ -112,46 +112,49 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
     global $thepostid;
     $global_dodaci_doba_text = '';
+    $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
     $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
     $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
 
-    if ( ! empty ( $dodaci_doba ) || $predobjednavka == "yes" ) {
-      echo '</div>';
-      echo '<div class="options_group">';
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>České služby</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastavení dodací doby</a>)</div>';
-    }
+    if ( $aktivace_dodaci_doby == "yes" ) {
+      if ( ! empty ( $dodaci_doba ) || $predobjednavka == "yes" ) {
+        echo '</div>';
+        echo '<div class="options_group">';
+        echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>České služby</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastavení dodací doby</a>)</div>';
+      }
 
-    if ( ! empty ( $dodaci_doba ) ) {
-      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-      if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
-        if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
-          $global_dodaci_doba_text = ' Globálně máte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaveno</a>: <strong>' . $dodaci_doba[ $global_dodaci_doba ] . '</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.').';
-        } else {
-          $global_dodaci_doba_text = ' Pro globální dodací dobu (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.') nemáte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaven</a> žádný text.';
+      if ( ! empty ( $dodaci_doba ) ) {
+        $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+        if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
+          if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
+            $global_dodaci_doba_text = ' Globálně máte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaveno</a>: <strong>' . $dodaci_doba[ $global_dodaci_doba ] . '</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.').';
+          } else {
+            $global_dodaci_doba_text = ' Pro globální dodací dobu (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.') nemáte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaven</a> žádný text.';
+          }
         }
+        $dodaci_doba = array ( '' => '- Vyberte -') + $dodaci_doba;
+        woocommerce_wp_select(
+          array( 
+            'id' => 'ceske_sluzby_dodaci_doba', 
+            'label' => 'Dodací doba',
+            'description' => 'Zvolte dodací dobu pro konkrétní produkt.' . $global_dodaci_doba_text,
+            'options' => $dodaci_doba
+          )
+        );
       }
-      $dodaci_doba = array ( '' => '- Vyberte -') + $dodaci_doba;
-      woocommerce_wp_select(
-        array( 
-          'id' => 'ceske_sluzby_dodaci_doba', 
-          'label' => 'Dodací doba',
-          'description' => 'Zvolte dodací dobu pro konkrétní produkt.' . $global_dodaci_doba_text,
-          'options' => $dodaci_doba
-        )
-      );
-    }
 
-    if ( $predobjednavka == "yes" ) {
-      $datum_predobjednavky = "";
-      $datum = get_post_meta( $thepostid, 'ceske_sluzby_xml_preorder_datum', true );
-      if ( ! empty ( $datum ) ) {
-        $datum_predobjednavky = date_i18n( 'Y-m-d', $datum );
+      if ( $predobjednavka == "yes" ) {
+        $datum_predobjednavky = "";
+        $datum = get_post_meta( $thepostid, 'ceske_sluzby_xml_preorder_datum', true );
+        if ( ! empty ( $datum ) ) {
+          $datum_predobjednavky = date_i18n( 'Y-m-d', $datum );
+        }
+        echo '<p class="form-field ceske_sluzby_xml_preorder_datum_field">
+                <label for="ceske_sluzby_xml_preorder_datum">Předobjednávka</label>
+                <input type="text" class="short" name="ceske_sluzby_xml_preorder_datum" id="ceske_sluzby_xml_preorder_datum" value="' . esc_attr( $datum_predobjednavky ) . '" placeholder="Požadovaný formát: YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+                <a href="#" class="cancel_preorder">Zrušit</a>' . wc_help_tip( 'Zadejte datum, kdy bude možné dodat produkt zákazníkovi.' ) . '
+              </p>';
       }
-      echo '<p class="form-field ceske_sluzby_xml_preorder_datum_field">
-              <label for="ceske_sluzby_xml_preorder_datum">Předobjednávka</label>
-              <input type="text" class="short" name="ceske_sluzby_xml_preorder_datum" id="ceske_sluzby_xml_preorder_datum" value="' . esc_attr( $datum_predobjednavky ) . '" placeholder="Požadovaný formát: YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-              <a href="#" class="cancel_preorder">Zrušit</a>' . wc_help_tip( 'Zadejte datum, kdy bude možné dodat produkt zákazníkovi.' ) . '
-            </p>';
     }
   }
 
