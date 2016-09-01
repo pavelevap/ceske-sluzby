@@ -199,10 +199,21 @@ function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dod
     }
   }
 
+  $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+  if ( $aktivace_predobjednavek == "yes" ) {
+    $datum_predobjednavky = get_post_meta( $item_id, 'ceske_sluzby_xml_preorder_datum', true );
+    if ( ! empty ( $datum_predobjednavky ) ) {
+      if ( $global_predbezna_objednavka == 'preorder' ) {
+        $dodaci_doba = date_i18n( 'c', $datum_predobjednavky );
+      } else {
+        $dodaci_doba = date_i18n( 'Y-m-d', $datum_predobjednavky );
+      }
+    }
+  }
+
   if ( is_numeric( $dodaci_doba ) && $global_predbezna_objednavka == 'preorder' ) {
     $dodaci_doba = 'in stock';
   }
-
   if ( $global_neni_skladem && ! $item->is_in_stock() ) {
     $dodaci_doba = $global_neni_skladem;
   }
@@ -1143,7 +1154,12 @@ function google_xml_feed_zobrazeni() {
             }
             $xmlWriter->writeElement( 'g:link', $varianta->get_permalink() );
             $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
-            $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+            if ( strtotime ( $dodaci_doba ) ) {
+              $xmlWriter->writeElement( 'g:availability', 'preorder' );
+              $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
+            } else {
+              $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+            }
             if ( $postovne != "" ) {
               $xmlWriter->startElement( 'g:shipping' );
                 $xmlWriter->writeElement( 'g:price', $postovne . ' ' . GOOGLE_MENA );
@@ -1196,7 +1212,12 @@ function google_xml_feed_zobrazeni() {
         }
         $xmlWriter->writeElement( 'g:link', get_permalink( $product_id ) );
         $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
-        $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+        if ( strtotime ( $dodaci_doba ) ) {
+          $xmlWriter->writeElement( 'g:availability', 'preorder' );
+          $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
+        } else {
+          $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+        }
         if ( $postovne != "" ) {
           $xmlWriter->startElement( 'g:shipping' );
             $xmlWriter->writeElement( 'g:price', $postovne . ' ' . GOOGLE_MENA );
