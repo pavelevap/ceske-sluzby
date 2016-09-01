@@ -647,7 +647,8 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
 	return $output;
 }
 
-function ceske_sluzby_xml_kategorie_pridat_pole() { ?>
+function ceske_sluzby_xml_kategorie_pridat_pole() {
+  $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ); ?>
   <tr>
     <th scope="row" valign="top"><strong>České služby:</strong></th>
   </tr>
@@ -671,13 +672,39 @@ function ceske_sluzby_xml_kategorie_pridat_pole() { ?>
       </span>
     </td>
   </tr>
+  <?php
+  if ( ! empty( $global_stav_produkt ) ) {
+    if ( $global_stav_produkt == 'used' ) {
+      $stav_produkt_hodnota = 'Použité (bazar)';
+    } else {
+      $stav_produkt_hodnota = 'Repasované';
+    }
+    $stav_produkt_text = 'Na úrovni eshopu je <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> hodnota: <strong>' . $stav_produkt_hodnota . '</strong>. Nastavení kategorie bude mít ale přednost.';
+  } else {
+    $stav_produkt_text = 'Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
+  } ?>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>Stav produktů</label></th>
+    <td>
+      <select id="ceske-sluzby-xml-stav-produktu" name="ceske-sluzby-xml-stav-produktu" class="postform">
+        <option value="">- Vyberte -</option>
+        <option value="used">Použité (bazar)</option>
+        <option value="refurbished">Repasované</option>
+      </select>
+      <span class="description">
+        <?php echo $stav_produkt_text; ?>
+      </span>
+    </td>
+  </tr>
 <?php
 }
 
 function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $checked = '';
   $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-  $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true ); ?>
+  $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
+  $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
+  $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ); ?>
   <tr>
     <th scope="row" valign="top"><strong>České služby:</strong></th>
   </tr>
@@ -705,7 +732,31 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
       </span>
     </td>
   </tr>
-<?php
+  <?php
+  if ( ! empty( $global_stav_produkt ) ) {
+    if ( $global_stav_produkt == 'used' ) {
+      $stav_produkt_hodnota = 'Použité (bazar)';
+    } else {
+      $stav_produkt_hodnota = 'Repasované';
+    }
+    $stav_produkt_text = 'Na úrovni eshopu je <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> hodnota: <strong>' . $stav_produkt_hodnota . '</strong>. Nastavení kategorie bude mít ale přednost.';
+  } else {
+    $stav_produkt_text = 'Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
+  } ?>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>Stav produktů</label></th>
+    <td>
+      <select id="ceske-sluzby-xml-stav-produktu" name="ceske-sluzby-xml-stav-produktu" class="postform">
+        <option value="" <?php selected( '', $xml_stav_produktu ); ?>>- Vyberte -</option>
+        <option value="used" <?php selected( 'used', $xml_stav_produktu ); ?>>Použité (bazar)</option>
+        <option value="refurbished" <?php selected( 'refurbished', $xml_stav_produktu ); ?>>Repasované</option>
+      </select>
+      <span class="description">
+        <?php echo $stav_produkt_text; ?>
+      </span>
+    </td>
+  </tr>
+<?php // http://themehybrid.com/weblog/introduction-to-wordpress-term-meta
 }
 
 function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -714,6 +765,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
     $heureka_kategorie = str_replace( 'Heureka.sk | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
     update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-heureka-kategorie', esc_attr( $heureka_kategorie ) );
   }
+
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', true );
   if ( isset( $_POST['ceske-sluzby-xml-vynechano'] ) && 'product_cat' === $taxonomy ) {
     $xml_vynechano = $_POST['ceske-sluzby-xml-vynechano'];
@@ -722,6 +774,13 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
     }
   } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
     delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano' );   
+  }
+
+  $xml_stav_produktu_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', true );
+  if ( isset( $_POST['ceske-sluzby-xml-stav-produktu'] ) && ! empty( $_POST['ceske-sluzby-xml-stav-produktu'] ) && 'product_cat' === $taxonomy ) {
+    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', esc_attr( $_POST['ceske-sluzby-xml-stav-produktu'] ) );  
+  } elseif ( ! empty( $xml_stav_produktu_ulozeno ) ) {
+    delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu' );   
   }
 }
 
@@ -739,7 +798,16 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
     if ( $kategorie_vynechano ) {
-      $columns .= '<span style="margin-left: 10px; color: red;">x</a>';
+      $columns .= '<span style="margin-left: 10px; color: red;">x</span>';
+    }
+    $stav_produktu = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-stav-produktu', true );
+    if ( $stav_produktu ) {
+      if ( $stav_produktu == 'used' ) {
+        $stav_produktu_hodnota = 'Použité (bazar)';
+      } else {
+        $stav_produktu_hodnota = 'Repasované';
+      }
+      $columns .= '<br />' . $stav_produktu_hodnota;
     }
   }
   return $columns;

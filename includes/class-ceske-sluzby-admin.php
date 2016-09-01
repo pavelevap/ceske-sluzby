@@ -222,6 +222,16 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_title'
         ),
         array(
+          'title' => 'Aktivovat shortcodes',
+          'type' => 'checkbox',
+          'desc' => 'Možnost spouštění zkrácených zápisů (shortcode). V základním nastavení jsou zcela ignorovány, ale pokud obsahují informace potřebné pro popis produktů, tak je můžete nechat zobrazovat.',
+          'id' => 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_title'
+        ),
+        array(
           'title' => 'Heureka.cz (.sk)',
           'type' => 'title',
           'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
@@ -254,9 +264,21 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Podpora výrobců',
           'type' => 'text',
-          'desc' => 'Pokud už doplňujete výrobce (<code>MANUFACTURER</code>), tak zadejte název příslušné taxonomie.',
+          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
           'css' => 'width: 250px',
+        ),
+        array(
+          'title' => 'Stav produktů',
+          'type' => 'select',
+          'desc_tip' => 'Zvolte stav produktů, který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu).',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            '' => '- Vyberte -',
+            'used' => 'Použité (bazar)',
+            'refurbished' => 'Repasované'
+          ),
         ),
         array(
           'type' => 'sectionend',
