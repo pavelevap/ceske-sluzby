@@ -9,6 +9,8 @@
  * License: GPL2
  */
 
+define( 'CS_VERSION', '0.5-alpha' );
+
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
@@ -166,6 +168,7 @@ function ceske_sluzby_sledovani_zasilek_email_akce( $email_actions ) {
  
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/ceske-sluzby-functions.php';
     if ( is_admin() ) {
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-admin.php';
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-sledovani-zasilek.php';
@@ -182,31 +185,31 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
 
     add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_dpd_parcelshop_init' );
     add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_dpd_parcelshop' );
-  
+
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_srovname_mereni_konverzi' );
     add_filter( 'wc_order_is_editable', 'ceske_sluzby_moznost_menit_dobirku', 10, 2 );
     add_filter( 'woocommerce_package_rates', 'ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma', 10, 2 );
-    
+
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
     add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
-    
+
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
     add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
-    
+
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
-    
+
     $aktivace_recenzi = get_option( 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace' );
     if ( $aktivace_recenzi == "yes" ) {
       add_shortcode( 'heureka-recenze-obchodu', 'ceske_sluzby_heureka_recenze_obchodu' );
@@ -218,13 +221,35 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
     }
 
+    $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+    if ( $aktivace_dodaci_doby == "yes" ) {
+      $dodaci_doba = get_option( 'wc_ceske_sluzby_dodaci_doba_zobrazovani' );
+      if ( ! empty ( $dodaci_doba ) ) {
+        foreach ( $dodaci_doba as $zobrazeni ) {
+          if ( $zobrazeni == 'get_availability_text' ) {
+            add_filter( 'woocommerce_get_availability_text', 'ceske_sluzby_zobrazit_dodaci_dobu_filtr', 10, 2 );
+          }
+          if ( $zobrazeni == 'before_add_to_cart_form' ) {
+            add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
+          }
+          if ( $zobrazeni == 'after_shop_loop_item' ) {
+            add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
+          }
+        }
+      }
+      $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+      if ( $predobjednavka == "yes" ) {
+        add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
+      }
+    }
+
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
     add_action( 'product_cat_edit_form_fields', 'ceske_sluzby_xml_kategorie_upravit_pole', 99 );
     add_action( 'created_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
     add_action( 'edit_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
     add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
-    
+
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
   }
 }
@@ -786,4 +811,62 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
     }
   }
   return $columns;
+}
+
+function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
+  $dostupnost = array();
+  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
+    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+      $availability_predobjednavka = 'Předobjednávka: ' . date_i18n( 'j.n.Y', $predobjednavka );
+      $availability = $availability_predobjednavka;
+    }
+  }
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $availability_predobjednavka ) ) {
+    $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
+    if ( empty ( $dostupnost ) ) {
+      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
+    }
+    if ( ! empty ( $dostupnost ) ) {
+      $availability = $dostupnost['text'];
+    }
+  }
+  return $availability;
+}
+
+function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
+  global $product;
+  $format = "";
+  $dostupnost = array();
+  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
+    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+      $format = ceske_sluzby_ziskat_format_predobjednavky( $predobjednavka );
+    }
+  }
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $format ) )  {
+    $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
+    if ( empty ( $dostupnost ) ) {
+      $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
+    }
+    if ( ! empty ( $dostupnost ) ) {
+      $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+    }
+  }
+  echo $format;
+}
+
+function ceske_sluzby_load_admin_scripts() {
+  $screen = get_current_screen();
+  $screen_id = $screen ? $screen->id : '';
+  if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
+    wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
+    wp_enqueue_script( 'wc-admin-ceske-sluzby' );
+  }
 }

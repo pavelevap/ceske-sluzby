@@ -254,22 +254,46 @@ function ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav, $kate
   return $aktualni_stav;      
 }
 
-function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $predbezna_objednavka, $neni_skladem ) {
+function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
   $dodaci_doba = $global_dodaci_doba;
-  if ( $item->managing_stock() && $item->backorders_allowed() ) {
-    $dodaci_doba = $predbezna_objednavka;
+  if ( $item->is_on_backorder( 1 ) && (int)$global_dodaci_doba == 0 ) {
+    $dodaci_doba = $global_predbezna_objednavka;
   }
-  if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
-    $vlastni_dodaci_doba = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
-    if ( is_numeric( $vlastni_dodaci_doba ) ) {
-      $dodaci_doba = $vlastni_dodaci_doba;
+
+  $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+  if ( $aktivace_dodaci_doby == "yes" ) {
+    if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
+      $dodaci_doba_item = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
+      if ( ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) && is_numeric( $dodaci_doba_item ) ) {
+        $dodaci_doba = $dodaci_doba_item;
+      }
+    } else {
+      $dodaci_doba_nastaveni = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
+      if ( ! empty ( $dodaci_doba_nastaveni ) ) {
+        $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
+        if ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) {
+          $dodaci_doba = $dodaci_doba_item;
+        }
+      }
+    }
+    $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+    if ( $aktivace_predobjednavek == "yes" ) {
+      $datum_predobjednavky = get_post_meta( $item_id, 'ceske_sluzby_xml_preorder_datum', true );
+      if ( ! empty ( $datum_predobjednavky ) ) {
+        if ( $global_predbezna_objednavka == 'preorder' ) {
+          $dodaci_doba = date_i18n( 'c', $datum_predobjednavky );
+        } else {
+          $dodaci_doba = date_i18n( 'Y-m-d', $datum_predobjednavky );
+        }
+      }
     }
   }
-  if ( is_numeric( $dodaci_doba ) && $predbezna_objednavka == 'preorder' ) {
+
+  if ( is_numeric( $dodaci_doba ) && $global_predbezna_objednavka == 'preorder' ) {
     $dodaci_doba = 'in stock';
   }
-  if ( $neni_skladem && ! $item->is_in_stock() ) {
-    $dodaci_doba = $neni_skladem;
+  if ( $global_neni_skladem && ! $item->is_in_stock() ) {
+    $dodaci_doba = $global_neni_skladem;
   }
   return $dodaci_doba;      
 }
@@ -1267,7 +1291,12 @@ function google_xml_feed_zobrazeni() {
             }
             $xmlWriter->writeElement( 'g:link', $varianta->get_permalink() );
             $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
-            $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+            if ( strtotime ( $dodaci_doba ) ) {
+              $xmlWriter->writeElement( 'g:availability', 'preorder' );
+              $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
+            } else {
+              $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+            }
             if ( $postovne != "" ) {
               $xmlWriter->startElement( 'g:shipping' );
                 $xmlWriter->writeElement( 'g:price', $postovne . ' ' . GOOGLE_MENA );
@@ -1322,7 +1351,12 @@ function google_xml_feed_zobrazeni() {
         }
         $xmlWriter->writeElement( 'g:link', get_permalink( $product_id ) );
         $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
-        $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+        if ( strtotime ( $dodaci_doba ) ) {
+          $xmlWriter->writeElement( 'g:availability', 'preorder' );
+          $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
+        } else {
+          $xmlWriter->writeElement( 'g:availability', $dodaci_doba );
+        }
         if ( $postovne != "" ) {
           $xmlWriter->startElement( 'g:shipping' );
             $xmlWriter->writeElement( 'g:price', $postovne . ' ' . GOOGLE_MENA );
