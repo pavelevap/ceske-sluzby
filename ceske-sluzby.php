@@ -9,6 +9,8 @@
  * License: GPL2
  */
 
+define( 'CS_VERSION', '0.5-alpha' );
+
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
@@ -232,6 +234,11 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
           add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
         }
       }
+    }
+
+    $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+    if ( $predobjednavka == "yes" ) {
+      add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
     }
 
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
@@ -783,4 +790,13 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
     }
   }
   echo $format;
+}
+
+function ceske_sluzby_load_admin_scripts() {
+  $screen = get_current_screen();
+	$screen_id = $screen ? $screen->id : '';
+  if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
+    wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
+    wp_enqueue_script( 'wc-admin-ceske-sluzby' );
+  }
 }

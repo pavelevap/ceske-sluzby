@@ -147,10 +147,10 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       if ( ! empty ( $datum ) ) {
         $datum_predobjednavky = date_i18n( 'Y-m-d', $datum );
       }
-      echo '<p class="form-field">
+      echo '<p class="form-field ceske_sluzby_xml_preorder_datum_field">
               <label for="ceske_sluzby_xml_preorder_datum">Předobjednávka</label>
-              <input type="text" class="short" name="ceske_sluzby_xml_preorder_datum" id="ceske_sluzby_xml_preorder_datum" value="' . esc_attr( $datum_predobjednavky ) . '" placeholder="Požadovaný formát: YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />' .
-              wc_help_tip( 'Zadejte datum, kdy bude možné dodat produkt zákazníkovi.' ) . '
+              <input type="text" class="short" name="ceske_sluzby_xml_preorder_datum" id="ceske_sluzby_xml_preorder_datum" value="' . esc_attr( $datum_predobjednavky ) . '" placeholder="Požadovaný formát: YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+              <a href="#" class="cancel_preorder">Zrušit</a>' . wc_help_tip( 'Zadejte datum, kdy bude možné dodat produkt zákazníkovi.' ) . '
             </p>';
     }
   }
@@ -198,7 +198,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $datum_predobjednavky_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', true );
     if ( isset( $_POST['ceske_sluzby_xml_preorder_datum'] ) ) {
       $datum_predobjednavky = $_POST['ceske_sluzby_xml_preorder_datum'];
-      if( ! empty( $datum_predobjednavky ) ) {
+      if ( ! empty( $datum_predobjednavky ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', strtotime( $datum_predobjednavky ) );
       } elseif ( ! empty( $datum_predobjednavky_ulozeno ) ) {
         delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' ); 
