@@ -9,6 +9,7 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
   // https://www.skyverge.com/blog/how-to-add-a-custom-woocommerce-email/
   function __construct() {
     $this->id = 'wc_email_ceske_sluzby_sledovani_zasilek';
+    $this->customer_email = true;
     $this->title = 'Sledování zásilek';
     $this->description = 'Pokud necháte email neaktivní, tak bude odkaz na aktuální stav zásilky přidáván do existujících emailů (např. při označení dokončené zásilky). Samostatné emaily jsou odesílány ve chvíli, kdy dojde k uložení čísla zásilky u objednávky a zároveň zaškrtnete políčko pro odeslání. V tomto případě je možná vhodné deaktivovat klasické emailové notifikace zasílané po dokončení objednávky.';
     $this->subject = '{site_title}: Odeslaná objednávka';
@@ -22,7 +23,7 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
   }
 
   public function ceske_sluzby_locate_template( $template, $template_name, $template_path ) {
-  // http://rahuljalavadiya.blogspot.cz/2015/06/how-to-add-custom-email-functionality.html
+    // http://rahuljalavadiya.blogspot.cz/2015/06/how-to-add-custom-email-functionality.html
     if ( $template_name == $this->template_html || $template_name == $this->template_plain ) {
       $template = plugin_dir_path( __FILE__ ) . 'emails/' . $template_name;
     }

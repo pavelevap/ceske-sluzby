@@ -865,7 +865,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
 function ceske_sluzby_load_admin_scripts() {
   $screen = get_current_screen();
   $screen_id = $screen ? $screen->id : '';
-  if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
+  if ( in_array( $screen_id, array( 'product', 'edit-product', 'shop_order' ) ) ) {
     wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );
   }
