@@ -10,17 +10,64 @@ if ( is_admin() ) {
   }
 }
 
-function ceske_sluzby_sledovani_zasilek_dostupni_dopravci() {
-  $dostupni_dopravci = array(
-    'CPOST' => array (
+function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
+  $dopravci = array(
+    'CPOST' => array(
       'nazev' => 'Česká pošta',
-      'url' => 'http://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%'
+      'url' => 'http://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
+      'lang' => 'CZ'
     ),
-    'DPD' => array (
+    'SPOST' => array(
+      'nazev' => 'Slovenská pošta',
+      'url' => 'http://tandt.posta.sk/zasielky/%ID%',
+      'lang' => 'SK'
+    ),
+    'DPD' => array(
       'nazev' => 'DPD',
-      'url' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ'
+      'lang' => array(
+                  'CZ' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ',
+                  'SK' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=sk_SK'
+                )
+    ),
+    'INTIME' => array(
+      'nazev' => 'Intime',
+      'url' => 'http://trace.intime.cz/index.php?orderNumber=%ID%',
+      'lang' => 'CZ'
+    ),
+    'PPL' => array(
+      'nazev' => 'PPL',
+      'url' => 'http://www.ppl.cz/main2.aspx?cls=Package&idSearch=%ID%',
+      'lang' => 'CZ'
+    ),
+    'DHL' => array(
+      'nazev' => 'DHL',
+      'lang' => array(
+                  'CZ' => 'http://www.dhl.cz/content/cz/cs/express/sledovani_zasilek.shtml?brand=DHL&AWB=%ID%',
+                  'SK' => 'http://www.dhl.sk/content/sk/sk/express/sledovanie_zasielky.shtml?brand=DHL&AWB=%ID%'
+                )
+    ),
+    'GEIS' => array(
+      'nazev' => 'Geis',
+      'lang' => array(
+                  'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
+                  'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
+                )
     )
   );
+  foreach ( $dopravci as $key => $dopravce ) {
+    if ( is_string( $dopravce['lang'] ) ) {
+        $dostupni_dopravci[$key]['nazev'] = $dopravce['nazev'];
+        $dostupni_dopravci[$key]['url'] = $dopravce['url'];
+    } elseif ( is_array( $dopravce['lang'] ) ) {
+      if ( array_key_exists( $lang, $dopravce['lang'] ) ) {
+        $dostupni_dopravci[$key]['nazev'] = $dopravce['nazev'];
+        $dostupni_dopravci[$key]['url'] = $dopravce['lang'][$lang];
+      } else {
+        $dostupni_dopravci[$key]['nazev'] = $dopravce['nazev'];
+        $dostupni_dopravci[$key]['url'] = $dopravce['lang']['CZ'];
+      }
+    }
+  }
   return $dostupni_dopravci;
 }
 
@@ -117,7 +164,8 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     }
     $id_zasilky = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
     $dopravce = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-    $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci();
+    $zeme_doruceni = $order->shipping_country;
+    $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $zeme_doruceni );
 
     if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {
       $odkaz = str_replace( '%ID%', $id_zasilky , $dostupni_dopravci[$dopravce]['url'] );
