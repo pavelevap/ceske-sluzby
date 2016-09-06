@@ -36,7 +36,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Dodací doba
 * WooCommerce: Sledování zásilek
 * WooCommerce: XML feed (Heureka.cz a Heureka.sk, Zbozi.cz, Google, Pricemania.cz a Pricemania.sk)
-* WooCommerce: Podpora variant a vlastností pro XML feedy
+* WooCommerce: Základní podpora variant a vlastností pro XML feedy (automatické generování parametrů a názvů)
 * WooCommerce: Průběžné generování velkého množství produktů do .xml souboru
 * WooCommerce: Možnost vynechání kategorií či produktů v XML feedech
 * WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE)
@@ -66,7 +66,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Nastavení různých informací na úrovni celého eshopu, kategorie či přímo produktu (vzájemně propojeno)
  * Možnost specifikovat vlastní název produktu (PRODUCTNAME)
  * Možnost vynechat libovolné kategorie či jednotlivé produkty 
- * Základní podpora variant a vlastností (unikátní URL adresy pro varianty)
+ * Základní podpora variant a vlastností (unikátní URL adresy pro varianty, automatické generování parametrů a názvů)
  * Možnost napojení EAN (na základě SKU či vlastního uživatelského pole)
  * Podpora pro doplnění výrobce (MANUFACTURER) - různé pluginy, taxonomie, vlastnosti či uživatelská pole
  * Možnost dodatečného označení produktů (CUSTOM_LABEL) pro Google a Zbozi.cz

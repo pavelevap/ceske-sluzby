@@ -112,7 +112,7 @@ function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_p
     foreach ( $attributes_produkt as $name => $attribute ) {
       if ( ! $attribute['is_variation'] ) {
         if ( $attribute['is_taxonomy'] ) {
-          $terms = wc_get_product_terms( $product_id, $attribute['name'] );
+          $terms = wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
           if ( ! empty ( $terms ) && ! is_wp_error( $terms ) ) {
             foreach ( $terms as $term ) {
               $vlastnosti_produkt[$i]['nazev'] = wc_attribute_label( $attribute['name'] );
@@ -533,7 +533,6 @@ function heureka_xml_feed_zobrazeni() {
             }
             $xmlWriter->writeElement( 'ITEMGROUP_ID', $product_id );
           }
-
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
           }
@@ -581,7 +580,6 @@ function heureka_xml_feed_zobrazeni() {
               $xmlWriter->endElement();
             }
           }
-
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
           }
