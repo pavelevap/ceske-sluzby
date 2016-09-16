@@ -601,6 +601,7 @@ function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
 }
 
 function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
+  $output = '<p>Pro zobrazení recenzí musíte ještě zadat API klíč pro Ověřeno zákazníky.</p>';
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
     if ( false === ( $source_xml = get_transient( 'ceske_sluzby_heureka_recenze_zakazniku' ) ) ) {
