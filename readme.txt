@@ -55,13 +55,18 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 == Changelog ==
 
+= 0.6 =
+* WooCommerce: Ověřeno zákazníky
+ * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
+ * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
+
 = 0.5 =
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)
 * WooCommerce: Nastavení a zobrazení dodací doby (napojení na XML feedy v podobě DELIVERY_DATE)
 * WooCommerce: Předobjednávky - nastavení pro jednotlivé produkty, možnost nastavení místa a formátu zobrazení na webu (napojení na XML feedy)
 * WooCommerce: Sledování zásilek - volitelné zasílání notifikačních emailů o odeslané zásilce
 * WooCommerce: XML feed (Google)
-* WooCommerce: XML feedy:
+* WooCommerce: XML feedy
  * Volitelné generování .xml souborů (probíhá postupně, vhodné pro eshopy s velkým množstvím produktů)
  * Nastavení různých informací na úrovni celého eshopu, kategorie či přímo produktu (vzájemně propojeno)
  * Možnost specifikovat vlastní název produktu (PRODUCTNAME)
@@ -75,11 +80,11 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Doplněno odřádkování pro snadnou čitelnost v prohlížečích
  * Opraveno zobrazení ceny (nově započítáno i DPH)
 * WooCommerce: XML feed (Heureka.cz a Heureka.sk) - možnost doplnění CATEGORYTEXT v nastavení kategorie i produktu
-* WooCommerce: XML feed (Zbozi.cz):
+* WooCommerce: XML feed (Zbozi.cz)
  * Aktualizace pro novou strukturu XML
  * Opraveno kódování URL adres
  * Opraveno zobrazení elementu PARAM
-* WooCommerce: Doprava (DPD ParcelShop, Uloženka.cz):
+* WooCommerce: Doprava (DPD ParcelShop, Uloženka.cz)
  * Zamezení dvojitému načítání funkce pro zobrazení poboček pomocí podmínky is_ajax().
  * Funkce get_shipping_methods() nahrazena funkcí load_shipping_methods(), takže by se měly pobočky bez problémů zobrazovat.
  * Zachování zvolené pobočky při změně platební metody.

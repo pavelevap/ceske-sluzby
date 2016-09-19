@@ -3,13 +3,13 @@
  * Plugin Name: České služby pro WordPress
  * Plugin URI: http://www.separatista.net
  * Description: Implementace různých českých služeb do WordPressu.
- * Version: 0.5
+ * Version: 0.6-alpha
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
  * License: GPL2
  */
 
-define( 'CS_VERSION', '0.5' );
+define( 'CS_VERSION', '0.6-alpha' );
 
 $language = get_locale();
 if ( $language == "sk_SK" ) {
@@ -24,29 +24,35 @@ else {
 function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
-  
     $order = new WC_Order( $order_id );
     
     // https://github.com/heureka/heureka-overeno-php-api
     require_once( dirname( __FILE__ ) . '/src/HeurekaOvereno.php' );
     
     $language = get_locale();
-    if ( $language == "sk_SK" ) {
-      $overeno = new HeurekaOvereno( $api, HeurekaOvereno::LANGUAGE_SK );
-    }
-    else {
-      $overeno = new HeurekaOvereno( $api );
-    }
-    
-    $overeno->setEmail( $posted['billing_email'] );
+    try {
+      if ( $language == "sk_SK" ) {
+        $overeno = new HeurekaOvereno( $api, HeurekaOvereno::LANGUAGE_SK );
+      }
+      else {
+        $overeno = new HeurekaOvereno( $api );
+      }
+      $overeno->setEmail( $posted['billing_email'] );
 
-    $products = $order->get_items();
-    foreach ( $products as $product ) {
-      $overeno->addProduct( $product['name'] );
-    }
+      $products = $order->get_items();
+      foreach ( $products as $product ) {
+        $overeno->addProduct( $product['name'] );
+      }
 
-    $overeno->addOrderId( $order_id );
-    $overeno->send();
+      $overeno->addOrderId( $order_id );
+      $overeno->send();
+    }
+    catch ( OverflowException $o ) {
+      $order->add_order_note( 'API klíč pro službu Ověřeno zákazníky nebyl správně nastaven: ' . $o->getMessage() );
+    }
+    catch ( HeurekaOverenoException $e ) {
+      $order->add_order_note( 'Odeslání dat pro službu Ověřeno zákazníky se nezdařilo: ' . $e->getMessage() );
+    }
   }
 }
 
