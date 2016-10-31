@@ -20,7 +20,7 @@ Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzb
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
 
-Plugin už sice bez problémů používá více než 900 různých webů, ale berte ho prosím stále jako testovací verzi.
+Plugin už sice bez problémů používá více než 1000 různých webů, ale berte ho prosím stále jako testovací verzi.
 
 Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
@@ -59,6 +59,9 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Ověřeno zákazníky
  * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
  * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
+ * Ošetření specifických situací, které by mohly nastat při získávání recenzí z Heureky.
+* WooCommerce: XML feed (Google)
+ * Upravena struktura podle manuálu (element rss). 
 
 = 0.5 =
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)

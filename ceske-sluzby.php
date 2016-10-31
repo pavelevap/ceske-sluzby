@@ -607,51 +607,66 @@ function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
 }
 
 function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
-  $output = '<p>Pro zobrazení recenzí musíte ještě zadat API klíč pro Ověřeno zákazníky.</p>';
+  $process = true;
+  $output = '<div class="recenze-zakazniku">';
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
     if ( false === ( $source_xml = get_transient( 'ceske_sluzby_heureka_recenze_zakazniku' ) ) ) {
       $url = "http://www." . HEUREKA_URL . "/direct/dotaznik/export-review.php?key=" . $api;
-      $source_xml = wp_remote_retrieve_body( wp_remote_get( $url ) );
-      set_transient( 'ceske_sluzby_heureka_recenze_zakazniku', $source_xml, 24 * HOUR_IN_SECONDS );
-    }
-
-    $recenze_xml = simplexml_load_string( $source_xml, 'SimpleXMLElement', LIBXML_NOCDATA );
-    $atributy = shortcode_atts( array( 'limit' => null ), $atts );
-    $limit = $atributy['limit'];
-    $i = 0;
-
-    $output = '<div class="recenze-zakazniku">';
-    if ( ! empty( $recenze_xml ) && ! is_scalar( $recenze_xml ) ) {
-      foreach( $recenze_xml as $recenze ) {
-        if ( ( ! empty ( $limit ) && $i < $limit ) || empty ( $limit ) ) {
-          if ( ! empty ( $recenze->summary ) ) {
-            $i = $i + 1;
-            $output .= '<ul>';
-            $output .= '<li>';
-            $output .= '<strong>' . $recenze->summary . '</strong><br />';
-            if ( ! empty ( $recenze->total_rating ) ) {
-              $output .= 'Hodnocení: ' . $recenze->total_rating . '/5 | ';
-            }
-            $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
-            if ( ! empty ( $recenze->name ) ) {
-              $output .= ' | Autor: ' . $recenze->name;
-            } 
-            $output .= '</li>';
-            $output .= '</ul>';
-          }
+      $response = wp_remote_get( $url );
+      if ( ! is_wp_error( $response ) ) {
+        $source_xml = wp_remote_retrieve_body( $response );
+        if ( ! empty( $source_xml ) && wp_remote_retrieve_response_code( $response ) == 200 ) {
+          set_transient( 'ceske_sluzby_heureka_recenze_zakazniku', $source_xml, 24 * HOUR_IN_SECONDS );
+        } else {
+          $process = false;
         }
-        else {
-          break;
-        }
+      } else {
+        $output .= 'Nepodařilo se získat data:' . $response->get_error_message();
       }
     }
-    else {
-      $output .= 'Zatím žádné hodnocení.';
+
+    if ( $process ) {
+      $recenze_xml = simplexml_load_string( $source_xml, 'SimpleXMLElement', LIBXML_NOCDATA );
+      $atributy = shortcode_atts( array( 'limit' => null ), $atts );
+      $limit = $atributy['limit'];
+      $i = 0;
+
+      if ( ! empty( $recenze_xml ) && ! is_scalar( $recenze_xml ) ) {
+        foreach( $recenze_xml as $recenze ) {
+          if ( ( ! empty ( $limit ) && $i < $limit ) || empty ( $limit ) ) {
+            if ( ! empty ( $recenze->summary ) ) {
+              $i = $i + 1;
+              $output .= '<ul>';
+              $output .= '<li>';
+              $output .= '<strong>' . $recenze->summary . '</strong><br />';
+              if ( ! empty ( $recenze->total_rating ) ) {
+                $output .= 'Hodnocení: ' . $recenze->total_rating . '/5 | ';
+              }
+              $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
+              if ( ! empty ( $recenze->name ) ) {
+                $output .= ' | Autor: ' . $recenze->name;
+              } 
+              $output .= '</li>';
+              $output .= '</ul>';
+            }
+          }
+          else {
+            break;
+          }
+        }
+      }
+      else {
+        $output .= 'Zatím žádné hodnocení.';
+      }
+    } else {
+      $output .= 'Nepodařilo se získat data.';
     }
-    $output .= '</div>';
+  } else {
+    $output .= 'Pro zobrazení recenzí musíte ještě <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby">zadat</a> API klíč pro Ověřeno zákazníky.';
   }
-	return $output;
+  $output .= '</div>';
+  return $output;
 }
 
 function ceske_sluzby_xml_kategorie_pridat_pole() {

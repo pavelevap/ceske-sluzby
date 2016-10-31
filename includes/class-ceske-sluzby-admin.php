@@ -137,7 +137,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Aktivovat zobrazení recenzí',
           'type' => 'checkbox',
           'desc' => 'Po aktivaci můžete zobrazit aktuální recenze pomocí zkráceného zápisu (shortcode): <code>[heureka-recenze-obchodu]</code>.
-                     Zobrazovat se budou všechny, pokud neomezíte jejich počet pomocí parametru <code>limit</code>, např. <code>[heureka-recenze-obchodu limit="10"]</code>',
+                     Zobrazovat se budou všechny, pokud neomezíte jejich počet pomocí parametru <code>limit</code>, např. <code>[heureka-recenze-obchodu limit="10"]</code>.
+                     Pozor, musí být zadán platný API klíč pro službu Ověřeno zákazníky.',
           'id' => 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace'
         ),
         array(
