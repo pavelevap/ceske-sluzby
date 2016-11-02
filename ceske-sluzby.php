@@ -686,6 +686,16 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
     </td>
   </tr>
   <tr class="form-field">
+    <th scope="row" valign="top"><label>Kategorie Zbozi.cz XML</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="" size="70"/>
+      <p class="description">
+        Zatím je nutné ručně doplnit příslušnou kategorii ze Zbozi.cz (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
+        Příklad: <strong>Počítače | Software | Grafický a video software</strong> (informace ze sloupce s názvem Celá cesta)<br />
+      </p>
+    </td>
+  </tr>
+  <tr class="form-field">
     <th scope="row" valign="top"><label>Odebrat z XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" />
@@ -733,6 +743,7 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
 function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $checked = '';
   $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+  $zbozi_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
   $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
@@ -741,13 +752,23 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     <th scope="row" valign="top"><strong>České služby:</strong></th>
   </tr>
   <tr class="form-field">
-    <th scope="row" valign="top"><label>Kategorie Heureka</label></th>
+    <th scope="row" valign="top"><label>Kategorie Heureka XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" />
       <p class="description">
         Zatím je nutné ručně doplnit příslušnou kategorii z Heureky (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
         Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
         Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "<?php echo ucfirst( HEUREKA_URL ); ?> | ".
+      </p>
+    </td>
+  </tr>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>Kategorie Zbozi.cz XML</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="<?php echo esc_attr( $zbozi_kategorie ); ?>" />
+      <p class="description">
+        Zatím je nutné ručně doplnit příslušnou kategorii ze Zbozi.cz (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
+        Příklad: <strong>Počítače | Software | Grafický a video software</strong> (informace ze sloupce s názvem Celá cesta)<br />
       </p>
     </td>
   </tr>
@@ -810,6 +831,10 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
     $heureka_kategorie = str_replace( 'Heureka.sk | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
     update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-heureka-kategorie', esc_attr( $heureka_kategorie ) );
   }
+  if ( isset( $_POST['ceske-sluzby-xml-zbozi-kategorie'] ) && 'product_cat' === $taxonomy ) {
+    $zbozi_kategorie = $_POST['ceske-sluzby-xml-zbozi-kategorie'];
+    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-zbozi-kategorie', esc_attr( $zbozi_kategorie ) );
+  }
 
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', true );
   if ( isset( $_POST['ceske-sluzby-xml-vynechano'] ) && 'product_cat' === $taxonomy ) {
@@ -849,7 +874,11 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
   if ( 'xml-heureka' == $column ) {
     $heureka_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
     if ( $heureka_kategorie ) {
-      $columns .= '<a href="#" title="Heureka: ' . $heureka_kategorie . '">Kategorie</a>';
+      $columns .= '<a href="#" title="' . $heureka_kategorie . '">Heureka</a>';
+    }
+    $zbozi_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+    if ( $zbozi_kategorie ) {
+      $columns .= '<a href="#" title="' . $zbozi_kategorie . '">Zbozi.cz</a>';
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
     if ( $kategorie_vynechano ) {

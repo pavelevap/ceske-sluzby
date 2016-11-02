@@ -119,14 +119,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
         if ( ! empty ( $kategorie ) ) {
           if ( empty ( $kategorie_heureka ) ) {
             $kategorie_heureka = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
-            $nazev_kategorie = $kategorie;
+            $nazev_kategorie_heureka = $kategorie;
           }
         }
       }
       if ( ! empty ( $kategorie_heureka ) ) {
-        echo '<p class="form-field"><label for="ceske_sluzby_xml_vynechano">Upozornění (!)</label>Nastavená hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie . '</code></p>';
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie_heureka . '</code></p>';
       }
-    
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_heureka_kategorie', 
@@ -149,6 +148,29 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'placeholder' => 'PRODUCTNAME',
           'desc_tip' => 'true',
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
+        )
+      );
+      
+      $kategorie_zbozi = "";
+      foreach ( $product_categories as $kategorie_produktu ) {
+        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+        if ( ! empty ( $kategorie ) ) {
+          if ( empty ( $kategorie_zbozi ) ) {
+            $kategorie_zbozi = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+            $nazev_kategorie_zbozi = $kategorie;
+          }
+        }
+      }
+      if ( ! empty ( $kategorie_zbozi ) ) {
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_zbozi . ': <code>' . $nazev_kategorie_zbozi . '</code></p>';
+      }
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_zbozi_kategorie', 
+          'label' => 'Kategorie (<a href="http://www.zbozi.cz/static/categories.csv" target="_blank">přehled</a>)', 
+          'placeholder' => 'CATEGORYTEXT',
+          'desc_tip' => 'true',
+          'description' => 'Příklad: Počítače | Software | Grafický a video software' 
         )
       );
       echo '</div>';

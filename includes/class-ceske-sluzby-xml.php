@@ -871,7 +871,7 @@ function zbozi_xml_feed_zobrazeni() {
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
     $kategorie_erotika = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-erotika' );
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_zbozi_kategorie', 'ceske-sluzby-xml-zbozi-kategorie', '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
@@ -1102,7 +1102,7 @@ function zbozi_xml_feed_aktualizace() {
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
     $kategorie_erotika = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-erotika' );
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_zbozi_kategorie', 'ceske-sluzby-xml-zbozi-kategorie', '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
