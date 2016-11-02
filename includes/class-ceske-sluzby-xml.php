@@ -289,7 +289,18 @@ function ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategor
       $aktualni_erotika = $value;
     }
   }
-  return $aktualni_erotika;      
+  return $aktualni_erotika;    
+}
+
+function ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt ) {
+  $galerie = array();
+  $obrazky_ids = $produkt->get_gallery_attachment_ids();
+  if ( ! empty ( $obrazky_ids ) ) {
+    foreach ( $obrazky_ids as $obrazek_id ) {
+      $galerie[] = wp_get_attachment_url( $obrazek_id );
+    }
+  }
+  return $galerie; 
 }
 
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
@@ -517,6 +528,7 @@ function heureka_xml_feed_zobrazeni() {
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, 'bazar' );
+    $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -559,6 +571,11 @@ function heureka_xml_feed_zobrazeni() {
           }
           $xmlWriter->writeElement( 'URL', $varianta->get_permalink() );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'IMGURL_ALTERNATIVE', $obrazek_url );
+            }
+          }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
           $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
           $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
@@ -607,6 +624,11 @@ function heureka_xml_feed_zobrazeni() {
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'IMGURL_ALTERNATIVE', $obrazek_url );
+            }
+          }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
@@ -715,6 +737,7 @@ function heureka_xml_feed_aktualizace() {
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, 'bazar' );
+    $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -757,6 +780,11 @@ function heureka_xml_feed_aktualizace() {
             }
             $xmlWriter->writeElement( 'URL', $varianta->get_permalink() );
             $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( $varianta->get_image_id() ) );
+            if ( $galerie ) {
+              foreach ( $galerie as $obrazek_url ) {
+                $xmlWriter->writeElement( 'IMGURL_ALTERNATIVE', $obrazek_url );
+              }
+            }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
@@ -806,6 +834,11 @@ function heureka_xml_feed_aktualizace() {
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'IMGURL_ALTERNATIVE', $obrazek_url );
+            }
+          }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
@@ -880,6 +913,7 @@ function zbozi_xml_feed_zobrazeni() {
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
     $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 1 );
+    $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -919,6 +953,11 @@ function zbozi_xml_feed_zobrazeni() {
             }
             $xmlWriter->writeElement( 'URL', $varianta->get_permalink() );
             $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
+            if ( $galerie ) {
+              foreach ( $galerie as $obrazek_url ) {
+                $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+              }
+            }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
@@ -980,6 +1019,11 @@ function zbozi_xml_feed_zobrazeni() {
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+            }
+          }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
@@ -1111,6 +1155,7 @@ function zbozi_xml_feed_aktualizace() {
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
     $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 1 );
+    $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -1150,6 +1195,11 @@ function zbozi_xml_feed_aktualizace() {
             }
             $xmlWriter->writeElement( 'URL', $varianta->get_permalink() );
             $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
+            if ( $galerie ) {
+              foreach ( $galerie as $obrazek_url ) {
+                $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+              }
+            }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
@@ -1212,6 +1262,11 @@ function zbozi_xml_feed_aktualizace() {
           }
           $xmlWriter->writeElement( 'URL', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'IMGURL', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+            }
+          }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
@@ -1309,6 +1364,7 @@ function google_xml_feed_zobrazeni() {
       $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, $nazev_webu );
       $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, 'new', 'value' );
       $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 'yes' );
+      $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
       $sku_produkt = $produkt->get_sku();
 
       if ( $produkt->is_type( 'variable' ) ) {
@@ -1350,6 +1406,11 @@ function google_xml_feed_zobrazeni() {
               }
               $xmlWriter->writeElement( 'g:link', $varianta->get_permalink() );
               $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( $varianta->get_image_id() ) ) ) );
+              if ( $galerie ) {
+                foreach ( $galerie as $obrazek_url ) {
+                  $xmlWriter->writeElement( 'g:additional_image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+                }
+              }
               if ( strtotime ( $dodaci_doba ) ) {
                 $xmlWriter->writeElement( 'g:availability', 'preorder' );
                 $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
@@ -1413,6 +1474,11 @@ function google_xml_feed_zobrazeni() {
           }
           $xmlWriter->writeElement( 'g:link', get_permalink( $product_id ) );
           $xmlWriter->writeElement( 'g:image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( wp_get_attachment_url( get_post_thumbnail_id( $product_id ) ) ) ) );
+          if ( $galerie ) {
+            foreach ( $galerie as $obrazek_url ) {
+              $xmlWriter->writeElement( 'g:additional_image_link', str_replace( array( '%3A', '%2F' ), array ( ':', '/' ), urlencode( $obrazek_url ) ) );
+            }
+          }
           if ( strtotime ( $dodaci_doba ) ) {
             $xmlWriter->writeElement( 'g:availability', 'preorder' );
             $xmlWriter->writeElement( 'g:availability_date', $dodaci_doba );
