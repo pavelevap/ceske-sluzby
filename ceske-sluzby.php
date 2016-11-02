@@ -718,6 +718,15 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
       </span>
     </td>
   </tr>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>Erotický obsah</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" />
+      <span class="description">
+        Zaškrtněte, pokud chcete označit obsah webu jako erotický.
+      </span>
+    </td>
+  </tr>
 <?php
 }
 
@@ -725,6 +734,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $checked = '';
   $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
+  $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
   $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ); ?>
   <tr>
@@ -778,6 +788,19 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
       </span>
     </td>
   </tr>
+  <?php
+  if ( ! empty( $xml_erotika_ulozeno ) ) {
+    $checked = 'checked="checked"';
+  } ?>
+  <tr class="form-field">
+    <th scope="row" valign="top"><label>Erotický obsah</label></th>
+    <td> 
+      <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" <?php echo $checked; ?>/>
+      <span class="description">
+        Zaškrtněte, pokud chcete označit obsah webu jako erotický.
+      </span>
+    </td>
+  </tr>
 <?php // http://themehybrid.com/weblog/introduction-to-wordpress-term-meta
 }
 
@@ -803,6 +826,16 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
     update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', esc_attr( $_POST['ceske-sluzby-xml-stav-produktu'] ) );  
   } elseif ( ! empty( $xml_stav_produktu_ulozeno ) ) {
     delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu' );   
+  }
+
+  $xml_erotika_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', true );
+  if ( isset( $_POST['ceske-sluzby-xml-erotika'] ) && 'product_cat' === $taxonomy ) {
+    $xml_erotika = $_POST['ceske-sluzby-xml-erotika'];
+    if ( ! empty( $xml_erotika ) ) {
+      update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', esc_attr( $xml_erotika ) );  
+    }
+  } elseif ( ! empty( $xml_erotika_ulozeno ) ) {
+    delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika' );   
   }
 }
 
@@ -830,6 +863,13 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         $stav_produktu_hodnota = 'Repasované';
       }
       $columns .= '<br />' . $stav_produktu_hodnota;
+    }
+    $erotika = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-erotika', true );
+    if ( $erotika ) {
+      if ( $erotika == 'yes' ) {
+        $erotika_hodnota = 'Erotický obsah';
+      }
+      $columns .= '<br />' . $erotika_hodnota;
     }
   }
   return $columns;

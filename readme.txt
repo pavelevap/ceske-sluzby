@@ -60,6 +60,9 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
  * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
  * Ošetření specifických situací, které by mohly nastat při získávání recenzí z Heureky.
+* WooCommerce: XML feedy
+ * Doplněna podpora pro označování erotického obsahu (Zbozi.cz a Google).
+ * Opravena logika pro zobrazování stavu produktu v případě, že je u produktu přiřazeno více kategorií s různým nastavením.  
 * WooCommerce: XML feed (Google)
  * Upravena struktura podle manuálu (element rss). 
 

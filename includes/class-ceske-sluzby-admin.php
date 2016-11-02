@@ -298,6 +298,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
         ),
         array(
+          'title' => 'Erotický obsah',
+          'type' => 'checkbox',
+          'desc' => 'Označit všechny produkty jako erotické. Pokud chcete označit pouze některé kategorie, tak to můžete nastavit přímo tam.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_erotika'
+        ),
+        array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
         ),

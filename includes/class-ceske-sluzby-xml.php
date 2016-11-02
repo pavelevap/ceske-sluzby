@@ -64,9 +64,7 @@ function ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $product_categorie
   if ( ! empty ( $product_categories ) ) {
     foreach ( $product_categories as $kategorie ) {
       $hodnota = get_woocommerce_term_meta( $kategorie->term_id, $termmeta_key );
-      if ( ! empty ( $hodnota ) ) {
-        $prirazene_hodnoty[] = $hodnota;
-      }
+      $prirazene_hodnoty[] = $hodnota;
     }
   }
   return $prirazene_hodnoty;
@@ -215,13 +213,12 @@ function ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav, $kate
     $aktualni_stav = $global_stav;
   }
   if ( ! empty ( $kategorie_stav ) ) {
-    if ( count( $kategorie_stav == 1 ) ) {
+    if ( count( $kategorie_stav ) == 1 ) {
       $aktualni_stav = $kategorie_stav[0];
     }
     else {
       $pocet_hodnot = array_count_values( $kategorie_stav );
       $i = 0;
-      $nejnizsi = 1;
       foreach ( $pocet_hodnot as $hodnota => $pocet ) {
         if ( $i == 0 ) {
           $stav_tmp = $hodnota;
@@ -230,7 +227,11 @@ function ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav, $kate
           if ( $pocet > $pocet_tmp ) {
             $stav_tmp = $hodnota;
           }
+          if ( $pocet == $pocet_tmp && empty ( $stav_tmp ) ) {
+            $stav_tmp = $hodnota;
+          }
         }
+        $i = $i + 1;
       }
       $aktualni_stav = $stav_tmp;
     }
@@ -252,6 +253,43 @@ function ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav, $kate
     }
   }
   return $aktualni_stav;      
+}
+
+function ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, $value ) {
+  $aktualni_erotika = "";
+  if ( $global_erotika == "yes" ) {
+    $aktualni_erotika = $global_erotika;
+  }
+  if ( ! empty ( $kategorie_erotika ) ) {
+    if ( count( $kategorie_erotika ) == 1 ) {
+      $aktualni_erotika = $kategorie_erotika[0];
+    }
+    else {
+      $pocet_hodnot = array_count_values( $kategorie_erotika );
+      $i = 0;
+      foreach ( $pocet_hodnot as $hodnota => $pocet ) {
+        if ( $i == 0 ) {
+          $erotika_tmp = $hodnota;
+          $pocet_tmp = $pocet;
+        } else {
+          if ( $pocet > $pocet_tmp ) {
+            $erotika_tmp = $hodnota;
+          }
+          if ( $pocet == $pocet_tmp && empty ( $erotika_tmp ) ) {
+            $erotika_tmp = $hodnota;
+          }
+        }
+        $i = $i + 1;
+      }
+      $aktualni_erotika = $erotika_tmp;
+    }
+  }
+  if ( ! empty ( $aktualni_erotika ) ) {
+    if ( ! empty ( $value ) ) {
+      $aktualni_erotika = $value;
+    }
+  }
+  return $aktualni_erotika;      
 }
 
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
@@ -815,6 +853,7 @@ function zbozi_xml_feed_zobrazeni() {
   $podpora_vyrobcu = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' );
   $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' );
   $zkracene_zapisy = get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' );
+  $global_erotika = get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' );
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $podpora_vyrobcu, $custom_labels_array );
 
@@ -831,6 +870,7 @@ function zbozi_xml_feed_zobrazeni() {
 
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
+    $kategorie_erotika = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-erotika' );
     $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
@@ -839,6 +879,7 @@ function zbozi_xml_feed_zobrazeni() {
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
+    $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 1 );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -892,6 +933,9 @@ function zbozi_xml_feed_zobrazeni() {
             }
             if ( ! empty ( $vyrobce_varianta ) ) {
               $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_varianta );
+            }
+            if ( ! empty ( $erotika_produkt ) ) {
+              $xmlWriter->writeElement( 'EROTIC', $erotika_produkt );
             }
             if ( ! empty ( $ean ) ) {
               $xmlWriter->writeElement( 'EAN', $ean );
@@ -949,6 +993,9 @@ function zbozi_xml_feed_zobrazeni() {
           }
           if ( ! empty ( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_produkt );
+          }
+          if ( ! empty ( $erotika_produkt ) ) {
+            $xmlWriter->writeElement( 'EROTIC', $erotika_produkt );
           }
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
@@ -1039,6 +1086,7 @@ function zbozi_xml_feed_aktualizace() {
   $podpora_vyrobcu = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' );
   $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' );
   $zkracene_zapisy = get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' );
+  $global_erotika = get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' );
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $podpora_vyrobcu, $custom_labels_array );
   $pocet_produkt = 0;
@@ -1053,6 +1101,7 @@ function zbozi_xml_feed_aktualizace() {
 
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
+    $kategorie_erotika = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-erotika' );
     $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_zbozi_productname', true );
     $attributes_produkt = $produkt->get_attributes();
@@ -1061,6 +1110,7 @@ function zbozi_xml_feed_aktualizace() {
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
+    $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 1 );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -1114,6 +1164,9 @@ function zbozi_xml_feed_aktualizace() {
             }
             if ( ! empty ( $vyrobce_varianta ) ) {
               $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_varianta );
+            }
+            if ( ! empty ( $erotika_produkt ) ) {
+              $xmlWriter->writeElement( 'EROTIC', $erotika_produkt );
             }
             if ( ! empty ( $ean ) ) {
               $xmlWriter->writeElement( 'EAN', $ean );
@@ -1173,6 +1226,9 @@ function zbozi_xml_feed_aktualizace() {
           if ( ! empty ( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_produkt );
           }
+          if ( ! empty ( $erotika_produkt ) ) {
+            $xmlWriter->writeElement( 'EROTIC', $erotika_produkt );
+          }
           if ( ! empty ( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
           }
@@ -1220,6 +1276,7 @@ function google_xml_feed_zobrazeni() {
   $podpora_vyrobcu = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' );
   $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' );
   $zkracene_zapisy = get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' );
+  $global_erotika = get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' );
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $podpora_vyrobcu, $custom_labels_array );
   $postovne = get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' );
@@ -1243,6 +1300,7 @@ function google_xml_feed_zobrazeni() {
 
       $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
       $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
+      $kategorie_erotika = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-erotika' );
       $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '>' );
       $attributes_produkt = $produkt->get_attributes();
       $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
@@ -1250,6 +1308,7 @@ function google_xml_feed_zobrazeni() {
       $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
       $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, $nazev_webu );
       $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, 'new', 'value' );
+      $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_erotika, $kategorie_erotika, 'yes' );
       $sku_produkt = $produkt->get_sku();
 
       if ( $produkt->is_type( 'variable' ) ) {
@@ -1312,6 +1371,9 @@ function google_xml_feed_zobrazeni() {
               if ( $podpora_ean != 'SKU' && ! empty ( $sku_varianta ) ) {
                 $xmlWriter->writeElement( 'g:mpn', $sku_varianta );
               }
+              if ( ! empty ( $erotika_produkt ) ) {
+                $xmlWriter->writeElement( 'g:adult', $erotika_produkt );
+              }
               if ( ! empty ( $custom_labels_array ) ) {
                 $a = 0;
                 foreach ( $custom_labels_array as $custom_label ) {
@@ -1371,6 +1433,9 @@ function google_xml_feed_zobrazeni() {
           }
           if ( $podpora_ean != 'SKU' && ! empty ( $sku_produkt ) ) {
             $xmlWriter->writeElement( 'g:mpn', $sku_produkt );
+          }
+          if ( ! empty ( $erotika_produkt ) ) {
+            $xmlWriter->writeElement( 'g:adult', $erotika_produkt );
           }
           if ( ! empty ( $custom_labels_array ) ) {
             $a = 0;
