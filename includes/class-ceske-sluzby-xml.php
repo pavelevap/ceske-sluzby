@@ -92,7 +92,7 @@ function ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, $postmeta_prod
         $rodice_kategorie = get_ancestors( $dostupne_kategorie[0]->term_id, 'product_cat' );
         if ( ! empty ( $rodice_kategorie ) ) {
           foreach ( $rodice_kategorie as $rodic ) {
-            $nazev_kategorie = get_term_by( 'ID', $rodic, 'product_cat' );
+            $nazev_kategorie = get_term_by( 'id', $rodic, 'product_cat' );
             $strom_kategorie = $nazev_kategorie->name . ' ' . $separator . ' ' . $strom_kategorie;
           }
         }
