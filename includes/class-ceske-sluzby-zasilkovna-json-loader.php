@@ -1,14 +1,14 @@
 <?php
 // http://pressing-matters.io/building-an-object-oriented-wordpress-plugin-xkcd-shortcode-part-5/
-class Ceske_Sluzby_Ulozenka_Json_Loader {
+class Ceske_Sluzby_Zasilkovna_Json_Loader {
   function load( $params = null ) {
-    $json = get_transient( 'ceske_sluzby_ulozenka_pobocky' );
-    if (!$json) {  
+    $json = get_transient( 'ceske_sluzby_zasilkovna_pobocky' );
+    if ( !$json ) {  
       $url = $this->build( $params );
       $result = $this->fetch( $url );
       $body = $this->verify( $result );
       $json = $this->parse( $body );
-      set_transient( 'ceske_sluzby_ulozenka_pobocky', $json, 24 * 60 * 60);
+      set_transient( 'ceske_sluzby_zasilkovna_pobocky', $json, 24 * 60 * 60);
     }
     return $json;
   }
@@ -44,24 +44,16 @@ class Ceske_Sluzby_Ulozenka_Json_Loader {
   }
 
   function build( $params ) {
-    $base_url = 'https://api.ulozenka.cz/v3/transportservices/';
+    $base_url = 'https://www.zasilkovna.cz/api/v3/';
     $available_shipping = WC()->shipping->load_shipping_methods();
-    $settings = $available_shipping[ "ceske_sluzby_ulozenka" ]->settings;
+    $settings = $available_shipping[ "ceske_sluzby_zasilkovna" ]->settings;
 
-    if ( ! is_null( $params ) ) {
-      if ( ! empty( $params['provider'] ) ) {
-        $base_url = $base_url . $params['provider'] . '/branches';
-      }
-      if ( ! empty( $params['country'] ) ) {
-        $base_url .= '?includeInactive=0&destinationOnly=1&destinationCountry=' . $params['country'];
-      }
-      if ( ! empty( $settings['ulozenka_id-obchodu'] ) ) {
-        $base_url .= '&shopId=' . $settings['ulozenka_id-obchodu'];
-      }
+    if ( ! empty( $settings['zasilkovna_id-obchodu'] ) ) {
+      $base_url .= $settings['zasilkovna_id-obchodu'];
+      $base_url .= '/branch.json';
       return $base_url;
     } else {
-      return $base_url . '1/branches';
+      return null;
     }
   }
 }
-// Je třeba doplnit cachovanou verzi (transients).
