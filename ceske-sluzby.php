@@ -309,7 +309,7 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
     
         <tr class="ulozenka">
           <td>
-            <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
+            <img src="<?php echo $settings['ulozenka_logo']; ?>" width="140" border="0">
           </td>
           <td>
             <font size="2">Uloženka - výběr pobočky:</font><br>
@@ -427,7 +427,7 @@ function ceske_sluzby_zasilkovna_zobrazit_pobocky() {
     
         <tr class="zasilkovna">
           <td>
-            <img src="//www.zasilkovna.cz/images/page/Zasilkovna_logo_inverzni_WEB.png" width="160" border="0">
+            <img src="<?php echo $settings['zasilkovna_logo']; ?>" width="160" border="0">
           </td>
           <td>
             <font size="2">Zásilkovna - výběr pobočky:</font><br>

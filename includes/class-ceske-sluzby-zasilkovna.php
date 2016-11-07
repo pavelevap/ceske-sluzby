@@ -52,6 +52,13 @@ class WC_Shipping_Ceske_Sluzby_Zasilkovna extends WC_Shipping_Method {
 				'default'     => '',
 				'css'         => 'width: 100px;'
       ),
+      'zasilkovna_logo'       => array(
+				'title'       => 'Logo',
+				'type'        => 'text',
+				'description' => 'Zadejte URL na logo Zásilkovny',
+				'default'     => '//www.zasilkovna.cz/images/page/Zasilkovna_logo_inverzni_WEB.png',
+				'css'         => 'width: 500px;'
+      ),       
       'zasilkovna_zakladni-cena' => array(
 				'title'       => 'Základní cena',
 				'type'        => 'price',

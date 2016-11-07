@@ -52,6 +52,13 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'default'     => '',
 				'css'         => 'width: 100px;'
       ),
+      'ulozenka_logo'       => array(
+				'title'       => 'Logo',
+				'type'        => 'text',
+				'description' => 'Zadejte URL na logo Uloženky',
+				'default'     => 'https://www.ulozenka.cz/logo/ulozenka.png',
+				'css'         => 'width: 500px;'
+      ),       
       'ulozenka_zakladni-cena' => array(
 				'title'       => 'Základní cena',
 				'type'        => 'price',
