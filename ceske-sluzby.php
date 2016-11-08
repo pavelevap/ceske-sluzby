@@ -414,7 +414,7 @@ function ceske_sluzby_zasilkovna_zobrazit_pobocky() {
     if ( $chosen_shipping_method[0] == "ceske_sluzby_zasilkovna" ) {
       $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
 
-      if ( $settings['enabled'] == "yes" && ! empty ( $settings['zasilkovna_id-obchodu'] ) ) {
+      if ( $settings['enabled'] == "yes" && ! empty ( $settings['zasilkovna_api-klic'] ) ) {
 
         $pobocky = new Ceske_Sluzby_Zasilkovna_Json_Loader();
 

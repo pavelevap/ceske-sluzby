@@ -45,10 +45,10 @@ class WC_Shipping_Ceske_Sluzby_Zasilkovna extends WC_Shipping_Method {
 				'default'     => 'Zásilkovna',
 				'css'         => 'width: 300px;'
       ),
-      'zasilkovna_id-obchodu' => array(
-				'title'       => 'ID obchodu',
+      'zasilkovna_api-klic' => array(
+				'title'       => 'API klíč',
 				'type'        => 'text',
-				'description' => 'Zadejte ID obchodu z administrace Zásilkovna.',
+				'description' => 'Zadejte API klíč z administrace Zásilkovna.',
 				'default'     => '',
 				'css'         => 'width: 100px;'
       ),

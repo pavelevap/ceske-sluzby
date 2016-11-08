@@ -48,8 +48,8 @@ class Ceske_Sluzby_Zasilkovna_Json_Loader {
     $available_shipping = WC()->shipping->load_shipping_methods();
     $settings = $available_shipping[ "ceske_sluzby_zasilkovna" ]->settings;
 
-    if ( ! empty( $settings['zasilkovna_id-obchodu'] ) ) {
-      $base_url .= $settings['zasilkovna_id-obchodu'];
+    if ( ! empty( $settings['zasilkovna_api-klic'] ) ) {
+      $base_url .= $settings['zasilkovna_api-klic'];
       $base_url .= '/branch.json';
       return $base_url;
     } else {
