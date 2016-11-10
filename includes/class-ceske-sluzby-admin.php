@@ -158,6 +158,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_sklik_konverze-objednavky'
         ),
         array(
+          'title' => 'ID pro retargeting',
+          'type' => 'text',
+          'desc' => 'ID získaného kódu pro retargeting naleznete <a href="https://www.sklik.cz/retargeting">zde</a>. Je třeba kliknout na odkaz "Zobrazit retargetingový kód" a z něho získat potřebné ID. Manuál pro použití této služby naleznete <a href="https://napoveda.sklik.cz/typy-cileni/retargeting/">zde</a>.',
+          'id' => 'wc_ceske_sluzby_sklik_retargeting'
+        ),
+        array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_sklik_title'
         ),

@@ -58,7 +58,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 = 0.6 =
 * WooCommerce: Ověřeno zákazníky
  * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
- * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
+ * Případná chyba bude uložena v podobě poznámky k příslušné objednávce
  * Ošetření specifických situací, které by mohly nastat při získávání recenzí z Heureky.
 * WooCommerce: Nastavení a zobrazení dodací doby pro varianty (napojení na XML feedy v podobě DELIVERY_DATE) 
 * WooCommerce: XML feedy
@@ -71,7 +71,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: XML feed (Google)
  * Upravena struktura podle manuálu (element rss).
 * WooCommerce: Měření konverzí (Sklik.cz)
- * Doplněno odesílání hodnoty objednávek.  
+ * Doplněno odesílání hodnoty objednávek.
+* WooCommerce: Podpora retargetingu pro Sklik.cz   
 
 = 0.5 =
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)

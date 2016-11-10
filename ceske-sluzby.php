@@ -130,6 +130,19 @@ function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
   }
 }
 
+function ceske_sluzby_sklik_retargeting() {
+  $konverze = get_option( 'wc_ceske_sluzby_sklik_retargeting' );
+  if ( ! empty( $konverze ) ) { ?>
+<script type="text/javascript">
+/* <![CDATA[ */
+var seznam_retargeting_id = <?php echo $konverze; ?>;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//c.imedia.cz/js/retargeting.js"></script>
+  <?php
+  }
+}
+
 function ceske_sluzby_srovname_mereni_konverzi( $order_id ) {
   $klic = get_option( 'wc_ceske_sluzby_srovname_konverze-objednavky' );
   if ( ! empty( $klic ) ) {
@@ -197,6 +210,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_srovname_mereni_konverzi' );
+    add_action( 'wp_footer', 'ceske_sluzby_sklik_retargeting' );
     add_filter( 'wc_order_is_editable', 'ceske_sluzby_moznost_menit_dobirku', 10, 2 );
     add_filter( 'woocommerce_package_rates', 'ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma', 10, 2 );
 
