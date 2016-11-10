@@ -69,7 +69,9 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: XML feed (Zbozi.cz)
  * Možnost doplnění CATEGORYTEXT v nastavení kategorie i produktu.
 * WooCommerce: XML feed (Google)
- * Upravena struktura podle manuálu (element rss). 
+ * Upravena struktura podle manuálu (element rss).
+* WooCommerce: Měření konverzí (Sklik.cz)
+ * Doplněno odesílání hodnoty objednávek.  
 
 = 0.5 =
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)
