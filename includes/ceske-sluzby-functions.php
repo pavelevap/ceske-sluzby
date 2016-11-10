@@ -19,7 +19,7 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu() {
 
 function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
   $availability = array();
-  if ( ! empty ( $actual_dodaci_doba ) || $actual_dodaci_doba === '0' ) {
+  if ( ! empty ( $actual_dodaci_doba ) || (string)$actual_dodaci_doba === '0' ) {
     if ( array_key_exists( $actual_dodaci_doba, $dodaci_doba ) ) {
       $availability['value'] = $actual_dodaci_doba;
       $availability['text'] = $dodaci_doba[ $actual_dodaci_doba ];

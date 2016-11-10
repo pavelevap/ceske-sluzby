@@ -198,10 +198,10 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
             $global_dodaci_doba_text = ' Globálně máte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaveno</a>: <strong>' . $dodaci_doba[ $global_dodaci_doba ] . '</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.').';
           } else {
-            $global_dodaci_doba_text = ' Pro globální dodací dobu (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.') nemáte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaven</a> žádný text.';
+            $global_dodaci_doba_text = ' Pro globální dodací dobu (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.') nemáte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaven</a> žádný speciální text.';
           }
         }
-        $dodaci_doba = array ( '' => '- Vyberte -') + $dodaci_doba;
+        $dodaci_doba = array ( '' => '- Vyberte -' ) + $dodaci_doba;
         woocommerce_wp_select(
           array( 
             'id' => 'ceske_sluzby_dodaci_doba', 
@@ -286,4 +286,3 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     }
   }
 }
-// Variace: http://www.remicorson.com/woocommerce-custom-fields-for-variations/

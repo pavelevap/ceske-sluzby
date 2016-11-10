@@ -308,19 +308,32 @@ function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dod
   if ( $item->is_on_backorder( 1 ) && (int)$global_dodaci_doba == 0 ) {
     $dodaci_doba = $global_predbezna_objednavka;
   }
-
   $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
   if ( $aktivace_dodaci_doby == "yes" ) {
     if ( ! empty( $dodaci_doba_vlastni_reseni ) ) {
       $dodaci_doba_item = get_post_meta( $item_id, $dodaci_doba_vlastni_reseni, true );
-      if ( ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) && is_numeric( $dodaci_doba_item ) ) {
+      if ( ( ! empty ( $dodaci_doba_item ) || (string)$dodaci_doba_item === '0' ) && is_numeric( $dodaci_doba_item ) ) {
         $dodaci_doba = $dodaci_doba_item;
       }
     } else {
       $dodaci_doba_nastaveni = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
       if ( ! empty ( $dodaci_doba_nastaveni ) ) {
-        $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
-        if ( ! empty ( $dodaci_doba_item ) || $dodaci_doba_item === '0' ) {
+        if ( ( (int)$item->get_stock_quantity() <= 0 && $item->managing_stock() ) || ! $item->managing_stock() ) {
+          if ( get_class( $item ) == "WC_Product_Variation" ) {
+            $dodaci_doba_varianta = get_post_meta( $item->variation_id, 'ceske_sluzby_dodaci_doba', true );
+            if ( empty ( $dodaci_doba_varianta ) ) {
+              $dodaci_doba_item = get_post_meta( $item->parent->id, 'ceske_sluzby_dodaci_doba', true );
+            } else {
+              $dodaci_doba_item = $dodaci_doba_varianta;
+            }
+          }
+          elseif ( get_class( $item ) == "WC_Product_Simple" ) {
+            $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
+          }
+        } else {
+          $dodaci_doba_item = 0;
+        }
+        if ( ! empty ( $dodaci_doba_item ) || (string)$dodaci_doba_item === '0' ) {
           $dodaci_doba = $dodaci_doba_item;
         }
       }
@@ -328,7 +341,7 @@ function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dod
     $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
     if ( $aktivace_predobjednavek == "yes" ) {
       $datum_predobjednavky = get_post_meta( $item_id, 'ceske_sluzby_xml_preorder_datum', true );
-      if ( ! empty ( $datum_predobjednavky ) ) {
+      if ( ! empty ( $datum_predobjednavky ) && (int)$datum_predobjednavky >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
         if ( $global_predbezna_objednavka == 'preorder' ) {
           $dodaci_doba = date_i18n( 'c', $datum_predobjednavky );
         } else {
