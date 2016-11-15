@@ -304,6 +304,7 @@ function ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt ) {
 }
 
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_dodaci_doba, $dodaci_doba_vlastni_reseni, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
+  $dodaci_doba_item = "";
   $dodaci_doba = $global_dodaci_doba;
   if ( $item->is_on_backorder( 1 ) && (int)$global_dodaci_doba == 0 ) {
     $dodaci_doba = $global_predbezna_objednavka;

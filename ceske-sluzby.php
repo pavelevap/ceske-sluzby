@@ -949,6 +949,12 @@ function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
         $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
         $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
       }
+    } else {
+      $pocet_skladem = ceske_sluzby_zpracovat_pocet_skladem( $product->get_stock_quantity() );
+      if ( ! empty ( $pocet_skladem ) ) {
+        $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $pocet_skladem, $product->get_stock_quantity() );
+        $availability['class'] .= ' skladem-' . $dostupnost['value'];
+      }
     }
     if ( ! empty ( $dostupnost ) ) {
       $availability['availability'] = $dostupnost['text'];

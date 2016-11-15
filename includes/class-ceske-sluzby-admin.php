@@ -450,6 +450,16 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 500px'
         ),
         array(
+          'title' => 'Intervaly počtu produktů',
+          'type' => 'textarea',
+          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (dolní hranice počtu produktů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.
+                     Použít můžete také hodnotu <code>{VALUE}</code>, která zobrazí přesný počet produktů skladem.
+                     Automaticky je také generována CSS třída ve formátu <code>skladem-{VALUE}</code>.',
+          'default' => sprintf( '0|Skladem: {VALUE}%1$s5|Skladem 5+%1$s10|Skladem 10+', PHP_EOL ),
+          'css' => 'width: 40%; height: 85px;',
+          'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
+        ),
+        array(
           'title' => 'Předobjednávky',
           'type' => 'checkbox',
           'desc' => 'Povolí možnost zadávat a zobrazovat datum předobjednávky u jednotlivých produktů.',

@@ -17,12 +17,43 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu() {
   return $dodaci_doba_array;
 }
 
+function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
+  $pocet_skladem_array = array();
+  $pocet_skladem_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_intervaly' );
+  if ( ! empty ( $pocet_skladem_hodnoty ) ) {
+    $pocet_skladem_tmp = array_values( array_filter( explode( PHP_EOL, $pocet_skladem_hodnoty ) ) );
+    foreach ( $pocet_skladem_tmp as $pocet_skladem_hodnota ) {
+      $rozdeleno = explode( "|", $pocet_skladem_hodnota );
+      if ( count( $rozdeleno ) == 2 && is_numeric( $rozdeleno[0] ) ) {
+        $pocet_skladem_array[ $rozdeleno[0] ] = str_replace( '{VALUE}', $pocet, $rozdeleno[1] );
+      }
+    }
+    if ( ! empty ( $pocet_skladem_array ) ) {
+      ksort( $pocet_skladem_array );
+    }
+  }
+  return $pocet_skladem_array;
+}
+
 function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
   $availability = array();
   if ( ! empty ( $actual_dodaci_doba ) || (string)$actual_dodaci_doba === '0' ) {
     if ( array_key_exists( $actual_dodaci_doba, $dodaci_doba ) ) {
       $availability['value'] = $actual_dodaci_doba;
       $availability['text'] = $dodaci_doba[ $actual_dodaci_doba ];
+    }
+  }
+  return $availability;
+}
+
+function ceske_sluzby_ziskat_interval_pocet_skladem( $pocet_skladem, $actual_pocet_skladem ) {
+  $availability = array();
+  if ( ! empty ( $actual_pocet_skladem ) ) {
+    foreach( $pocet_skladem as $pocet => $text ) {
+      if ( $actual_pocet_skladem > $pocet ) {
+        $availability['value'] = $pocet;
+        $availability['text'] = $text;
+      }
     }
   }
   return $availability;
