@@ -62,7 +62,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Ošetření specifických situací, které by mohly nastat při získávání recenzí z Heureky.
 * WooCommerce: Dodací doba
  * Nastavení a zobrazení dodací doby pro varianty (napojení na XML feedy v podobě DELIVERY_DATE).
- * Možnost nastavení intervalů a textů pro počet produktů skladem.  
+ * Možnost nastavení intervalů a textů pro počet produktů skladem.
+ * Možnost definování vlastního textu (a formátu pro zobrazení) pro dostupnost dodatečných produktů (nad rámec uvedených skladových zásob).   
 * WooCommerce: XML feedy
  * Doplněna podpora pro označování erotického obsahu (Zbozi.cz a Google).
  * Opravena logika pro zobrazování stavu produktu v případě, že je u produktu přiřazeno více kategorií s různým nastavením.

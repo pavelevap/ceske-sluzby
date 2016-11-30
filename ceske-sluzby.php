@@ -251,12 +251,18 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
             // Původně použitý filtr woocommerce_get_availability_text je funkční až od WooCommerce 2.6.2
             // https://github.com/woocommerce/woocommerce/commit/33346938855b334861678bccecef4a58e5fc0cfa
             add_filter( 'woocommerce_get_availability', 'ceske_sluzby_zobrazit_dodaci_dobu_filtr', 10, 2 );
+            add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce' );
+            add_filter( 'woocommerce_available_variation', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr', 10, 3 );
           }
           if ( $zobrazeni == 'before_add_to_cart_form' ) {
             add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
+            add_filter( 'woocommerce_stock_html', 'ceske_sluzby_nahradit_zobrazeny_text', 10, 3 );
+            add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce' );
+            add_filter( 'woocommerce_available_variation', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr', 10, 3 );
           }
           if ( $zobrazeni == 'after_shop_loop_item' ) {
-            add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 9 );
+            add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodaci_dobu_akce', 8 );
+            add_action( 'woocommerce_after_shop_loop_item', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce', 9 );
           }
         }
       }
@@ -922,74 +928,122 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
 }
 
 function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
-  $dostupnost = array();
-  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
-  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
-    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-      $availability_predobjednavka = 'Předobjednávka: ' . date_i18n( 'j.n.Y', $predobjednavka );
-      $availability['availability'] = $availability_predobjednavka;
-    }
-  }
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
-  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $availability_predobjednavka ) ) {
-    if ( ( (int)$product->get_stock_quantity() <= 0 && $product->managing_stock() ) || ! $product->managing_stock() ) {
-      if ( get_class( $product ) == "WC_Product_Variation" ) {
-        $dodaci_doba_varianta = get_post_meta( $product->variation_id, 'ceske_sluzby_dodaci_doba', true );
-        if ( empty ( $dodaci_doba_varianta ) ) {
-          $dodaci_doba_produkt = get_post_meta( $product->parent->id, 'ceske_sluzby_dodaci_doba', true );
-        } else {
-          $dodaci_doba_produkt = $dodaci_doba_varianta;
-        }
-      }
-      elseif ( get_class( $product ) == "WC_Product_Simple" ) {
-        $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
-      }
-      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
-      if ( empty ( $dostupnost ) ) {
-        $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-        $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
-      }
-    } else {
-      $pocet_skladem = ceske_sluzby_zpracovat_pocet_skladem( $product->get_stock_quantity() );
-      if ( ! empty ( $pocet_skladem ) ) {
-        $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $pocet_skladem, $product->get_stock_quantity() );
-        $availability['class'] .= ' skladem-' . $dostupnost['value'];
-      }
-    }
+  if ( ! $product->is_in_stock() ) {
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
     if ( ! empty ( $dostupnost ) ) {
       $availability['availability'] = $dostupnost['text'];
     }
+    return $availability;
+  }
+  $dostupnost = ceske_sluzby_ziskat_predobjednavku( $product, false );
+  if ( ! empty ( $dostupnost ) ) {
+    $availability['availability'] = $dostupnost;
+    return $availability;
+  }
+  if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
+    $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), false );
+    if ( ! empty ( $dostupnost ) ) {
+      return $dostupnost;
+    }
+  }
+  $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, false );
+  if ( ! empty ( $dostupnost ) ) {
+    $availability['availability'] = $dostupnost['text'];
+    return $availability;
   }
   return $availability;
 }
 
 function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
   global $product;
-  $format = "";
-  $dostupnost = array();
-  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
-  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
-    if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-      $format = ceske_sluzby_ziskat_format_predobjednavky( $predobjednavka );
-    }
+  if ( $product->is_type( 'variable' ) ) {
+    return;
   }
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu();
-  if ( ! empty ( $dodaci_doba ) && $product->is_in_stock() && empty ( $format ) && $product->is_type( 'simple' ) )  {
-    if ( ( (int)$product->get_stock_quantity() <= 0 && $product->managing_stock() ) || ! $product->managing_stock() ) {
-      $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
-      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
-      if ( empty ( $dostupnost ) ) {
-        $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-        $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
-      }
-    } else {
-      $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 0 );
-    }
-    if ( ! empty ( $dostupnost ) ) {
+  if ( ! $product->is_in_stock() ) {
+    $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
+    if ( ! empty ( $dodaci_doba_text ) ) {
+      $dostupnost['value'] = 99;
+      $dostupnost['text'] = $dodaci_doba_text;
       $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
     }
+    echo $format;
+    return;
   }
-  echo $format;
+  $format = ceske_sluzby_ziskat_predobjednavku( $product, true );
+  if ( ! empty ( $format ) ) {
+    echo $format;
+    return;
+  }
+  $availability = $product->get_availability();
+  if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
+    $format = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), true );
+    echo $format;
+    return;
+  }
+  $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, false );
+  if ( ! empty ( $dostupnost ) ) {
+    $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+    echo $format;
+  }
+}
+
+function ceske_sluzby_nahradit_zobrazeny_text( $html, $availability, $product ) {
+  if ( get_class( $product ) == "WC_Product_Simple" ) {
+    $html = "";
+  }
+  elseif ( get_class( $product ) == "WC_Product_Variation" ) {
+    if ( ! $product->is_in_stock() ) {
+      $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
+      if ( ! empty ( $dodaci_doba_text ) ) {
+        $dostupnost['value'] = 99;
+        $dostupnost['text'] = $dodaci_doba_text;
+        $html = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+      }
+      return $html;
+    }
+    $html = ceske_sluzby_ziskat_predobjednavku( $product, true );
+    if ( ! empty ( $html ) ) {
+      return $html;
+    }
+    if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
+      $html = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), true );
+      return $html;
+    }
+    $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, false );
+    if ( ! empty ( $dostupnost ) ) {
+      $html = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
+    }
+  }
+  return $html;
+}
+
+function ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr( $data, $this, $variation ) {
+  $dostupnost = ceske_sluzby_ziskat_predobjednavku( $variation, false );
+  if ( ! empty ( $dostupnost ) ) {
+    return $data;
+  }
+  $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $variation, true );
+  if ( $variation->managing_stock() && (int)$variation->get_stock_quantity() > 0 ) {
+    $format = ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $variation );
+    $data['availability_html'] .= $format;
+  }
+  return $data;
+}
+
+function ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce() {
+  global $product;
+  if ( ! $product->is_type( 'simple' ) ) {
+    return;
+  }
+  $format = ceske_sluzby_ziskat_predobjednavku( $product, true );
+  if ( ! empty ( $format ) ) {
+    return;
+  }
+  $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, true );
+  if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
+    $format = ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product );
+    echo $format;
+  }
 }
 
 function ceske_sluzby_load_admin_scripts() {

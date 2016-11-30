@@ -84,7 +84,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function admin_settings_sanitize_option( $value, $option, $raw_value ) {
-    if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_preorder_format_zobrazeni' == $option['id'] ) {
+    if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_preorder_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_dodatecne_produkty_format_zobrazeni' == $option['id'] ) {
       $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
     }
     return $value; 
@@ -447,6 +447,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'text',
           'desc' => 'Na webu můžete přesně definovat libovolný text (včetně HTML) s použitím výše zadaných hodnot <code>{VALUE}</code> (počet dní) nebo <code>{TEXT}</code> (příslušný text). Pokud není nic vyplněno, tak je použit jednoduchý odstavec s třídou <code>dodaci-doba</code>.',
           'id' => 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni',
+          'css' => 'width: 500px'
+        ),
+        array(
+          'title' => 'Dodatečné produkty',
+          'type' => 'text',
+          'desc' => 'Na webu můžete přesně definovat libovolný text (včetně HTML) s použitím výše zadaných hodnot <code>{VALUE}</code> (počet dní) nebo <code>{TEXT}</code> (doplňující text).',
+          'id' => 'wc_ceske_sluzby_dodatecne_produkty_format_zobrazeni',
           'css' => 'width: 500px'
         ),
         array(
