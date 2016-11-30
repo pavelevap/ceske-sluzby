@@ -994,7 +994,6 @@ function ceske_sluzby_load_admin_scripts() {
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );
   }
 }
-
 /** Feedy dashboard widget */
 function ceske_sluzby_feedy_dashboard_widget() {
         $url_heureka = site_url('?feed=heureka');
