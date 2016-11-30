@@ -994,3 +994,54 @@ function ceske_sluzby_load_admin_scripts() {
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );
   }
 }
+/** Feedy dashboard widget */
+function ceske_sluzby_feedy_dashboard_widget() {
+        $url_heureka = site_url('?feed=heureka');
+        $url_heureka1 = content_url('/heureka.xml');
+        $url_zbozi = site_url('?feed=zbozi');
+        $url_zbozi1 = site_url('/obsah/zbozi.xml');
+        $url_pricemania = content_url('pricemania.xml');
+        $url_google = site_url('?feed=google');
+        $dirsd = get_stylesheet_directory_uri();
+        ?>
+        <div style="width:100%">
+            <div style="width:45%;float:left;">
+                <img src="<?php echo plugin_dir_url( __FILE__ ).'/includes/images/Heureka.png'?>" />
+            </div>
+            <div style="width:55%;float:right;">
+                <strong>Feed</strong> pro <strong>Heureka.cz</strong> najdete <a href="<?php echo $url_heureka ?>">zde.</a> <?php echo $url_heureka ?>
+            </div>
+            <div style="clear:both;"><strong>Průběžně generovaný feed pro Heureka.cz</strong> najdete <a href="<?php echo $url_heureka1 ?>">zde.</a> <?php echo $url_heureka1 ?> </div>
+        <hr>
+            <div style="width:45%;float:left;">
+                <img src="<?php echo plugin_dir_url( __FILE__ ).'/includes/images/Zbozi.png'?>" />
+            </div>
+            <div style="width:55%;float:right;">
+                <strong>Feed</strong> pro <strong>Zbozi.cz</strong> najdete <a href="<?php echo $url_zbozi ?>">zde.</a> <?php echo $url_zbozi ?>
+            </div>
+            <div style="clear:both;"><strong>Průběžně generovaný feed pro Zbozi.cz</strong> najdete <a href="<?php echo $url_zbozi1 ?>">zde.</a><br /> <?php echo $url_zbozi1 ?> </div>
+        <hr>
+            <div style="width:45%;float:left;">
+                <img style="margin-top:5px;" src="<?php echo plugin_dir_url( __FILE__ ).'/includes/images/Pricemania.png'?>" />
+            </div>
+            <div style="width:55%;float:right;">
+                <strong>Feed</strong> pro <strong>Pricemania.cz</strong> najdete <a href="<?php echo $url_pricemania ?>">zde.</a></div>
+            <div style="clear:both;"><?php echo $url_pricemania ?></div>
+        <hr>
+            <div style="width:45%;float:left;">
+                <img style="margin-top:5px;" src="<?php echo plugin_dir_url( __FILE__ ).'/includes/images/google-shopping.jpg'?>" />
+            </div>
+            <div style="width:55%;float:right;">
+                <strong>Feed</strong> pro <strong>Google Merchant</strong> najdete <a href="<?php echo $url_google ?>">zde.</a></div>
+            <div style="clear:both;"><?php echo $url_google ?></div>
+        <hr>
+        </div>
+<?php
+
+}
+
+function pridat_ceske_sluzby_feedy_dashboard_widget() {
+    wp_add_dashboard_widget('ceske_sluzby_feedy_dashboard_widget', 'České služby - adresy feedů', 'ceske_sluzby_feedy_dashboard_widget');
+}
+
+add_action('wp_dashboard_setup', 'pridat_ceske_sluzby_feedy_dashboard_widget');
