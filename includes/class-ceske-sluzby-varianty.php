@@ -7,8 +7,7 @@ if ( version_compare( WOOCOMMERCE_VERSION, '2.5', '>=' ) ) {
 }
 
 function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variation ) {
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false );
-  $dodaci_doba = array ( '' => '- Vyberte -' ) + $dodaci_doba;
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
   $params = array( 
     'id' => "ceske_sluzby_dodaci_doba[{$loop}]",
     'label' => 'Dodací doba', 

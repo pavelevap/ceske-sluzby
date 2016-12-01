@@ -1,5 +1,5 @@
 <?php
-function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek ) {
+function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
   $dodaci_doba_array = array();
   $dodaci_doba_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_hodnoty' );
   if ( ! empty ( $dodaci_doba_hodnoty ) ) {
@@ -7,6 +7,12 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek ) {
     foreach ( $dodaci_doba_tmp as $dodaci_doba_hodnota ) {
       $rozdeleno = explode( "|", $dodaci_doba_hodnota );
       if ( is_numeric( $rozdeleno[0] ) ) {
+        if ( $dropdown && in_array( $rozdeleno[0], array( 0, 98, 99 ) ) ) {
+          $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
+          if ( $global_dodaci_doba == $rozdeleno[0] ) {
+            continue;
+          }
+        }
         if ( $dodatek ) {
           if ( count( $rozdeleno ) == 3 ) {
             $dodaci_doba_array[ $rozdeleno[0] ] = $rozdeleno[2];
@@ -22,6 +28,9 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek ) {
     }
     if ( ! empty ( $dodaci_doba_array ) ) {
       ksort( $dodaci_doba_array );
+      if ( $dropdown ) {
+        $dodaci_doba_array = array ( '' => '- Vyberte -' ) + $dodaci_doba_array;
+      }
     }
   }
   return $dodaci_doba_array;
@@ -101,7 +110,7 @@ function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
 function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek ) {
   $dodaci_doba_produkt = "";
   $dostupnost = "";
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek );
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, false );
   if ( empty ( $dodaci_doba ) ) {
     return $dostupnost;
   }
@@ -171,7 +180,7 @@ function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
   if ( ! empty ( $format ) ) {
     // Pokud je produkt obecně skladem...
     if ( (string)$dostupnost['value'] === '0' ) {
-      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( true );
+      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( true, false );
       if ( ! empty ( $dodaci_doba ) ) {
         if ( $product->backorders_require_notification() ) {
           $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 98 );
