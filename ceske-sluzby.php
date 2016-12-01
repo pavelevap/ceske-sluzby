@@ -929,7 +929,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
 
 function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
   if ( ! $product->is_in_stock() ) {
-    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
+    $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 99 );
     if ( ! empty ( $dostupnost ) ) {
       $availability['availability'] = $dostupnost['text'];
     }
@@ -960,7 +960,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
     return;
   }
   if ( ! $product->is_in_stock() ) {
-    $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
+    $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 99 );
     if ( ! empty ( $dodaci_doba_text ) ) {
       $dostupnost['value'] = 99;
       $dostupnost['text'] = $dodaci_doba_text;
@@ -993,7 +993,7 @@ function ceske_sluzby_nahradit_zobrazeny_text( $html, $availability, $product ) 
   }
   elseif ( get_class( $product ) == "WC_Product_Variation" ) {
     if ( ! $product->is_in_stock() ) {
-      $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
+      $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 99 );
       if ( ! empty ( $dodaci_doba_text ) ) {
         $dostupnost['value'] = 99;
         $dostupnost['text'] = $dodaci_doba_text;

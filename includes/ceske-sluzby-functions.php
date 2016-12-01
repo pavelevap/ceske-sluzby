@@ -56,6 +56,12 @@ function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
 
 function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
   $availability = array();
+  if ( empty ( $dodaci_doba ) ) {
+    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
+  }
+  if ( empty ( $dodaci_doba ) ) {
+    return $availability;
+  }
   if ( ! empty ( $actual_dodaci_doba ) || (string)$actual_dodaci_doba === '0' ) {
     if ( array_key_exists( $actual_dodaci_doba, $dodaci_doba ) ) {
       $availability['value'] = $actual_dodaci_doba;
