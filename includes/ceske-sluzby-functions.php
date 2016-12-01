@@ -166,6 +166,7 @@ function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
 }
 
 function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
+  $html = "";
   $format = get_option( 'wc_ceske_sluzby_dodatecne_produkty_format_zobrazeni' );
   if ( ! empty ( $format ) ) {
     // Pokud je produkt obecně skladem...
@@ -175,11 +176,8 @@ function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
         if ( $product->backorders_require_notification() ) {
           $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 98 );
         } else {
-          $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 0 );
+          return $html;
         }
-      }
-      if ( empty ( $dostupnost ) ) {
-        $html = "";
       }
     }
     if ( ! empty ( $dostupnost ) && is_array( $dostupnost ) ) {

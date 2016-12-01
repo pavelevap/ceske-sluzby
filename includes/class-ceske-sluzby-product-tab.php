@@ -253,18 +253,23 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     if ( isset( $_POST['ceske_sluzby_xml_vynechano'] ) ) {
       $xml_vynechano = $_POST['ceske_sluzby_xml_vynechano'];
       if ( ! empty( $xml_vynechano ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', $xml_vynechano );  
+        update_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', $xml_vynechano );
       }
     } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
-        delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );  
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );
     }
 
     $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
     $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
-    if ( ! empty ( $dodaci_doba ) || $dodaci_doba === '0' ) {
-      update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
-    } elseif ( isset( $dodaci_doba_ulozeno ) ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );  
+    if ( is_array( $dodaci_doba_ulozeno ) ) {
+      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
+    }
+    if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
+      if ( ! is_array( $dodaci_doba ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+      }
+    } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
+      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
     }
 
     $datum_predobjednavky_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', true );
@@ -273,7 +278,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       if ( ! empty( $datum_predobjednavky ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', strtotime( $datum_predobjednavky ) );
       } elseif ( ! empty( $datum_predobjednavky_ulozeno ) ) {
-        delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' ); 
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' );
       }
     }
 
