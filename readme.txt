@@ -68,7 +68,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Doplněna podpora pro označování erotického obsahu (Zbozi.cz a Google).
  * Opravena logika pro zobrazování stavu produktu v případě, že je u produktu přiřazeno více kategorií s různým nastavením.
  * Opraveno zobrazování hodnot pro dodací dobu a starého data předobjednávek.
- * Dodatečné obrázky na základě nastavené galerie produktu. 
+ * Dodatečné obrázky na základě nastavené galerie produktu.
+ * Doplněna možnost zadávat EAN kódy na úrovni jednotlivých produktů i variant.  
 * WooCommerce: XML feed (Zbozi.cz)
  * Možnost doplnění CATEGORYTEXT v nastavení kategorie i produktu.
 * WooCommerce: XML feed (Google)

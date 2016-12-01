@@ -7,6 +7,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
       add_action( 'woocommerce_process_product_meta', array( $this, 'ceske_sluzby_product_tab_ulozeni' ) );
       add_action( 'woocommerce_product_options_stock_status', array( $this, 'ceske_sluzby_zobrazit_nastaveni_dodaci_doby' ) );
+      add_action( 'woocommerce_product_options_sku', array( $this, 'ceske_sluzby_zobrazit_nastaveni_ean' ) );
     }
   }
 
@@ -226,7 +227,37 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     }
   }
 
+  public function ceske_sluzby_zobrazit_nastaveni_ean() {
+    global $thepostid;
+    $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
+    if ( empty ( $podpora_ean ) ) {
+      $value = get_post_meta( $thepostid, 'ceske_sluzby_hodnota_ean', true );
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_hodnota_ean', 
+          'label' => 'EAN kód',
+          'value' => $value, 
+          'placeholder' => 'EAN',
+          'desc_tip' => 'true',
+          'description' => 'Zadejte hodnotu EAN.' 
+        )
+      );
+    }
+  }
+
   public function ceske_sluzby_product_tab_ulozeni( $post_id ) {
+    $hodnota_ean_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_hodnota_ean', true );
+    if ( isset( $_POST['ceske_sluzby_hodnota_ean'] ) ) {
+      $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean'];
+      if( ! empty( $hodnota_ean ) ) {
+        if ( ! is_array( $hodnota_ean ) ) {
+          update_post_meta( $post_id, 'ceske_sluzby_hodnota_ean', esc_attr( $hodnota_ean ) );
+        }
+      } elseif ( ! empty( $hodnota_ean_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_hodnota_ean' );
+      }
+    }
+
     if ( isset( $_POST['ceske_sluzby_xml_heureka_productname'] ) ) {
       $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
       if( ! empty( $heureka_productname ) ) {
