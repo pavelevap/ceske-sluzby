@@ -6,6 +6,7 @@
  * Version: 0.6-alpha
  * Author: Pavel Hejn
  * Author URI: http://www.separatista.net
+ * GitHub Plugin URI: pavelevap/ceske-sluzby 
  * License: GPL2
  */
 

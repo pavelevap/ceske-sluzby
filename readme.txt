@@ -76,7 +76,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Upravena struktura podle manuálu (element rss).
 * WooCommerce: Měření konverzí (Sklik.cz)
  * Doplněno odesílání hodnoty objednávek.
-* WooCommerce: Podpora retargetingu pro Sklik.cz   
+* WooCommerce: Podpora retargetingu pro Sklik.cz
+* Doplněna podpora pro automatické aktualizace pomocí pluginu Github Updater.   
 
 = 0.5 =
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)
