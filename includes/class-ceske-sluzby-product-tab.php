@@ -248,6 +248,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     }
 
+    if ( isset( $_POST['ceske_sluzby_xml_zbozi_kategorie'] ) ) {
+      $zbozi_kategorie = $_POST['ceske_sluzby_xml_zbozi_kategorie'];
+      if( ! empty( $zbozi_kategorie ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_kategorie', esc_attr( $zbozi_kategorie ) );
+      }
+    }
+
     $xml_vynechano_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', true );
     if ( isset( $_POST['ceske_sluzby_xml_vynechano'] ) ) {
       $xml_vynechano = $_POST['ceske_sluzby_xml_vynechano'];
