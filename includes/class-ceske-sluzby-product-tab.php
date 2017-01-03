@@ -113,7 +113,15 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
         )
       );
-
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_heureka_product', 
+          'label' => 'Doplněný název (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/#PRODUCT" target="_blank">manuál</a>)', 
+          'placeholder' => 'PRODUCT',
+          'desc_tip' => 'true',
+          'description' => 'Zadejte doplněk názvu produktu, mezera je zobrazena automaticky (použito i pro feed Zboží.cz).' 
+        )
+      );
       $kategorie_heureka = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
@@ -151,7 +159,17 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
         )
       );
-      
+      if ( $xml_feed_heureka != "yes" ) {
+        woocommerce_wp_text_input(
+          array( 
+            'id' => 'ceske_sluzby_xml_heureka_product', 
+            'label' => 'Doplněný název (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#PRODUCT" target="_blank">manuál</a>)', 
+            'placeholder' => 'PRODUCT',
+            'desc_tip' => 'true',
+            'description' => 'Zadejte doplněk názvu produktu, mezera je zobrazena automaticky..' 
+          )
+        );
+      }
       $kategorie_zbozi = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
@@ -249,7 +267,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $hodnota_ean_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_hodnota_ean', true );
     if ( isset( $_POST['ceske_sluzby_hodnota_ean'] ) ) {
       $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean'];
-      if( ! empty( $hodnota_ean ) ) {
+      if ( ! empty( $hodnota_ean ) ) {
         if ( ! is_array( $hodnota_ean ) ) {
           update_post_meta( $post_id, 'ceske_sluzby_hodnota_ean', esc_attr( $hodnota_ean ) );
         }
@@ -260,28 +278,38 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( isset( $_POST['ceske_sluzby_xml_heureka_productname'] ) ) {
       $heureka_productname = $_POST['ceske_sluzby_xml_heureka_productname'];
-      if( ! empty( $heureka_productname ) ) {
+      if ( ! empty( $heureka_productname ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_productname', esc_attr( $heureka_productname ) );
+      }
+    }
+
+    $heureka_product_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_heureka_product', true );
+    if ( isset( $_POST['ceske_sluzby_xml_heureka_product'] ) ) {
+      $heureka_product = $_POST['ceske_sluzby_xml_heureka_product'];
+      if ( ! empty( $heureka_product ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_product', esc_attr( $heureka_product ) );
+      } elseif ( ! empty( $heureka_product_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_heureka_product' );
       }
     }
 
     if ( isset( $_POST['ceske_sluzby_xml_heureka_kategorie'] ) ) {
       $heureka_kategorie = $_POST['ceske_sluzby_xml_heureka_kategorie'];
-      if( ! empty( $heureka_kategorie ) ) {
+      if ( ! empty( $heureka_kategorie ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_heureka_kategorie', esc_attr( $heureka_kategorie ) );
       }
     }
 
     if ( isset( $_POST['ceske_sluzby_xml_zbozi_productname'] ) ) {
       $zbozi_productname = $_POST['ceske_sluzby_xml_zbozi_productname'];
-      if( ! empty( $zbozi_productname ) ) {
+      if ( ! empty( $zbozi_productname ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_productname', esc_attr( $zbozi_productname ) );
       }
     }
 
     if ( isset( $_POST['ceske_sluzby_xml_zbozi_kategorie'] ) ) {
       $zbozi_kategorie = $_POST['ceske_sluzby_xml_zbozi_kategorie'];
-      if( ! empty( $zbozi_kategorie ) ) {
+      if ( ! empty( $zbozi_kategorie ) ) {
         update_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_kategorie', esc_attr( $zbozi_kategorie ) );
       }
     }
