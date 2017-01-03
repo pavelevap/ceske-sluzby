@@ -52,6 +52,13 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
                   'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
                   'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
                 )
+    ),
+    'GLS' => array(
+      'nazev' => 'GLS',
+      'lang' => array(
+                  'CZ' => 'https://gls-group.eu/CZ/cs/sledovani-zasilek?match=%ID%',
+                  'SK' => 'https://gls-group.eu/SK/sk/sledovanie-zasielok?match=%ID%'
+                )
     )
   );
   foreach ( $dopravci as $key => $dopravce ) {
