@@ -184,6 +184,7 @@ function ceske_sluzby_xml_ziskat_popis_produktu( $post_excerpt, $post_content, $
   } else {
     $description = strip_shortcodes( $description );
   }
+  $description = str_replace( chr(26), '', $description );
   return wp_strip_all_tags( $description );
 }
 
