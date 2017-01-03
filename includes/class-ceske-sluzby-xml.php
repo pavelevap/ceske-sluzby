@@ -541,7 +541,7 @@ function heureka_xml_feed_zobrazeni() {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
-    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, 'bazar' );
@@ -622,8 +622,8 @@ function heureka_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty ( $doplneny_nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $doplneny_nazev_produkt );
+            if ( ! empty ( $nazev_produkt_doplnek ) ) {
+              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
           }
           if ( ! empty ( $popis_produkt ) ) {
@@ -754,7 +754,7 @@ function heureka_xml_feed_aktualizace() {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
-    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, 'bazar' );
@@ -836,8 +836,8 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty ( $doplneny_nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $doplneny_nazev_produkt );
+            if ( ! empty ( $nazev_produkt_doplnek ) ) {
+              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
           }
           if ( ! empty ( $popis_produkt ) ) {
@@ -933,7 +933,7 @@ function zbozi_xml_feed_zobrazeni() {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
-    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
@@ -1028,8 +1028,8 @@ function zbozi_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty ( $doplneny_nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $doplneny_nazev_produkt );
+            if ( ! empty ( $nazev_produkt_doplnek ) ) {
+              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
           }
           if ( ! empty ( $popis_produkt ) ) {
@@ -1179,7 +1179,7 @@ function zbozi_xml_feed_aktualizace() {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $doplneny_nazev_produkt, $vlastnosti_produkt, $produkt->post->post_title );
-    $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $zkracene_zapisy );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $podpora_vyrobcu, true );
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_stav_produkt, $kategorie_stav_produkt, false, false );
@@ -1275,8 +1275,8 @@ function zbozi_xml_feed_aktualizace() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty ( $doplneny_nazev_produkt ) ) {
-              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $doplneny_nazev_produkt );
+            if ( ! empty ( $nazev_produkt_doplnek ) ) {
+              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
           }
           if ( ! empty ( $popis_produkt ) ) {
