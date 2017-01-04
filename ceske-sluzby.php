@@ -126,7 +126,7 @@ function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
     $order = new WC_Order( $order_id );
     $hodnota_objednavky = round( $order->get_subtotal() ); ?>
 <!-- Měřicí kód Sklik.cz -->
-<iframe width="119" height="22" frameborder="0" scrolling="no" src="http://c.imedia.cz/checkConversion?c=<?php echo $konverze; ?>&color=ffffff&v=<?php echo $hodnota_objednavky; ?>"></iframe>
+<iframe width="119" height="22" frameborder="0" scrolling="no" src="//c.imedia.cz/checkConversion?c=<?php echo $konverze; ?>&color=ffffff&v=<?php echo $hodnota_objednavky; ?>"></iframe>
   <?php
   }
 }
