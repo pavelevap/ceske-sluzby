@@ -290,7 +290,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Přesný název produktu',
           'type' => 'text',
-          'desc' => 'Zvolte název produktu (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{NAZEV} {VLASTAX}</code>, což je název doplněný o přiřazené vlastnosti v podobě taxonomií. Dále je možné použít hodnoty některých elementů (např. <code>{MANUFACTURER}</code>) nebo konkrétních vlastností (např. <code>{pa_barva}</code>, viz dostupný přehled níže).',
+          'desc' => 'Zvolte název produktu (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUKT} | {KATEGORIE} | {NAZEV} {VLASTAX}</code>, což je název doplněný o přiřazené vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů (např. <code>{MANUFACTURER}</code>) nebo konkrétních vlastností (např. <code>{pa_barva}</code>, viz dostupný přehled níže).',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu',
           'css' => 'width: 400px',
         ),

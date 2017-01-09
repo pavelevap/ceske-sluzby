@@ -204,3 +204,26 @@ function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
   } 
   return $html;
 }
+
+function ceske_sluzby_xml_nahradit_prazdny_placeholder( $podminka, $placeholder, $pos, $posend ) {
+  if ( $pos == 0 ) {
+    $pos_pred = substr( $podminka, $pos, 1 );
+  } else {
+    $pos_pred = substr( $podminka, $pos - 1, 1 );
+  }
+  if ( $posend == ( strlen( $podminka ) - 1 ) ) {
+    $pos_za = substr( $podminka, $posend, 1 );
+  } else {
+    $pos_za = substr( $podminka, $posend + 1, 1 );
+  }
+  if ( $pos_pred == " " && $pos_za == " " ) {
+    $podminka = str_replace( ' {' . $placeholder . '}', "", $podminka );
+  }
+  if ( $pos_pred != " " && $pos_za == " " ) {
+    $podminka = str_replace( '{' . $placeholder . '} ', "", $podminka );
+  } 
+  if ( $pos_pred == " " && $pos_za != " " ) {
+    $podminka = str_replace( ' {' . $placeholder . '}', "", $podminka );
+  }
+  return $podminka; 
+}

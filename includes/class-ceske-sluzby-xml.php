@@ -148,13 +148,57 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $global_nazev_produkt, $
   }
   if ( $druh == 'produkt' ) {
     $nazev_produkt_vlastnosti = ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti );
-    if ( ! empty ( $doplneny_nazev_produkt ) ) {
-      $nazev = $doplneny_nazev_produkt;
-    } else {
-      $nazev = $nazev_prispevku . $nazev_produkt_vlastnosti;
-    }
+    $nazev = ceske_sluzby_xml_zpracovat_nazev_produktu( $global_nazev_produkt, $doplneny_nazev_produkt, $nazev_produkt_vlastnosti, $nazev_prispevku );
   }    
   return wp_strip_all_tags( $nazev ); // Potřebujeme wp_strip_all_tags()?
+}
+
+function ceske_sluzby_xml_zpracovat_nazev_produktu( $global_nazev_produkt, $doplneny_nazev_produkt, $nazev_produkt_vlastnosti, $nazev_prispevku ) {
+  if ( empty( $global_nazev_produkt ) ) {
+    $global_nazev_produkt = '{PRODUKT} | {KATEGORIE} | {NAZEV} {VLASTAX}';
+  }
+
+  $variables = array(
+    'NAZEV' => $nazev_prispevku,
+    'VLASTAX' => $nazev_produkt_vlastnosti,
+    'PRODUKT' => $doplneny_nazev_produkt
+  );
+  $rozdeleno = explode( "|", $global_nazev_produkt );
+  $poradi = 0;
+
+  foreach ( $rozdeleno as $podminka ) {
+    $poradi = $poradi + 1;
+    $podminka = trim( $podminka );
+    $pocet = substr_count( $podminka, '{' );
+    if ( $pocet > 0 ) {
+      $nahrada = 0;
+      for ( $i = 0; $i < $pocet; ++$i ) {
+        $pos = strpos( $podminka, '{' );
+        $posend = strpos( $podminka, '}' );
+        $delka = $posend - $pos - 1;
+        $placeholder = trim( substr( $podminka, $pos + 1, $delka ) );
+        if ( array_key_exists( $placeholder, $variables ) ) {
+          if ( empty( $variables[$placeholder] ) ) {
+            $podminka = ceske_sluzby_xml_nahradit_prazdny_placeholder( $podminka, $placeholder, $pos, $posend );
+          } else {
+            $podminka = str_replace( '{' . $placeholder . '}', $variables[$placeholder], $podminka );
+            $nahrada = $nahrada + 1;
+          }
+        } else {
+          $podminka = ceske_sluzby_xml_nahradit_prazdny_placeholder( $podminka, $placeholder, $pos, $posend );
+        }
+      }
+      if ( $pocet == $nahrada || count( $rozdeleno ) == $poradi ) {
+        if ( strlen( $podminka ) > 0 ) {
+          return $podminka;
+        }
+      }
+    } else {
+      if ( strlen( $podminka ) > 0 ) {
+        return $podminka;
+      }
+    }
+  }
 }
 
 function ceske_sluzby_xml_ziskat_popis_produktu( $post_excerpt, $post_content, $varianta, $zkracene_zapisy ) {
