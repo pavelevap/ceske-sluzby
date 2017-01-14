@@ -227,3 +227,55 @@ function ceske_sluzby_xml_nahradit_prazdny_placeholder( $podminka, $placeholder,
   }
   return $podminka; 
 }
+
+function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
+  $dostupne_taxonomie = "";
+  if ( $vlastnosti == false ) {
+    $taxonomies = get_object_taxonomies( 'product', 'objects' );
+    foreach ( $taxonomies as $name => $taxonomy ) {
+      if ( $druh == "vlastnosti" ) {
+        if ( taxonomy_is_product_attribute( $name ) ) {
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+          else {
+            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+        }
+      } elseif ( $druh == "obecne" ) {
+        if ( ! taxonomy_is_product_attribute( $name ) ) {
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+          else {
+            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
+          }
+        }
+      }
+    }
+    if ( empty( $dostupne_taxonomie ) && ( $druh == "vlastnosti" ) ) {
+      $dostupne_taxonomie = 'Zatím žádné, ale snadno můžete nějaké <a href="' . admin_url(). 'edit.php?post_type=product&page=product_attributes">vytvořit</a>.';
+    }
+  } else {
+    if ( is_array( $vlastnosti ) && ! empty( $vlastnosti ) ) {
+      foreach ( $vlastnosti as $name => $vlastnost ) {
+        if ( ! $vlastnost['is_taxonomy'] ) {
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<code>{' . $vlastnost['name'] . '}</code>';
+          }
+          else {
+            $dostupne_taxonomie .= ', <code>{' . $vlastnost['name'] . '}</code>';
+          }
+        } else { 
+          if ( empty ( $dostupne_taxonomie ) ) {
+            $dostupne_taxonomie = '<code>{' . $name . '}</code> (' . wc_attribute_label( $vlastnost['name'] ) .  ')';
+          }
+          else {
+            $dostupne_taxonomie .= ', <code>{' . $name . '}</code> (' . wc_attribute_label( $vlastnost['name'] ) .  ')';
+          }
+        }
+      } 
+    }
+  }
+  return $dostupne_taxonomie;
+}

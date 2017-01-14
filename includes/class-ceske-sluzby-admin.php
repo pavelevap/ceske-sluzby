@@ -53,36 +53,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     woocommerce_update_options( self::get_settings( $current_section ) );
   }
 
-  public static function zobrazit_dostupne_taxonomie( $druh ) {
-    $dostupne_taxonomie = "";
-    $taxonomies = get_object_taxonomies( 'product', 'objects' );
-    foreach ( $taxonomies as $name => $taxonomy ) {
-      if ( $druh == "vlastnosti" ) {
-        if ( taxonomy_is_product_attribute( $name ) ) {
-          if ( empty ( $dostupne_taxonomie ) ) {
-            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
-          }
-          else {
-            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
-          }
-        }
-      } elseif ( $druh == "obecne" ) {
-        if ( ! taxonomy_is_product_attribute( $name ) ) {
-          if ( empty ( $dostupne_taxonomie ) ) {
-            $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
-          }
-          else {
-            $dostupne_taxonomie .= ', <strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
-          }
-        }
-      }
-    }
-    if ( empty( $dostupne_taxonomie ) && ( $druh == "vlastnosti" ) ) {
-      $dostupne_taxonomie = 'Zatím žádné, ale snadno můžete nějaké <a href="' . admin_url(). 'edit.php?post_type=product&page=product_attributes">vytvořit</a>.';
-    }
-    return $dostupne_taxonomie;
-  }
-
   public static function admin_settings_sanitize_option( $value, $option, $raw_value ) {
     if ( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_preorder_format_zobrazeni' == $option['id'] || 'wc_ceske_sluzby_dodatecne_produkty_format_zobrazeni' == $option['id'] ) {
       $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
@@ -288,9 +258,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           ),
         ),
         array(
-          'title' => 'Přesný název produktu',
+          'title' => 'Název produktů',
           'type' => 'text',
-          'desc' => 'Zvolte název produktu (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUKT} | {KATEGORIE} | {NAZEV} {VLASTAX}</code>, což je název doplněný o přiřazené vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů (např. <code>{MANUFACTURER}</code>) nebo konkrétních vlastností (např. <code>{pa_barva}</code>, viz dostupný přehled níže).',
+          'desc' => 'Zvolte název produktu (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAX}</code>, což je název doplněný o přiřazené vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů (např. <code>{MANUFACTURER}</code>) nebo konkrétních vlastností (např. <code>{pa_barva}</code>, viz dostupný přehled níže).',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu',
           'css' => 'width: 400px',
         ),
@@ -362,8 +332,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
           'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
-                     Dostupné taxonomie: ' . self::zobrazit_dostupne_taxonomie( 'obecne' ) . '
-                     Dostupné vlastnosti v podobě taxonomií: ' . self::zobrazit_dostupne_taxonomie( 'vlastnosti' ) . '
+                     Dostupné taxonomie: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'obecne', false ) . '
+                     Dostupné vlastnosti v podobě taxonomií: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', false ) . '
                      Podporovány jsou také názvy jednoduchých textových vlastností nebo uživatelských polí.',
           'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
         ),

@@ -151,25 +151,26 @@ function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_p
   return $vlastnosti_produkt;
 }
 
-function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $nazev_prispevku, $feed_data ) {
-  if ( empty( $global_nazev_produkt ) ) {
+function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $original_global_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $nazev_prispevku, $feed_data ) {
+  if ( empty( $original_global_nazev_produkt ) ) {
     if ( $druh == 'produkt' ) {
-      $global_nazev_produkt = '{PRODUKT} | {KATEGORIE} | {MANUFACTURER} {NAZEV} {VLASTAX}';
+      $global_nazev_produkt = '{PRODUCTNAME} | {KATEGORIE} | {MANUFACTURER} {NAZEV} {VLASTAX}';
     }
     if ( $druh == 'varianta' ) {
-      $global_nazev_produkt = '{PRODUKT} {VLASVAR} | {KATEGORIE} | {MANUFACTURER} {NAZEV} {VLASVAR}';
+      $global_nazev_produkt = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {MANUFACTURER} {NAZEV} {VLASVAR}';
     }
   }
-  if ( strpos( $global_nazev_produkt, '{PRODUKT}' ) !== false ) {
+  if ( strpos( $global_nazev_produkt, '{PRODUCTNAME} {VLASVAR}' ) !== false && empty( $original_global_nazev_produkt ) ) {
     if ( strpos( $doplneny_nazev_produkt, '{' ) !== false ) {
-      $global_nazev_produkt = str_replace( '{PRODUKT}', $doplneny_nazev_produkt, $global_nazev_produkt );
+      $global_nazev_produkt = str_replace( '{PRODUCTNAME} {VLASVAR}', $doplneny_nazev_produkt, $global_nazev_produkt );
     }
   }
+
   $variables = array(
     'NAZEV' => $nazev_prispevku,
     'VLASTAX' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt ),
     'VLASVAR' => ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_produkt ),
-    'PRODUKT' => $doplneny_nazev_produkt,
+    'PRODUCTNAME' => $doplneny_nazev_produkt,
     'MANUFACTURER' => $feed_data['MANUFACTURER'],
   );
   $rozdeleno = explode( "|", $global_nazev_produkt );
@@ -197,6 +198,7 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_naz
           $hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $placeholder, false );
           if ( ! empty( $hodnota ) ) {
             $podminka = str_replace( '{' . $placeholder . '}', $hodnota, $podminka );
+            $nahrada = $nahrada + 1;
           } else {
             $podminka = ceske_sluzby_xml_nahradit_prazdny_placeholder( $podminka, $placeholder, $pos, $posend );
           }
