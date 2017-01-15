@@ -241,7 +241,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Podpora výrobců',
           'type' => 'text',
-          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
+          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text pro element <code>MANUFACTURER</code>. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu',
           'css' => 'width: 250px',
         ),
@@ -260,8 +260,15 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Název produktů',
           'type' => 'text',
-          'desc' => 'Zvolte název produktu (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAX}</code>, což je název doplněný o přiřazené vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů (např. <code>{MANUFACTURER}</code>) nebo konkrétních vlastností (např. <code>{pa_barva}</code>, viz dostupný přehled níže).',
+          'desc' => 'Zvolte obecný název produktů (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}</code>, což je název doplněný o přiřazené (viditelné) vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů, např. <code>{MANUFACTURER}</code>, nebo konkrétních vlastností, např. <code>{pa_barva}</code>.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu',
+          'css' => 'width: 400px',
+        ),
+        array(
+          'title' => 'Název variant',
+          'type' => 'text',
+          'desc' => 'Zvolte obecný název variant (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}</code>, což je název doplněný o přiřazené vlastnosti variant, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů, např. <code>{MANUFACTURER}</code>, nebo konkrétních vlastností, např. <code>{pa_barva}</code>.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant',
           'css' => 'width: 400px',
         ),
         array(
