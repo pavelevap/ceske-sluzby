@@ -291,8 +291,8 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_zbozi_kategorie'
     );
     foreach ( $ukladana_data as $key ) {
-      $value = $_POST[ $key ];
-      if ( isset( $value ) ) {
+      if ( isset( $_POST[ $key ] ) ) {
+        $value = $_POST[ $key ];
         $ulozeno = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
           update_post_meta( $post_id, $key, esc_attr( $value ) );
