@@ -152,7 +152,11 @@ function ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_p
   return $vlastnosti_produkt;
 }
 
-function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_data, $doplneny_nazev_kategorie, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $nazev_prispevku, $feed_data ) {
+function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_data, $doplneny_nazev_kategorie, $doplneny_nazev_produkt, $vlastnosti, $rozsirene_vlastnosti, $dostupna_postmeta, $nazev_prispevku, $feed_data ) {
+  $nazev_kategorie = "";
+  if ( $rozsirene_vlastnosti == false ) {
+    $rozsirene_vlastnosti = $vlastnosti;
+  }
   if ( $druh == 'produkt' ) {
     $nazev_varianta = "";
     if ( empty( $global_data['nazev_produktu'] ) ) {
@@ -162,7 +166,7 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_dat
     }
   }
   if ( $druh == 'varianta' ) {
-    $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti_produkt );
+    $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti );
     if ( empty( $global_data['nazev_variant'] ) ) {
       $global_nazev = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
       if ( ! empty( $doplneny_nazev_produkt ) ) {
@@ -182,10 +186,11 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_dat
 
   $variables = array(
     'NAZEV' => $nazev_prispevku,
-    'VLASTAX' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt, false ),
-    'VLASTAXVID' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $vlastnosti_produkt, true ),
+    'VLASTAX' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $rozsirene_vlastnosti, false ),
+    'VLASTAXVID' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $rozsirene_vlastnosti, true ),
     'VLASVAR' => $nazev_varianta,
     'PRODUCTNAME' => $doplneny_nazev_produkt,
+    'KATEGORIE' => $nazev_kategorie,
     'MANUFACTURER' => $feed_data['MANUFACTURER'],
   );
   $rozdeleno = explode( "|", $global_nazev );
@@ -209,7 +214,7 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_dat
             $nahrada = $nahrada + 1;
           }
         } else {
-          $hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $placeholder, false );
+          $hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $rozsirene_vlastnosti, $dostupna_postmeta, $placeholder, false );
           if ( ! empty( $hodnota ) ) {
             $podminka = str_replace( '{' . $placeholder . '}', $hodnota, $podminka );
             $nahrada = $nahrada + 1;
@@ -606,7 +611,7 @@ function heureka_xml_feed_zobrazeni() {
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-heureka-productname' );
-    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -624,7 +629,7 @@ function heureka_xml_feed_zobrazeni() {
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
           $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
@@ -817,7 +822,7 @@ function heureka_xml_feed_aktualizace() {
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-heureka-productname' );
-    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -835,7 +840,7 @@ function heureka_xml_feed_aktualizace() {
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
@@ -994,7 +999,7 @@ function zbozi_xml_feed_zobrazeni() {
     $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_data['erotika'], $kategorie_erotika, 1 );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-productname' );
-    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -1012,7 +1017,7 @@ function zbozi_xml_feed_zobrazeni() {
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
@@ -1236,7 +1241,7 @@ function zbozi_xml_feed_aktualizace() {
     $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_data['erotika'], $kategorie_erotika, 1 );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-productname' );
-    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -1254,7 +1259,7 @@ function zbozi_xml_feed_aktualizace() {
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
-          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+          $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
           $xmlWriter->startElement( 'SHOPITEM' );
             $xmlWriter->writeElement( 'ITEM_ID', $varianta->variation_id );
@@ -1444,7 +1449,7 @@ function google_xml_feed_zobrazeni() {
       $erotika_produkt = ceske_sluzby_xml_ziskat_erotiku( $product_id, $global_data['erotika'], $kategorie_erotika, 'yes' );
       $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
       $sku_produkt = $produkt->get_sku();
-      $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, false, false, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+      $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, false, false, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
       if ( $produkt->is_type( 'variable' ) ) {
         foreach( $produkt->get_available_variations() as $variation ) {
@@ -1463,7 +1468,7 @@ function google_xml_feed_zobrazeni() {
             }
             $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], $nazev_webu );
             $feed_data['MANUFACTURER'] = $vyrobce_varianta;
-            $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, false, false, $vlastnosti_varianta_only, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+            $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, false, false, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
             $xmlWriter->startElement( 'item' );
               $xmlWriter->writeElement( 'g:id', $varianta->variation_id );
@@ -1678,7 +1683,7 @@ function pricemania_xml_feed_aktualizace() {
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $produkt->post->post_excerpt, $produkt->post->post_content, false, $global_data['zkracene_zapisy'] );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
-    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, false, false, $vlastnosti_produkt, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
+    $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, false, false, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
 
     $xmlWriter->startElement( 'product' );
     $xmlWriter->writeElement( 'id', $product_id );

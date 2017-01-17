@@ -281,6 +281,7 @@ function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
 }
 
 function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $termmeta_id, $global_data, $custom_labels_array ) {
+  $kategorie_url = "";
   $produkt = wc_get_product( $product_id );
   $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
   $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, $termmeta_id );
@@ -302,16 +303,24 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
   $feed_data['MANUFACTURER'] = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], false );
   if ( $produkt->is_type( 'simple' ) ) {
-    $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, $dostupna_postmeta, $post->post_title, $feed_data );
+    $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post->post_title, $feed_data );
     if ( empty( $global_data['nazev_produktu'] ) ) {
       if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
-        echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (defaultní nastavení, možno změnit na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        if ( empty( $kategorie_url ) ) {
+          echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (defaultní nastavení, možno změnit na úrovni kategorie a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        } else {
+          echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (defaultní nastavení, možno změnit na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        }
       } else {
         echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (nastaveno na úrovni kategorie ' . $kategorie_url . ', možno změnit i na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
       }
     } else {
       if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
-        echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (nastaveno na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        if ( empty( $kategorie_url ) ) {
+          echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (nastaveno na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        } else {
+          echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (nastaveno na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
+        }
       } else {
         echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code> (nastaveno na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>)</div>';
       }
@@ -321,13 +330,21 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
     if ( ! empty( $produkt->get_available_variations() ) ) {
       if ( empty( $global_data['nazev_produktu'] ) ) {
         if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
-          echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (defaultní nastavení, možno změnit na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          if ( empty( $kategorie_url ) ) {
+            echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (defaultní nastavení, možno změnit na úrovni kategorie a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          } else {
+            echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (defaultní nastavení, možno změnit na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          }
         } else {
           echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni kategorie ' . $kategorie_url . ', možno změnit na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
         }
       } else {
         if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
-          echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          if ( empty( $kategorie_url ) ) {
+            echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          } else {
+            echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
+          }
         } else {
           echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
         }
@@ -341,7 +358,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
         } else {
           $vlastnosti_varianta = $vlastnosti_varianta_only;
         }
-        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
+        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
         echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code></div>';
       }
       echo '<div style="margin-left: 161px;">Dostupné vlastnosti: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', $attributes_produkt ) . '</div>';
