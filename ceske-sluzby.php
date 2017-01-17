@@ -694,43 +694,65 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
 }
 
 function ceske_sluzby_xml_kategorie_pridat_pole() {
-  $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ); ?>
-  <tr>
-    <th scope="row" valign="top"><strong>České služby:</strong></th>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Kategorie Heureka XML</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="" size="70"/>
-      <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii z Heureky (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
-        Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
-        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "<?php echo ucfirst( HEUREKA_URL ); ?> | ".
+  $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
+  $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
+  $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+  if ( $xml_feed_heureka == "yes" ) { ?>
+    <div style="font-size: 14px; font-weight: bold;">České služby: Heureka</div>
+    <div class="form-field">
+      <label for="ceske-sluzby-xml-heureka-kategorie">Kategorie</label>
+      <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="" placeholder="CATEGORYTEXT" size="70"/>
+      <p>
+        Zatím je nutné doplnit příslušnou kategorii z Heureky ručně (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+        Příklad: <strong>Elektronika | Počítače a kancelář | Software | Antiviry</strong><br />
+        Poznámka: Z <code>CATEGORY_FULLNAME</code> je třeba vynechat část <code><?php echo ucfirst( HEUREKA_URL ); ?> | </code>.
       </p>
-    </td>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Kategorie Zbozi.cz XML</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="" size="70"/>
-      <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii ze Zbozi.cz (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
-        Příklad: <strong>Počítače | Software | Grafický a video software</strong> (informace ze sloupce s názvem Celá cesta)<br />
+    </div>
+    <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
+      <div class="form-field">
+        <label for="ceske-sluzby-xml-heureka-productname">Název produktů</label>
+        <input name="ceske-sluzby-xml-heureka-productname" id="ceske-sluzby-xml-heureka-productname" type="text" value="" placeholder="PRODUCTNAME" size="70"/>
+        <p>
+          Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Heureky (aktuální přehled naleznete <a href="http://sluzby.<?php echo HEUREKA_URL; ?>/napoveda/povinne-nazvy/" target="_blank">zde</a>).<br />
+          Příklad (Svatební dekorace): <strong>Výrobce | Druh | Barva</strong><br />
+          Pokud používáte nastavení výrobce, druh máte jako název produktu a barvu zase uloženou jako vlastnost v podobě taxonomie, tak můžete zadat: <code>{MANUFACTURER} {NAZEV} {pa_barva}</code>
+        </p>
+      </div>
+    <?php } ?>
+  <?php }
+  if ( $xml_feed_zbozi == "yes" ) { ?>
+    <div style="font-size: 14px; font-weight: bold;">České služby: Zboží.cz</div>
+    <div class="form-field">
+      <label for="ceske-sluzby-xml-zbozi-kategorie">Kategorie</label>
+      <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="" placeholder="CATEGORYTEXT" size="70" />
+      <p>
+        Zatím je nutné doplnit příslušnou kategorii ze Zbozi.cz ručně (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
+        Příklad: <strong>Počítače | Software | Grafický a video software</strong><br />
       </p>
-    </td>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Odebrat z XML</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" />
-      <span class="description">
-        Zaškrtněte, pokud chcete odebrat všechny produkty této kategorie z XML feedů.
-      </span>
-    </td>
-  </tr>
+    </div>
+    <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
+      <div class="form-field">
+        <label for="ceske-sluzby-xml-zbozi-productname">Název produktů</label>
+        <input name="ceske-sluzby-xml-zbozi-productname" id="ceske-sluzby-xml-zbozi-productname" type="text" value="" placeholder="PRODUCTNAME" size="70" />
+        <p>
+          Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Zboží.cz (aktuální přehled naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">zde</a>).<br />
+          Příklad pro konrétní kategorii: <strong>Výrobce | Druh | Barva</strong><br />
+          Pokud používáte nastavení výrobce, druh máte jako název produktu a barvu zase uloženou jako vlastnost v podobě taxonomie, tak můžete zadat: <code>{MANUFACTURER} {NAZEV} {pa_barva}</code>
+        </p>
+      </div>
+    <?php } ?>
+  <?php } ?>
+  <div style="font-size: 14px; font-weight: bold;">České služby: XML feedy</div>
+  <div class="form-field">
+    <label for="ceske-sluzby-xml-vynechano">Odebrat z XML</label>
+    <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" />
+    <span>
+      Zaškrtněte pokud chcete odebrat produkty této kategorie z XML feedů.
+    </span>
+  </div>
   <?php
-  if ( ! empty( $global_stav_produkt ) ) {
-    if ( $global_stav_produkt == 'used' ) {
+  if ( ! empty( $global_data['stav_produktu'] ) ) {
+    if ( $global_data['stav_produktu'] == 'used' ) {
       $stav_produkt_hodnota = 'Použité (bazar)';
     } else {
       $stav_produkt_hodnota = 'Repasované';
@@ -739,79 +761,115 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
   } else {
     $stav_produkt_text = 'Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
   } ?>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Stav produktů</label></th>
-    <td>
-      <select id="ceske-sluzby-xml-stav-produktu" name="ceske-sluzby-xml-stav-produktu" class="postform">
-        <option value="">- Vyberte -</option>
-        <option value="used">Použité (bazar)</option>
-        <option value="refurbished">Repasované</option>
-      </select>
-      <span class="description">
-        <?php echo $stav_produkt_text; ?>
-      </span>
-    </td>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Erotický obsah</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" />
-      <span class="description">
-        Zaškrtněte, pokud chcete označit obsah webu jako erotický.
-      </span>
-    </td>
-  </tr>
+  <div class="form-field">
+    <label for="ceske-sluzby-xml-stav-produktu">Stav produktů</label>
+    <select id="ceske-sluzby-xml-stav-produktu" name="ceske-sluzby-xml-stav-produktu" class="postform">
+      <option value="">- Vyberte -</option>
+      <option value="used">Použité (bazar)</option>
+      <option value="refurbished">Repasované</option>
+    </select>
+    <span>
+      <?php echo $stav_produkt_text; ?>
+    </span>
+  </div>
+  <div class="form-field">
+    <label for="ceske-sluzby-xml-erotika">Erotický obsah</label>
+    <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" />
+    <span>
+      Zaškrtněte pokud chcete označit obsah webu jako erotický.
+    </span>
+  </div>
 <?php
 }
 
 function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $checked = '';
+  $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+  $heureka_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-productname', true );
   $zbozi_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+  $zbozi_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-productname', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
   $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
-  $global_stav_produkt = get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ); ?>
-  <tr>
-    <th scope="row" valign="top"><strong>České služby:</strong></th>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Kategorie Heureka XML</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" />
-      <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii z Heureky (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
-        Příklad: <strong>Elektronika | Počítače a kancelář | Software | Multimediální software</strong><br />
-        Z CATEGORY_FULLNAME je také třeba vynechat úvodní část "<?php echo ucfirst( HEUREKA_URL ); ?> | ".
-      </p>
-    </td>
-  </tr>
-  <tr class="form-field">
-    <th scope="row" valign="top"><label>Kategorie Zbozi.cz XML</label></th>
-    <td> 
-      <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="<?php echo esc_attr( $zbozi_kategorie ); ?>" />
-      <p class="description">
-        Zatím je nutné ručně doplnit příslušnou kategorii ze Zbozi.cz (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
-        Příklad: <strong>Počítače | Software | Grafický a video software</strong> (informace ze sloupce s názvem Celá cesta)<br />
-      </p>
-    </td>
-  </tr>
-  <?php
-  if ( ! empty( $xml_vynechano_ulozeno ) ) {
+  $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
+  $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+  if ( $xml_feed_heureka == "yes" ) { ?>
+    <tr>
+      <th scope="row" valign="top"><strong>České služby: Heureka</strong></th>
+    </tr>
+    <tr class="form-field">
+      <th scope="row" valign="top"><label>Kategorie</label></th>
+      <td> 
+        <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" placeholder="CATEGORYTEXT" />
+        <p class="description">
+          Zatím je nutné doplnit příslušnou kategorii z Heureky ručně (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
+          Příklad: <strong>Elektronika | Počítače a kancelář | Software | Antiviry</strong><br />
+          Poznámka: Z <code>CATEGORY_FULLNAME</code> je třeba vynechat část <code><?php echo ucfirst( HEUREKA_URL ); ?> | </code>.
+        </p>
+      </td>
+    </tr>
+    <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
+      <tr class="form-field">
+        <th scope="row" valign="top"><label>Název produktů</label></th>
+        <td> 
+          <input name="ceske-sluzby-xml-heureka-productname" id="ceske-sluzby-xml-heureka-productname" type="text" value="<?php echo esc_attr( $heureka_productname ); ?>" placeholder="PRODUCTNAME" />
+            <p class="description">
+              Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Heureky (aktuální přehled naleznete <a href="http://sluzby.<?php echo HEUREKA_URL; ?>/napoveda/povinne-nazvy/" target="_blank">zde</a>).<br />
+              Příklad (Svatební dekorace): <strong>Výrobce | Druh | Barva</strong><br />
+              Pokud používáte nastavení výrobce, druh máte jako název produktu a barvu zase uloženou jako vlastnost v podobě taxonomie, tak můžete zadat: <code>{MANUFACTURER} {NAZEV} {pa_barva}</code>
+            </p>
+        </td>
+      </tr>
+    <?php } ?>
+  <?php }
+  if ( $xml_feed_zbozi == "yes" ) { ?>
+    <tr>
+      <th scope="row" valign="top"><strong>České služby: Zboží.cz</strong></th>
+    </tr>
+    <tr class="form-field">
+      <th scope="row" valign="top"><label>Kategorie</label></th>
+      <td> 
+        <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="<?php echo esc_attr( $zbozi_kategorie ); ?>" placeholder="CATEGORYTEXT" />
+        <p class="description">
+          Zatím je nutné doplnit příslušnou kategorii ze Zbozi.cz ručně (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
+          Příklad: <strong>Počítače | Software | Grafický a video software</strong><br />
+        </p>
+      </td>
+    </tr>
+    <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
+      <tr class="form-field">
+        <th scope="row" valign="top"><label>Název produktů</label></th>
+        <td> 
+          <input name="ceske-sluzby-xml-zbozi-productname" id="ceske-sluzby-xml-zbozi-productname" type="text" value="<?php echo esc_attr( $zbozi_productname ); ?>" placeholder="PRODUCTNAME" />
+            <p class="description">
+              Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Zboží.cz (aktuální přehled naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">zde</a>).<br />
+              Příklad pro konrétní kategorii: <strong>Výrobce | Druh | Barva</strong><br />
+              Pokud používáte nastavení výrobce, druh máte jako název produktu a barvu zase uloženou jako vlastnost v podobě taxonomie, tak můžete zadat: <code>{MANUFACTURER} {NAZEV} {pa_barva}</code>
+            </p>
+        </td>
+      </tr>
+    <?php } ?>
+  <?php } ?>
+
+  <?php if ( ! empty( $xml_vynechano_ulozeno ) ) {
     $checked = 'checked="checked"';
   } ?>
+  <tr>
+    <th scope="row" valign="top"><strong>České služby: XML feedy</strong></th>
+  </tr>
   <tr class="form-field">
     <th scope="row" valign="top"><label>Odebrat z XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" <?php echo $checked; ?>/>
       <span class="description">
-        Zaškrtněte, pokud chcete odebrat všechny produkty této kategorie z XML feedů.
+        Zaškrtněte pokud chcete odebrat produkty této kategorie z XML feedů.
       </span>
     </td>
   </tr>
   <?php
-  if ( ! empty( $global_stav_produkt ) ) {
-    if ( $global_stav_produkt == 'used' ) {
+  if ( ! empty( $global_data['stav_produktu'] ) ) {
+    if ( $global_data['stav_produktu'] == 'used' ) {
       $stav_produkt_hodnota = 'Použité (bazar)';
     } else {
       $stav_produkt_hodnota = 'Repasované';
@@ -842,7 +900,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     <td> 
       <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" <?php echo $checked; ?>/>
       <span class="description">
-        Zaškrtněte, pokud chcete označit obsah webu jako erotický.
+        Zaškrtněte pokud chcete označit obsah webu jako erotický.
       </span>
     </td>
   </tr>
@@ -850,41 +908,55 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
 }
 
 function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '' ) {
-  if ( isset( $_POST['ceske-sluzby-xml-heureka-kategorie'] ) && 'product_cat' === $taxonomy ) {
-    $heureka_kategorie = str_replace( 'Heureka.cz | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
-    $heureka_kategorie = str_replace( 'Heureka.sk | ', '', $_POST['ceske-sluzby-xml-heureka-kategorie'] );
-    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-heureka-kategorie', esc_attr( $heureka_kategorie ) );
-  }
-  if ( isset( $_POST['ceske-sluzby-xml-zbozi-kategorie'] ) && 'product_cat' === $taxonomy ) {
-    $zbozi_kategorie = $_POST['ceske-sluzby-xml-zbozi-kategorie'];
-    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-zbozi-kategorie', esc_attr( $zbozi_kategorie ) );
-  }
-
-  $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', true );
-  if ( isset( $_POST['ceske-sluzby-xml-vynechano'] ) && 'product_cat' === $taxonomy ) {
-    $xml_vynechano = $_POST['ceske-sluzby-xml-vynechano'];
-    if ( ! empty( $xml_vynechano ) ) {
-      update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', esc_attr( $xml_vynechano ) );  
+  if ( 'product_cat' === $taxonomy ) {
+    $ukladana_data = array(
+      'ceske-sluzby-xml-heureka-kategorie',
+      'ceske-sluzby-xml-heureka-productname',
+      'ceske-sluzby-xml-zbozi-kategorie',
+      'ceske-sluzby-xml-zbozi-productname'
+    );
+    foreach ( $ukladana_data as $key ) {
+      if ( isset( $_POST[ $key ] ) ) {
+        $value = $_POST[ $key ];
+        if ( $key == 'ceske-sluzby-xml-heureka-kategorie' ) {
+          $value = str_replace( 'Heureka.cz | ', '', $value );
+          $value = str_replace( 'Heureka.sk | ', '', $value );
+        }
+        $ulozeno = get_woocommerce_term_meta( $term_id, $key, true );
+        if ( ! empty( $value ) ) {
+          update_woocommerce_term_meta( $term_id, $key, esc_attr( $value ) );
+        } elseif ( ! empty( $ulozeno ) ) {
+          delete_woocommerce_term_meta( $term_id, $key ); 
+        }
+      }
     }
-  } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
-    delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano' );   
-  }
 
-  $xml_stav_produktu_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', true );
-  if ( isset( $_POST['ceske-sluzby-xml-stav-produktu'] ) && ! empty( $_POST['ceske-sluzby-xml-stav-produktu'] ) && 'product_cat' === $taxonomy ) {
-    update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', esc_attr( $_POST['ceske-sluzby-xml-stav-produktu'] ) );  
-  } elseif ( ! empty( $xml_stav_produktu_ulozeno ) ) {
-    delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu' );   
-  }
-
-  $xml_erotika_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', true );
-  if ( isset( $_POST['ceske-sluzby-xml-erotika'] ) && 'product_cat' === $taxonomy ) {
-    $xml_erotika = $_POST['ceske-sluzby-xml-erotika'];
-    if ( ! empty( $xml_erotika ) ) {
-      update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', esc_attr( $xml_erotika ) );  
+    $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', true );
+    if ( isset( $_POST['ceske-sluzby-xml-vynechano'] ) ) {
+      $xml_vynechano = $_POST['ceske-sluzby-xml-vynechano'];
+      if ( ! empty( $xml_vynechano ) ) {
+        update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano', esc_attr( $xml_vynechano ) );  
+      }
+    } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
+      delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-vynechano' );   
     }
-  } elseif ( ! empty( $xml_erotika_ulozeno ) ) {
-    delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika' );   
+
+    $xml_stav_produktu_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', true );
+    if ( isset( $_POST['ceske-sluzby-xml-stav-produktu'] ) && ! empty( $_POST['ceske-sluzby-xml-stav-produktu'] ) ) {
+      update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu', esc_attr( $_POST['ceske-sluzby-xml-stav-produktu'] ) );  
+    } elseif ( ! empty( $xml_stav_produktu_ulozeno ) ) {
+      delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-stav-produktu' );   
+    }
+
+    $xml_erotika_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', true );
+    if ( isset( $_POST['ceske-sluzby-xml-erotika'] ) ) {
+      $xml_erotika = $_POST['ceske-sluzby-xml-erotika'];
+      if ( ! empty( $xml_erotika ) ) {
+        update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika', esc_attr( $xml_erotika ) );  
+      }
+    } elseif ( ! empty( $xml_erotika_ulozeno ) ) {
+      delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika' );   
+    }
   }
 }
 
@@ -897,12 +969,31 @@ function ceske_sluzby_xml_kategorie_pridat_sloupec( $columns ) {
 function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
   if ( 'xml-heureka' == $column ) {
     $heureka_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
+    $heureka_nazev = false;
     if ( $heureka_kategorie ) {
-      $columns .= '<a href="#" title="' . $heureka_kategorie . '">Heureka</a>';
+      $columns .= 'Heureka: <a href="#" title="' . $heureka_kategorie . '">KA</a>';
+      $heureka_nazev = true;
+    }
+    $heureka_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-productname', true );
+    if ( $heureka_productname ) {
+      if ( $heureka_nazev ) {
+        $columns .= ' <a href="#" title="' . $heureka_productname . '">PR</a>';
+      } else {
+        $columns .= 'Heureka: <a href="#" title="' . $heureka_productname . '">PR</a>';
+      }
     }
     $zbozi_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+    $zbozi_nazev = false;
     if ( $zbozi_kategorie ) {
-      $columns .= '<a href="#" title="' . $zbozi_kategorie . '">Zbozi.cz</a>';
+      $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_kategorie . '">KA</a>';
+    }
+    $zbozi_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-productname', true );
+    if ( $zbozi_productname ) {
+      if ( $zbozi_nazev ) {
+        $columns .= ' <a href="#" title="' . $zbozi_productname . '">PR</a>';
+      } else {
+        $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_productname . '">PR</a>';
+      }
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
     if ( $kategorie_vynechano ) {
