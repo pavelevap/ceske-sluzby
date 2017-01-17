@@ -151,6 +151,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     }
 
     if ( $xml_feed_zbozi == "yes" ) {
+      $xml_feed_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
       echo '<div class="options_group">';
       echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
       $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
@@ -199,11 +200,31 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Příklad: Počítače | Software | Grafický a video software' 
         )
       );
+      $extra_message_ulozeno = get_post_meta( $post->ID, 'ceske_sluzby_xml_zbozi_extra_message', true );
+      $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+      if ( ! empty ( $xml_feed_extra_message ) ) {
+        foreach ( $xml_feed_extra_message as $extra_message ) {
+          $value = "";
+          if ( array_key_exists( $extra_message, $extra_message_ulozeno ) ) {
+            $value = $extra_message_ulozeno[ $extra_message ];
+          }
+          woocommerce_wp_checkbox( 
+            array( 
+              'id' => 'ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']',
+              'value' => $value,
+              'cbvalue' => 'yes', 
+              'wrapper_class' => '',
+              'label' => $extra_message_array[ $extra_message ], 
+              'description' => 'Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací'
+            ) 
+          );
+        }
+      }
       echo '</div>';
     }
     echo '</div>';
   }
-  
+
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
     global $thepostid;
     $global_dodaci_doba_text = '';
@@ -341,6 +362,16 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       update_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', $stav_produktu );
     } elseif ( ! empty ( $stav_produktu_ulozeno ) ) {
       delete_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu' );
+    }
+
+    $xml_extra_message_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_extra_message', true );
+    if ( isset( $_POST['ceske_sluzby_xml_zbozi_extra_message'] ) ) {
+      $xml_extra_message = $_POST['ceske_sluzby_xml_zbozi_extra_message'];
+      if ( ! empty( $xml_extra_message ) ) {
+        update_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_extra_message', $xml_extra_message );
+      }
+    } elseif ( ! empty( $xml_extra_message_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_extra_message' );
     }
   }
 }

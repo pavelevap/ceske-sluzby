@@ -395,3 +395,17 @@ function ceske_sluzby_xml_zpracovat_hodnoty_kategorie( $hodnoty ) {
   }
   return $aktualni_hodnota;
 }
+
+function ceske_sluzby_ziskat_nastaveni_zbozi_extra_message() {
+  $hodnoty = array(
+    'extended_warranty' => 'Rozšířená záruka',
+    'free_accessories' => 'Příslušenství zdarma',
+    'free_case' => 'Pouzdro zdarma',
+    'free_delivery' => 'Doprava zdarma',
+    'free_gift' => 'Dárek zdarma',
+    'free_installation' => 'Montáž zdarma',
+    'free_store_pickup' => 'Osobní odběr zdarma',
+    'voucher' => 'Voucher na další nákup'
+  );
+  return $hodnoty;
+}

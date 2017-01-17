@@ -288,6 +288,17 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
         ),
         array(
+          'title' => 'Doplňkové informace',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte položky, které budete chtít používat jako doplňkové informace k produktu (element <code>EXTRA_MESSAGE</code>). Jednotlivé hodnoty bude po uložení možné nastavit na úrovni produktu, kategorie a eshopu.',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message',
+          'class' => 'wc-enhanced-select',
+          'options' => ceske_sluzby_ziskat_nastaveni_zbozi_extra_message(),
+          'custom_attributes' => array(
+            'data-placeholder' => 'EXTRA_MESSAGE'
+          )
+        ),
+        array(
           'title' => 'Erotický obsah',
           'type' => 'checkbox',
           'desc' => 'Označit všechny produkty jako erotické. Pokud chcete označit pouze některé kategorie, tak to můžete nastavit přímo tam.',
