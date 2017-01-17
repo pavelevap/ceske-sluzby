@@ -20,7 +20,7 @@ Potom můžete použít přímo Github: https://github.com/pavelevap/ceske-sluzb
 Nějaká funkce chybí?
 Můžete ji sponzorovat a urychlit její implementaci.
 
-Plugin už sice bez problémů používá více než 1000 různých webů, ale berte ho prosím stále jako testovací verzi.
+Plugin už sice bez problémů používá více než 1500 různých webů, ale berte ho prosím stále jako testovací verzi.
 
 Pro správnou funkčnost vyžaduje WooCommerce verzi 2.2.x.
 
@@ -29,17 +29,18 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Ověřeno zákazníky (Heureka.cz a Heureka.sk)
 * WooCommerce: Certifikát spokojenosti (Heureka.cz a Heureka.sk)
 * WooCommerce: Měření konverzí (Heureka.cz a Heureka.sk, Sklik.cz, Srovname.cz)
+* WooCommerce: Skript pro retargeting (Sklik.cz)
 * WooCommerce: Doprava (Uloženka.cz) - CZ i SK
 * WooCommerce: Doprava (DPD ParcelShop) - CZ i SK
 * WooCommerce: Možnost změny provedených objednávek v případě dobírky
 * WooCommerce: Předobjednávky
 * WooCommerce: Dodací doba
 * WooCommerce: Sledování zásilek
-* WooCommerce: XML feed (Heureka.cz a Heureka.sk, Zbozi.cz, Google, Pricemania.cz a Pricemania.sk)
-* WooCommerce: Základní podpora variant a vlastností pro XML feedy (automatické generování parametrů a názvů)
+* WooCommerce: XML feedy (Heureka.cz a Heureka.sk, Zbozi.cz, Google, Pricemania.cz a Pricemania.sk)
+* WooCommerce: Základní podpora variant a vlastností pro XML feedy (automatické generování parametrů)
 * WooCommerce: Průběžné generování velkého množství produktů do .xml souboru
 * WooCommerce: Možnost vynechání kategorií či produktů v XML feedech
-* WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE)
+* WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, EAN, PRODUCT, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE a další)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
 
@@ -63,19 +64,25 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 * WooCommerce: Dodací doba
  * Nastavení a zobrazení dodací doby pro varianty (napojení na XML feedy v podobě DELIVERY_DATE).
  * Možnost nastavení intervalů a textů pro počet produktů skladem.
- * Možnost definování vlastního textu (a formátu pro zobrazení) pro dostupnost dodatečných produktů (nad rámec uvedených skladových zásob).   
+ * Možnost definování vlastního textu (a formátu pro zobrazení) pro dostupnost dodatečných produktů (nad rámec uvedených skladových zásob).
+* WooCommerce: Sledování zásilek
+ * Doplněn dopravce GLS.    
 * WooCommerce: XML feedy
  * Doplněna podpora pro označování erotického obsahu (Zbozi.cz a Google).
- * Opravena logika pro zobrazování stavu produktu v případě, že je u produktu přiřazeno více kategorií s různým nastavením.
+ * Opravena logika pro zobrazování stavu produktu v případě, že je přiřazeno více kategorií s různým nastavením.
  * Opraveno zobrazování hodnot pro dodací dobu a starého data předobjednávek.
  * Dodatečné obrázky na základě nastavené galerie produktu.
- * Doplněna možnost zadávat EAN kódy na úrovni jednotlivých produktů i variant.  
+ * Doplněna možnost zadávat EAN kódy na úrovni jednotlivých produktů i variant.
+ * Možnost specifikovat doplňkový název produktu (element PRODUCT).
+ * Pokročilé možnosti definice vlastního názvu produktu (element PRODUCTNAME) pomocí podmínek a mnoha různých placeholderů, a to na úrovni eshopu, kategorie i produktu. 
+ * Opraveny problémy s řídícím znakem U+001A v obsahu produktů v kombinaci s knihovnou XMLWriter.   
 * WooCommerce: XML feed (Zbozi.cz)
  * Možnost doplnění CATEGORYTEXT v nastavení kategorie i produktu.
 * WooCommerce: XML feed (Google)
  * Upravena struktura podle manuálu (element rss).
 * WooCommerce: Měření konverzí (Sklik.cz)
  * Doplněno odesílání hodnoty objednávek.
+ * HTTP protokol načítán relativně podle nastavení webu. 
 * WooCommerce: Podpora retargetingu pro Sklik.cz
 * Doplněna podpora pro automatické aktualizace pomocí pluginu Github Updater.   
 
