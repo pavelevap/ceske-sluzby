@@ -744,12 +744,18 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
     $xml_feed_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
     if ( ! empty ( $xml_feed_extra_message ) ) {
       $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
-      foreach ( $xml_feed_extra_message as $extra_message ) { ?>
+      foreach ( $xml_feed_extra_message as $extra_message ) {
+        $xml_feed_extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message_' . $extra_message );
+        if ( $xml_feed_extra_message_aktivace == "yes" ) {
+          $extra_message_text = 'Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.';
+        } else {
+          $extra_message_text = 'Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
+        } ?>
         <div class="form-field">
           <label for="ceske-sluzby-xml-zbozi-extra-message"><?php echo $extra_message_array[ $extra_message ]; ?></label>
           <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" />
           <span>
-            Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací.
+            <?php echo $extra_message_text; ?>
           </span>
         </div>
       <?php }
@@ -868,6 +874,12 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     if ( ! empty ( $xml_feed_extra_message ) ) {
       $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
       foreach ( $xml_feed_extra_message as $extra_message ) {
+        $xml_feed_extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message_' . $extra_message );
+        if ( $xml_feed_extra_message_aktivace == "yes" ) {
+          $extra_message_text = 'Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.';
+        } else {
+          $extra_message_text = 'Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
+        }
         $checked = "";
         if ( ! empty( $zbozi_extra_message_ulozeno ) && array_key_exists( $extra_message, $zbozi_extra_message_ulozeno ) ) {
           $checked = 'checked="checked"';
@@ -877,7 +889,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
           <td> 
             <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" <?php echo $checked; ?>/>
             <span class="description">
-              Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací.
+              <?php echo $extra_message_text; ?>
             </span>
           </td>
         </tr>
@@ -1017,10 +1029,14 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         $columns .= 'Heureka: <a href="#" title="' . $heureka_productname . '">PR</a>';
       }
     }
+    if ( $heureka_nazev ) {
+      $columns .= '<br />';
+    }
     $zbozi_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
     $zbozi_nazev = false;
     if ( $zbozi_kategorie ) {
       $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_kategorie . '">KA</a>';
+      $zbozi_nazev = true;
     }
     $zbozi_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-productname', true );
     if ( $zbozi_productname ) {
@@ -1028,6 +1044,25 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         $columns .= ' <a href="#" title="' . $zbozi_productname . '">PR</a>';
       } else {
         $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_productname . '">PR</a>';
+        $zbozi_nazev = true;
+      }
+    }
+    $xml_feed_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
+    $extra_message_ulozeno = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-extra-message', true );
+    if ( ! empty( $extra_message_ulozeno ) ) {
+      $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+      foreach ( $extra_message_ulozeno as $key => $value ) {
+        if ( ! empty ( $xml_feed_extra_message ) && in_array( $key, $xml_feed_extra_message ) ) {
+          $zbozi_extra_message[] = $extra_message_array[ $key ];
+        }
+      }
+      if ( ! empty( $zbozi_extra_message ) ) {
+        $zbozi_extra_message_text = implode( ', ', $zbozi_extra_message );
+        if ( $zbozi_nazev ) {
+          $columns .= ' <a href="#" title="' . $zbozi_extra_message_text . '">EM</a>';
+        } else {
+          $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_extra_message_text . '">EM</a>';
+        }
       }
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
@@ -1035,7 +1070,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       $columns .= '<span style="margin-left: 10px; color: red;">x</span>';
     }
     $stav_produktu = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-stav-produktu', true );
-    if ( $stav_produktu ) {
+    if ( ! empty( $stav_produktu ) ) {
       if ( $stav_produktu == 'used' ) {
         $stav_produktu_hodnota = 'Použité (bazar)';
       } else {

@@ -45,7 +45,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function settings_tab() {
-    woocommerce_admin_fields( self::get_settings() );
+    global $current_section;
+    $settings = self::get_settings( $current_section );
+    woocommerce_admin_fields( $settings );
   }
 
   public static function update_settings() {
@@ -191,7 +193,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
 
     if ( 'xml-feed' == $current_section ) {
-      $settings = array(
+      $settings_before = array(
         array(
           'title' => 'XML feed',
           'type' => 'title',
@@ -297,7 +299,24 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'custom_attributes' => array(
             'data-placeholder' => 'EXTRA_MESSAGE'
           )
-        ),
+        )
+      );
+
+      $xml_zbozi_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
+      if ( ! empty( $xml_zbozi_extra_message ) ) {
+        $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+        foreach ( $xml_zbozi_extra_message as $extra_message ) {
+          $settings_before[] =
+          array(
+            'title' => $extra_message_array[ $extra_message ],
+            'type' => 'checkbox',
+            'desc' => 'Po zaškrtnutí budou všechny produkty v eshopu označeny příslušnou doplňkovou informací.',
+            'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message_' . $extra_message,
+          );
+        }
+      }
+
+      $settings_after = array(
         array(
           'title' => 'Erotický obsah',
           'type' => 'checkbox',
@@ -367,6 +386,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
         ),
       );
+      $settings = array_merge( $settings_before, $settings_after );
     }
 
     if ( 'certifikat-spokojenosti' == $current_section ) {
