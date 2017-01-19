@@ -327,7 +327,8 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
     }
   }
   if ( $produkt->is_type( 'variable' ) ) {
-    if ( ! empty( $produkt->get_available_variations() ) ) {
+    $dostupne_varianty = $produkt->get_available_variations();
+    if ( ! empty( $dostupne_varianty ) ) {
       if ( empty( $global_data['nazev_produktu'] ) ) {
         if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
           if ( empty( $kategorie_url ) ) {
@@ -349,7 +350,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
           echo '<div style="margin-left: 161px;"><strong>Přehled názvů variant</strong> (nastaveno na úrovni kategorie ' . $kategorie_url . ' a <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">eshopu</a>):</div>';
         }
       }
-      foreach( $produkt->get_available_variations() as $variation ) {
+      foreach( $dostupne_varianty as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         $attributes_varianta = $varianta->get_variation_attributes();
         $vlastnosti_varianta_only = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
