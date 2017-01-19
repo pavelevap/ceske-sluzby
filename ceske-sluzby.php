@@ -740,8 +740,21 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
           Pokud používáte nastavení výrobce, druh máte jako název produktu a barvu zase uloženou jako vlastnost v podobě taxonomie, tak můžete zadat: <code>{MANUFACTURER} {NAZEV} {pa_barva}</code>
         </p>
       </div>
-    <?php } ?>
-  <?php } ?>
+    <?php }
+    $xml_feed_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
+    if ( ! empty ( $xml_feed_extra_message ) ) {
+      $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+      foreach ( $xml_feed_extra_message as $extra_message ) { ?>
+        <div class="form-field">
+          <label for="ceske-sluzby-xml-zbozi-extra-message"><?php echo $extra_message_array[ $extra_message ]; ?></label>
+          <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" />
+          <span>
+            Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací.
+          </span>
+        </div>
+      <?php }
+    }
+  } ?>
   <div style="font-size: 14px; font-weight: bold;">České služby: XML feedy</div>
   <div class="form-field">
     <label for="ceske-sluzby-xml-vynechano">Odebrat z XML</label>
@@ -789,6 +802,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $heureka_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-productname', true );
   $zbozi_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
   $zbozi_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-productname', true );
+  $zbozi_extra_message_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
   $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
@@ -849,11 +863,26 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
             </p>
         </td>
       </tr>
-    <?php } ?>
-  <?php } ?>
-
-  <?php if ( ! empty( $xml_vynechano_ulozeno ) ) {
-    $checked = 'checked="checked"';
+    <?php }
+    $xml_feed_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
+    if ( ! empty ( $xml_feed_extra_message ) ) {
+      $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+      foreach ( $xml_feed_extra_message as $extra_message ) {
+        $checked = "";
+        if ( ! empty( $zbozi_extra_message_ulozeno ) && array_key_exists( $extra_message, $zbozi_extra_message_ulozeno ) ) {
+          $checked = 'checked="checked"';
+        } ?>
+        <tr class="form-field">
+          <th scope="row" valign="top"><label><?php echo $extra_message_array[ $extra_message ]; ?></label></th>
+          <td> 
+            <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" <?php echo $checked; ?>/>
+            <span class="description">
+              Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací.
+            </span>
+          </td>
+        </tr>
+      <?php }
+    }
   } ?>
   <tr>
     <th scope="row" valign="top"><strong>České služby: XML feedy</strong></th>
@@ -861,7 +890,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   <tr class="form-field">
     <th scope="row" valign="top"><label>Odebrat z XML</label></th>
     <td> 
-      <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" <?php echo $checked; ?>/>
+      <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" <?php checked( $xml_vynechano_ulozeno, "yes" ); ?>/>
       <span class="description">
         Zaškrtněte pokud chcete odebrat produkty této kategorie z XML feedů.
       </span>
@@ -891,14 +920,10 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
       </span>
     </td>
   </tr>
-  <?php
-  if ( ! empty( $xml_erotika_ulozeno ) ) {
-    $checked = 'checked="checked"';
-  } ?>
   <tr class="form-field">
     <th scope="row" valign="top"><label>Erotický obsah</label></th>
     <td> 
-      <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" <?php echo $checked; ?>/>
+      <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" <?php checked( $xml_erotika_ulozeno, "yes" ); ?>/>
       <span class="description">
         Zaškrtněte pokud chcete označit obsah webu jako erotický.
       </span>
@@ -956,6 +981,16 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
       }
     } elseif ( ! empty( $xml_erotika_ulozeno ) ) {
       delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-erotika' );   
+    }
+
+    $xml_zbozi_extra_message_ulozeno = get_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
+    if ( isset( $_POST['ceske-sluzby-xml-zbozi-extra-message'] ) ) {
+      $xml_zbozi_extra_message = $_POST['ceske-sluzby-xml-zbozi-extra-message'];
+      if ( ! empty( $xml_zbozi_extra_message ) ) {
+        update_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-zbozi-extra-message', $xml_zbozi_extra_message );  
+      }
+    } elseif ( ! empty( $xml_zbozi_extra_message_ulozeno ) ) {
+      delete_woocommerce_term_meta( $term_id, 'ceske-sluzby-xml-zbozi-extra-message' );   
     }
   }
 }

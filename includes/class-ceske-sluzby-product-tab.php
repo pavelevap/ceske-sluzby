@@ -205,7 +205,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       if ( ! empty ( $xml_feed_extra_message ) ) {
         foreach ( $xml_feed_extra_message as $extra_message ) {
           $value = "";
-          if ( array_key_exists( $extra_message, $extra_message_ulozeno ) ) {
+          if ( ! empty( $extra_message_ulozeno ) && array_key_exists( $extra_message, $extra_message_ulozeno ) ) {
             $value = $extra_message_ulozeno[ $extra_message ];
           }
           woocommerce_wp_checkbox( 
@@ -215,7 +215,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
               'cbvalue' => 'yes', 
               'wrapper_class' => '',
               'label' => $extra_message_array[ $extra_message ], 
-              'description' => 'Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací'
+              'description' => 'Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací.'
             ) 
           );
         }
@@ -309,13 +309,18 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_heureka_product',
       'ceske_sluzby_xml_heureka_kategorie',
       'ceske_sluzby_xml_zbozi_productname',
-      'ceske_sluzby_xml_zbozi_kategorie'
+      'ceske_sluzby_xml_zbozi_kategorie',
+      'ceske_sluzby_xml_stav_produktu',
+      'ceske_sluzby_xml_preorder_datum'
     );
     foreach ( $ukladana_data as $key ) {
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
         $ulozeno = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
+          if ( $key == 'ceske_sluzby_xml_preorder_datum' ) {
+            $value = strtotime( $value );
+          }
           update_post_meta( $post_id, $key, esc_attr( $value ) );
         } elseif ( ! empty( $ulozeno ) ) {
           delete_post_meta( $post_id, $key );
@@ -344,24 +349,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
       delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
-    }
-
-    $datum_predobjednavky_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', true );
-    if ( isset( $_POST['ceske_sluzby_xml_preorder_datum'] ) ) {
-      $datum_predobjednavky = $_POST['ceske_sluzby_xml_preorder_datum'];
-      if ( ! empty( $datum_predobjednavky ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', strtotime( $datum_predobjednavky ) );
-      } elseif ( ! empty( $datum_predobjednavky_ulozeno ) ) {
-        delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' );
-      }
-    }
-
-    $stav_produktu = $_POST['ceske_sluzby_xml_stav_produktu'];
-    $stav_produktu_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', true );
-    if ( ! empty ( $stav_produktu ) ) {
-      update_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', $stav_produktu );
-    } elseif ( ! empty ( $stav_produktu_ulozeno ) ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu' );
     }
 
     $xml_extra_message_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_zbozi_extra_message', true );
