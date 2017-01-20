@@ -293,7 +293,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Doplňkové informace',
           'type' => 'multiselect',
           'desc' => 'Zvolte položky, které budete chtít používat jako doplňkové informace k produktu (element <code>EXTRA_MESSAGE</code>). Jednotlivé hodnoty bude po uložení možné nastavit na úrovni produktu, kategorie a eshopu.',
-          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace',
           'class' => 'wc-enhanced-select',
           'options' => ceske_sluzby_ziskat_nastaveni_zbozi_extra_message(),
           'custom_attributes' => array(
@@ -302,16 +302,16 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         )
       );
 
-      $xml_zbozi_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' );
-      if ( ! empty( $xml_zbozi_extra_message ) ) {
+      $global_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
+      if ( ! empty( $global_extra_message ) ) {
         $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
-        foreach ( $xml_zbozi_extra_message as $extra_message ) {
+        foreach ( $global_extra_message as $extra_message ) {
           $settings_before[] =
           array(
             'title' => $extra_message_array[ $extra_message ],
             'type' => 'checkbox',
             'desc' => 'Po zaškrtnutí budou všechny produkty v eshopu označeny příslušnou doplňkovou informací.',
-            'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message_' . $extra_message,
+            'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message[' . $extra_message . ']'
           );
         }
       }
