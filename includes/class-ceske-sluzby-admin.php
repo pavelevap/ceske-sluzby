@@ -306,11 +306,15 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       if ( ! empty( $global_extra_message ) ) {
         $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
         foreach ( $global_extra_message as $extra_message ) {
+          $extra_message_desc = 'Po zaškrtnutí budou všechny produkty v eshopu označeny příslušnou doplňkovou informací.';
+          if ( $extra_message == "free_delivery" ) {
+            $extra_message_desc = 'Po zaškrtnutí bude na všechny produkty v eshopu aplikováno nastavení dopravy zdarma.';
+          }
           $settings_before[] =
           array(
             'title' => $extra_message_array[ $extra_message ],
             'type' => 'checkbox',
-            'desc' => 'Po zaškrtnutí budou všechny produkty v eshopu označeny příslušnou doplňkovou informací.',
+            'desc' => $extra_message_desc,
             'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message[' . $extra_message . ']'
           );
         }

@@ -2,7 +2,7 @@
 Donate link: http://www.separatista.net
 Tags: Heureka.cz, Sklik.cz, WooCommerce, Ulozenka.cz, Srovname.cz, DPD, Zbozi.cz, Pricemania.cz, Google
 Requires at least: 4.0
-Tested up to: 4.6.1
+Tested up to: 4.7.1
 Stable tag: 0.5
 
 Implementace různých českých služeb do WordPressu (zejména pro WooCommerce)
@@ -40,7 +40,7 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Základní podpora variant a vlastností pro XML feedy (automatické generování parametrů)
 * WooCommerce: Průběžné generování velkého množství produktů do .xml souboru
 * WooCommerce: Možnost vynechání kategorií či produktů v XML feedech
-* WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, EAN, PRODUCT, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE a další)
+* WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, EAN, PRODUCT, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE, EXTRA_MESSAGE a další)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
 
@@ -78,6 +78,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Opraveny problémy s řídícím znakem U+001A v obsahu produktů v kombinaci s knihovnou XMLWriter.   
 * WooCommerce: XML feed (Zbozi.cz)
  * Možnost doplnění CATEGORYTEXT v nastavení kategorie i produktu.
+ * Doplněna možnost zadávat doplňkové informace pro element EXTRA_MESSAGE v nastavení kategorie i produktu (automaticky aplikováno nastavení dopravy zdarma). 
 * WooCommerce: XML feed (Google)
  * Upravena struktura podle manuálu (element rss).
 * WooCommerce: Měření konverzí (Sklik.cz)
