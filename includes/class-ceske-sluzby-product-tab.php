@@ -40,10 +40,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     $vynechane_kategorie = "";
     $stav_produktu_kategorie = "";
+    $extra_message_kategorie_odkaz = "";
+    $extra_message_kategorie_array = array();
     $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
     foreach ( $product_categories as $kategorie_produktu ) {
       $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
       $stav_produktu = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
+      $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
       if ( ! empty ( $vynechano ) ) {
         if ( ! empty ( $vynechane_kategorie ) ) {
           $vynechane_kategorie .= ", ";
@@ -60,6 +63,15 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           $stav_produktu_kategorie .= ", ";
         }
         $stav_produktu_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>: <strong>' . $stav_produktu_hodnota . '</strong>';
+      }
+      if ( ! empty ( $kategorie_extra_message_ulozeno ) ) {
+        if ( ! empty ( $extra_message_kategorie_odkaz ) ) {
+          $extra_message_kategorie_odkaz .= ", ";
+        }
+        $extra_message_kategorie_odkaz .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+        foreach ( $kategorie_extra_message_ulozeno as $key => $value ) {
+          $extra_message_kategorie_array[] = $key;
+        }
       }
     }
     if ( ! empty ( $vynechane_kategorie ) ) {
@@ -135,9 +147,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           }
         }
       }
-      if ( ! empty ( $kategorie_heureka ) ) {
-        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie_heureka . '</code></p>';
-      }
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_heureka_kategorie', 
@@ -147,6 +156,9 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Příklad: Elektronika | Počítače a kancelář | Software | Multimediální software' 
         )
       );
+      if ( ! empty ( $kategorie_heureka ) ) {
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie_heureka . '</code></p>';
+      }
       echo '</div>';
     }
 
@@ -187,9 +199,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           }
         }
       }
-      if ( ! empty ( $kategorie_zbozi ) ) {
-        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_zbozi . ': <code>' . $nazev_kategorie_zbozi . '</code></p>';
-      }
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_zbozi_kategorie', 
@@ -199,11 +208,48 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Příklad: Počítače | Software | Grafický a video software' 
         )
       );
+      if ( ! empty ( $kategorie_zbozi ) ) {
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_zbozi . ': <code>' . $nazev_kategorie_zbozi . '</code></p>';
+      }
+      $extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
+      if ( ! empty ( $extra_message_aktivace ) ) {
+        $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+        foreach ( $extra_message_aktivace as $extra_message ) {
+          if ( ! empty ( $extra_message_kategorie_odkaz ) && ! empty ( $extra_message_kategorie_array ) && in_array( $extra_message, $extra_message_kategorie_array ) ) {
+            if ( array_key_exists( $extra_message, $global_data['extra_message'] ) ) {
+              echo '<p class="form-field"><label for="ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']">' . $extra_message_array[ $extra_message ] . '</label>Není potřeba nic zadávat, protože na úrovni kategorie ' . $extra_message_kategorie_odkaz . ' i eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.';
+            } else {
+              echo '<p class="form-field"><label for="ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']">' . $extra_message_array[ $extra_message ] . '</label>Není potřeba nic zadávat, protože je tato informace nastavena na úrovni kategorie ' . $extra_message_kategorie_odkaz . '.';
+            }
+          } else {
+            if ( array_key_exists( $extra_message, $global_data['extra_message'] ) ) {
+              echo '<p class="form-field"><label for="ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']">' . $extra_message_array[ $extra_message ] . '</label>Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.';
+            } else {
+              $extra_message_text = 'Po zaškrtnutí bude produkt označen příslušnou doplňkovou informací. Na úrovni eshopu ani kategorie zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.';
+              $value = "";
+              $produkt_extra_message_ulozeno = get_post_meta( $post->ID, 'ceske_sluzby_xml_zbozi_extra_message', true );
+              if ( ! empty( $produkt_extra_message_ulozeno ) && array_key_exists( $extra_message, $produkt_extra_message_ulozeno ) ) {
+                $value = $produkt_extra_message_ulozeno[ $extra_message ];
+              }
+              woocommerce_wp_checkbox( 
+                array( 
+                  'id' => 'ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']',
+                  'value' => $value,
+                  'cbvalue' => 'yes', 
+                  'wrapper_class' => '',
+                  'label' => $extra_message_array[ $extra_message ], 
+                  'description' => $extra_message_text
+                ) 
+              );
+            }
+          }
+        }
+      }
       echo '</div>';
     }
     echo '</div>';
   }
-  
+
   public function ceske_sluzby_zobrazit_nastaveni_dodaci_doby() {
     global $thepostid;
     $global_dodaci_doba_text = '';
@@ -283,18 +329,23 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     }
 
-    $ukladana_data = array(
+    $ukladana_data_text = array(
       'ceske_sluzby_xml_heureka_productname',
       'ceske_sluzby_xml_heureka_product',
       'ceske_sluzby_xml_heureka_kategorie',
       'ceske_sluzby_xml_zbozi_productname',
-      'ceske_sluzby_xml_zbozi_kategorie'
+      'ceske_sluzby_xml_zbozi_kategorie',
+      'ceske_sluzby_xml_stav_produktu',
+      'ceske_sluzby_xml_preorder_datum'
     );
-    foreach ( $ukladana_data as $key ) {
+    foreach ( $ukladana_data_text as $key ) {
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
         $ulozeno = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
+          if ( $key == 'ceske_sluzby_xml_preorder_datum' ) {
+            $value = strtotime( $value );
+          }
           update_post_meta( $post_id, $key, esc_attr( $value ) );
         } elseif ( ! empty( $ulozeno ) ) {
           delete_post_meta( $post_id, $key );
@@ -302,14 +353,20 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     }
 
-    $xml_vynechano_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', true );
-    if ( isset( $_POST['ceske_sluzby_xml_vynechano'] ) ) {
-      $xml_vynechano = $_POST['ceske_sluzby_xml_vynechano'];
-      if ( ! empty( $xml_vynechano ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_xml_vynechano', $xml_vynechano );
+    $ukladana_data_checkbox = array(
+      'ceske_sluzby_xml_vynechano',
+      'ceske_sluzby_xml_zbozi_extra_message'
+    );
+    foreach ( $ukladana_data_checkbox as $key ) {
+      if ( isset( $_POST[ $key ] ) ) {
+        $value = $_POST[ $key ];
+        $ulozeno = get_post_meta( $post_id, $key, true );
+        if ( ! empty( $value ) ) {
+          update_post_meta( $post_id, $key, $value );
+        }
+      } elseif ( ! empty( $ulozeno ) ) {
+        delete_post_meta( $post_id, $key );
       }
-    } elseif ( ! empty( $xml_vynechano_ulozeno ) ) {
-        delete_post_meta( $post_id, 'ceske_sluzby_xml_vynechano' );
     }
 
     $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
@@ -323,24 +380,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
       delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
-    }
-
-    $datum_predobjednavky_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', true );
-    if ( isset( $_POST['ceske_sluzby_xml_preorder_datum'] ) ) {
-      $datum_predobjednavky = $_POST['ceske_sluzby_xml_preorder_datum'];
-      if ( ! empty( $datum_predobjednavky ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum', strtotime( $datum_predobjednavky ) );
-      } elseif ( ! empty( $datum_predobjednavky_ulozeno ) ) {
-        delete_post_meta( $post_id, 'ceske_sluzby_xml_preorder_datum' );
-      }
-    }
-
-    $stav_produktu = $_POST['ceske_sluzby_xml_stav_produktu'];
-    $stav_produktu_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', true );
-    if ( ! empty ( $stav_produktu ) ) {
-      update_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu', $stav_produktu );
-    } elseif ( ! empty ( $stav_produktu_ulozeno ) ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_xml_stav_produktu' );
     }
   }
 }

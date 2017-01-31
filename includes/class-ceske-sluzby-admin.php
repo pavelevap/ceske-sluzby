@@ -45,7 +45,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function settings_tab() {
-    woocommerce_admin_fields( self::get_settings() );
+    global $current_section;
+    $settings = self::get_settings( $current_section );
+    woocommerce_admin_fields( $settings );
   }
 
   public static function update_settings() {
@@ -191,7 +193,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
 
     if ( 'xml-feed' == $current_section ) {
-      $settings = array(
+      $settings_before = array(
         array(
           'title' => 'XML feed',
           'type' => 'title',
@@ -288,6 +290,38 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi-aktivace'
         ),
         array(
+          'title' => 'Doplňkové informace',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte položky, které budete chtít používat jako doplňkové informace k produktu (element <code>EXTRA_MESSAGE</code>). Jednotlivé hodnoty bude po uložení možné nastavit na úrovni produktu, kategorie a eshopu.',
+          'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace',
+          'class' => 'wc-enhanced-select',
+          'options' => ceske_sluzby_ziskat_nastaveni_zbozi_extra_message(),
+          'custom_attributes' => array(
+            'data-placeholder' => 'EXTRA_MESSAGE'
+          )
+        )
+      );
+
+      $global_extra_message = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
+      if ( ! empty( $global_extra_message ) ) {
+        $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
+        foreach ( $global_extra_message as $extra_message ) {
+          $extra_message_desc = 'Po zaškrtnutí budou všechny produkty v eshopu označeny příslušnou doplňkovou informací.';
+          if ( $extra_message == "free_delivery" ) {
+            $extra_message_desc = 'Po zaškrtnutí bude na všechny produkty v eshopu aplikováno nastavení dopravy zdarma.';
+          }
+          $settings_before[] =
+          array(
+            'title' => $extra_message_array[ $extra_message ],
+            'type' => 'checkbox',
+            'desc' => $extra_message_desc,
+            'id' => 'wc_ceske_sluzby_xml_feed_zbozi_extra_message[' . $extra_message . ']'
+          );
+        }
+      }
+
+      $settings_after = array(
+        array(
           'title' => 'Erotický obsah',
           'type' => 'checkbox',
           'desc' => 'Označit všechny produkty jako erotické. Pokud chcete označit pouze některé kategorie, tak to můžete nastavit přímo tam.',
@@ -356,6 +390,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni_title'
         ),
       );
+      $settings = array_merge( $settings_before, $settings_after );
     }
 
     if ( 'certifikat-spokojenosti' == $current_section ) {
