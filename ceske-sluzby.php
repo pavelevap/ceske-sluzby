@@ -327,18 +327,24 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
             <font size="2">Uloženka - výběr pobočky:</font><br>
             <div id="ulozenka-branch-select-options">
               <select name="ulozenka_branches">
-              <option>Vyberte pobočku</option>
-    
-        <?php
-        foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
-          if ( ! empty ( $ulozenka_branches ) && $ulozenka_branches == $pobocka->name ) {
-            $selected = ' selected="selected"';
-          } else {
-            $selected = "";
-          }
-          echo '<option value="' . $pobocka->name . '"' . $selected . '>' . $pobocka->name . '</option>';
-        } ?>
-              </select>    	
+		<option>Vyberte pobočku</option>
+		<?php
+		$pobockySorted = array();
+		  foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
+		  $pobockySorted [] = $pobocka->name;
+		}
+		sort($pobockySorted);
+	      
+		foreach ( $pobockySorted as $pobocka ) {
+		  if ( ! empty ( $ulozenka_branches ) && $ulozenka_branches == $pobocka ) {
+		    $selected = ' selected="selected"';
+		  } else {
+		    $selected = "";
+		  }
+		  echo '<option value="' . $pobocka . '"' . $selected . '>' . $pobocka . '</option>';
+		}
+		?>
+	      </select>  	
             </div>
           </td>
         </tr>
