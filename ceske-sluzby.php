@@ -338,7 +338,7 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
           }
           echo '<option value="' . $pobocka->name . '"' . $selected . '>' . $pobocka->name . '</option>';
         } ?>
-    
+              </select>    	
             </div>
           </td>
         </tr>
