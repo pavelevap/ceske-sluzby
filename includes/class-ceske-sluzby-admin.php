@@ -16,6 +16,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
     $aktivace_certifikatu = get_option( 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace' );
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+    $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
     $sections = array(
       '' => 'Základní nastavení'
     );
@@ -27,6 +28,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
     if ( $aktivace_dodaci_doby == "yes" ) {
       $sections['dodaci-doba'] = 'Dodací doba';
+    }
+    if ( $aktivace_eet == "yes" ) {
+      $sections['eet'] = 'EET';
     }
     if ( empty( $sections ) ) {
       return;
@@ -172,6 +176,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'checkbox',
           'desc' => 'Aktivovat možnost podrobného nastavení dodací doby, které bude dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">zde</a>.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace'
+        ),
+        array(
+          'title' => 'EET',
+          'type' => 'checkbox',
+          'desc' => 'Aktivovat možnost použití elektronické evidence tržeb, podrobné nastavení bude dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=eet">zde</a>.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace'
         ),
         array(
           'title' => 'Možnost změny objednávek pro dobírku',
@@ -408,7 +418,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'options' => array(
             'vlevo' => 'Vlevo',
             'vpravo' => 'Vpravo',
-				  ),
+          ),
           'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti_umisteni'
         ),
         array(
@@ -429,7 +439,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         )
       );
     }
-    
+
     if ( 'dodaci-doba' == $current_section ) {
       $settings = array(
         array(
@@ -508,6 +518,62 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_dodaci_doba_title'
+        )
+      );
+    }
+
+    if ( 'eet' == $current_section ) {
+      $settings = array(
+        array(
+          'title' => 'Elektronická evidence tržeb (EET)',
+          'type' => 'title',
+          'desc' => 'Nastavení potřebných informací pro odesílání elektronických účtenek.',
+          'id' => 'wc_ceske_sluzby_eet_title'
+        ),
+        array(
+          'title' => 'DIČ',
+          'type' => 'text',
+          'desc' => 'DIČ provozovatele obchodu.',
+          'id' => 'wc_ceske_sluzby_eet_dic',
+          'css' => 'width: 150px',
+        ),
+        array(
+          'title' => 'ID provozovny',
+          'type' => 'text',
+          'desc' => 'Identifikace provozovny (získáte v rámci registrace provozovny pro EET).',
+          'id' => 'wc_ceske_sluzby_eet_id_provozovna',
+          'css' => 'width: 100px',
+        ),
+        array(
+          'title' => 'ID pokladny',
+          'type' => 'text',
+          'desc' => 'Identifikace pokladního zařízení (můžete nastavit libovolně).',
+          'id' => 'wc_ceske_sluzby_eet_id_pokladna',
+          'css' => 'width: 100px',
+        ),
+        array(
+          'title' => 'Heslo',
+          'type' => 'password',
+          'desc' => 'Heslo k certifikátu.',
+          'id' => 'wc_ceske_sluzby_eet_heslo',
+          'css' => 'width: 150px',
+        ),
+        array(
+          'title' => 'Prostředí',
+          'type' => 'select',
+          'desc_tip' => 'Nejdříve je vhodné celou funkci vyzkoušet na nějaké testovací objednávce.',
+          'id' => 'wc_ceske_sluzby_eet_prostredi',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            'test' => 'Testovací',
+            'produkce' => 'Produkční',
+          ),
+          'default' => 'test',
+          'css' => 'width: 150px',
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_eet_title'
         )
       );
     }
