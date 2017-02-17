@@ -28,7 +28,7 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
     $order = new WC_Order( $order_id );
     
     // https://github.com/heureka/heureka-overeno-php-api
-    require_once( dirname( __FILE__ ) . '/src/HeurekaOvereno.php' );
+    require_once( dirname( __FILE__ ) . '/src/heureka/HeurekaOvereno.php' );
     
     $language = get_locale();
     try {
