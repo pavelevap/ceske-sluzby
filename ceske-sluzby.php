@@ -242,6 +242,11 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_filter( 'woocommerce_email_classes', 'ceske_sluzby_sledovani_zasilek_email' );
       add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
     }
+    
+    $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
+    if ( $aktivace_eet == "yes" ) {
+      add_filter( 'upload_mimes', 'ceske_sluzby_povolit_nahravani_certifikatu' );
+    }
 
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
     if ( $aktivace_dodaci_doby == "yes" ) {
@@ -267,10 +272,6 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
           }
         }
       }
-      $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
-      if ( $predobjednavka == "yes" ) {
-        add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
-      }
     }
 
     add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
@@ -279,7 +280,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'edit_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
     add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
-
+    add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
   }
 }
@@ -1202,8 +1203,22 @@ function ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce() {
 function ceske_sluzby_load_admin_scripts() {
   $screen = get_current_screen();
   $screen_id = $screen ? $screen->id : '';
-  if ( in_array( $screen_id, array( 'product', 'edit-product', 'shop_order' ) ) ) {
+  $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+  $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
+  if ( in_array( $screen_id, array( 'product', 'edit-product', 'shop_order' ) ) && $predobjednavka == "yes" ) {
     wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );
   }
+  if ( in_array( $screen_id, array( 'woocommerce_page_wc-settings' ) ) && $aktivace_eet == "yes" ) {
+    if ( ! did_action( 'wp_enqueue_media' ) ) {
+      wp_enqueue_media();
+    } 
+    wp_register_script( 'wc-admin-ceske-sluzby-upload-button', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-upload-button-admin.js', array( 'jquery' ), CS_VERSION );
+    wp_enqueue_script( 'wc-admin-ceske-sluzby-upload-button' );
+  }
+}
+
+function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
+  $mime_types['p12'] = 'application/x-pkcs12';
+  return $mime_types;
 }

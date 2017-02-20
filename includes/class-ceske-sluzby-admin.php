@@ -8,6 +8,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_action( 'woocommerce_update_options_ceske-sluzby', __CLASS__ . '::update_settings' );
     add_action( 'woocommerce_sections_ceske-sluzby', __CLASS__ . '::output_sections' );
     add_filter( 'woocommerce_admin_settings_sanitize_option', __CLASS__ . '::admin_settings_sanitize_option', 10, 3 );
+    add_action( 'woocommerce_admin_field_upload', __CLASS__ . '::ceske_sluzby_upload_button_settings_field' );
   }
   
   public static function output_sections() {
@@ -64,6 +65,49 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
     }
     return $value; 
+  }
+
+  public static function ceske_sluzby_upload_button_settings_field( $value ) {
+    if ( array_key_exists( 'upload_button', $value ) && ! empty( $value['upload_button'] ) ) {
+      $upload_button = $value['upload_button'];
+    } else {
+      $upload_button = 'Nahrát';
+    }
+    if ( array_key_exists( 'remove_button', $value ) && ! empty( $value['remove_button'] ) ) {
+      $remove_button = $value['remove_button'];
+    } else {
+      $remove_button = 'Odstranit';
+    }
+    $description = '';
+    $nazev_souboru = '';
+    if ( array_key_exists( 'desc', $value ) && ! empty( $value['desc'] ) ) {
+      $description = '<span class="description">' . $value['desc'] . '</span>';
+    }  
+    $selected_value = get_option( $value['id'] );
+    $display = 'inline-block';
+    $display_remove = 'none';
+    if ( ! empty( $selected_value ) ) {
+      $display_remove = 'inline-block';
+      $display = 'none';
+    }
+    $button = ' button">' . $upload_button;
+    $nazev_souboru = basename( get_attached_file( $selected_value ) ); ?>
+    <tr valign="top">
+      <th scope="row" class="titledesc">
+        <label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+      </th>
+      <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
+        <div>
+          <?php if ( ! empty( $nazev_souboru ) ) { ?>
+            <span class="nazev-souboru" style="padding-right:10px;"><strong><?php echo $nazev_souboru; ?></strong></span>
+          <?php } ?>
+          <a href="#" style="display:<?php echo $display; ?>" class="ceske_sluzby_upload_button<?php echo $button; ?></a>
+          <input type="hidden" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" value="<?php echo $selected_value; ?>" />
+          <a href="#" class="ceske_sluzby_remove_button" style="font-size:13px;display:<?php echo $display_remove; ?>"><?php echo $remove_button; ?></a>
+        </div>
+        <?php echo $description; ?>
+      </td>
+    </tr><?php
   }
 
   public static function get_settings( $current_section = '' ) {
@@ -550,6 +594,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'desc' => 'Identifikace pokladního zařízení (můžete nastavit libovolně).',
           'id' => 'wc_ceske_sluzby_eet_id_pokladna',
           'css' => 'width: 100px',
+        ),
+        array(
+          'title' => 'Certifikát',
+          'type' => 'upload',
+          'upload_button' => 'Nahrát certifikát',
+          'remove_button' => 'Odstranit certifikát',
+          'desc' => 'Nastavení získaného certifikátu (soubor ve formátu .p12).',
+          'id' => 'wc_ceske_sluzby_eet_certifikat',
         ),
         array(
           'title' => 'Heslo',
