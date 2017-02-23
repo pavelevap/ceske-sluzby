@@ -242,10 +242,11 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_filter( 'woocommerce_email_classes', 'ceske_sluzby_sledovani_zasilek_email' );
       add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
     }
-    
+
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
     if ( $aktivace_eet == "yes" ) {
       add_filter( 'upload_mimes', 'ceske_sluzby_povolit_nahravani_certifikatu' );
+      require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-eet.php';
     }
 
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
@@ -1221,4 +1222,9 @@ function ceske_sluzby_load_admin_scripts() {
 function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
   $mime_types['p12'] = 'application/x-pkcs12';
   return $mime_types;
+}
+
+add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
+function ceske_sluzby_zobrazit_eet( $template_type, $order ) {
+  Ceske_Sluzby_EET::ceske_sluzby_zobrazit_eet_uctenku( $order->id );
 }
