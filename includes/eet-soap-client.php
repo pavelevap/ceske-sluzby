@@ -4,11 +4,11 @@ class Ceske_Sluzby_EET_SoapClient extends SoapClient {
     $heslo = get_option( 'wc_ceske_sluzby_eet_heslo' );
     if ( ! empty( $heslo ) ) {
       // https://github.com/robrichards/wse-php/blob/1.2/src/WSSESoap.php
-      require_once( '/../src/eet/wse-php/WSSESoap.php' );
+      require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/wse-php/WSSESoap.php' );
       // https://github.com/robrichards/xmlseclibs/blob/1.4/src/XMLSecurityDSig.php
-      require_once( '/../src/eet/xmlseclibs/XMLSecurityDSig.php' );
+      require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/xmlseclibs/XMLSecurityDSig.php' );
       // https://github.com/robrichards/xmlseclibs/blob/1.4/src/XMLSecurityKey.php
-      require_once( '/../src/eet/xmlseclibs/XMLSecurityKey.php' );
+      require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/xmlseclibs/XMLSecurityKey.php' );
 
       // http://www.etrzby.cz/assets/cs/prilohy/EETServiceSOAP.wsdl
       $wsdl = dirname( dirname( __FILE__ ) ) . '/src/eet/EETServiceSOAP.wsdl';

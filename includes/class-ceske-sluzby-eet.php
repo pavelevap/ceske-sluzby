@@ -217,14 +217,14 @@ class Ceske_Sluzby_EET {
     $local_cert = "";
     if ( $dic_popl = 'CZ1212121218' ) {
       // http://www.etrzby.cz/assets/cs/prilohy/EET_CA1_Playground_v1.zip
-      $local_cert = dirname( dirname( __FILE__ ) ) . "/src/eet/EET_CA1_Playground-CZ1212121218.p12";
+      $local_cert = dirname( dirname( __FILE__ ) ) . '/src/eet/EET_CA1_Playground-CZ1212121218.p12';
     } elseif ( ! empty( $certifikat ) ) {
       $local_cert = get_attached_file( $certifikat );
     }
     // https://github.com/robrichards/xmlseclibs/blob/1.4/src/XMLSecurityDSig.php
-    require_once( '/../src/eet/xmlseclibs/XMLSecurityDSig.php' );
+    require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/xmlseclibs/XMLSecurityDSig.php' );
     // https://github.com/robrichards/xmlseclibs/blob/1.4/src/XMLSecurityKey.php
-    require_once( '/../src/eet/xmlseclibs/XMLSecurityKey.php' );
+    require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/xmlseclibs/XMLSecurityKey.php' );
     require_once( 'eet-soap-client.php' );
     $certs = array();   
     if ( openssl_pkcs12_read( file_get_contents( $local_cert ), $certs, $heslo ) ) {
