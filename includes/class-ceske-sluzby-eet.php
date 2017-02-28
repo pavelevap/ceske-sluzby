@@ -118,17 +118,20 @@ class Ceske_Sluzby_EET {
         foreach ( $objednavka_dane as $code => $tax ) {
           if ( array_key_exists( $tax->rate_id, $tax_rates ) && array_key_exists( 'rate', $tax_rates[$tax->rate_id] ) ) {
             $sazba = (float)$tax_rates[$tax->rate_id]['rate'];
+            $decimals = get_option( 'woocommerce_price_num_decimals' );
+            $zaklad_dane = number_format( (float)( round( $tax->amount / $sazba * 100, $decimals ) ), 2, '.', '' );
+            $dan = number_format( (float)( round( $tax->amount, $decimals ) ), 2, '.', '' );
             if ( $sazba == 21 ) {
-              $danova_data['zakl_dan1'] = number_format( (float)( $tax->amount / $sazba * 100 ), 2, '.', '' );
-              $danova_data['dan1'] = $tax->amount;
+              $danova_data['zakl_dan1'] = $zaklad_dane;
+              $danova_data['dan1'] = $dan;
             } elseif ( $sazba == 15 ) {
-              $danova_data['zakl_dan2'] = number_format( (float)( $tax->amount / $sazba * 100 ), 2, '.', '' );
-              $danova_data['dan2'] = $tax->amount;
+              $danova_data['zakl_dan2'] = $zaklad_dane;
+              $danova_data['dan2'] = $dan;
             } elseif ( $sazba == 10 ) {
-              $danova_data['zakl_dan3'] = number_format( (float)( $tax->amount / $sazba * 100 ), 2, '.', '' );
-              $danova_data['dan3'] = $tax->amount;
+              $danova_data['zakl_dan3'] = $zaklad_dane;
+              $danova_data['dan3'] = $dan;
             }
-            $zaklad_celkem = $zaklad_celkem + number_format( (float)( $tax->amount / $sazba * 100 ), 2, '.', '' );
+            $zaklad_celkem = $zaklad_celkem + $zaklad_dane;
           }
         }
         $zakl_nepodl_dph = $order->get_total() - $order->get_total_tax() - $zaklad_celkem;
@@ -225,6 +228,24 @@ class Ceske_Sluzby_EET {
             echo '<strong>Čas</strong>: ' . $date->format( 'G:i:s' ) . '<br>';
             echo '<strong>Celková částka</strong>: ' . wc_price( $uctenka['Data']['celk_trzba'] ) . ' - ';
             echo '<strong>Režim tržby</strong>: běžný<br>';
+            if ( array_key_exists( 'zakl_dan1', $uctenka['Data'] ) ) {
+              echo '<strong>DPH 21 %</strong>: ' . wc_price( $uctenka['Data']['zakl_dan1'] ) . ' (základ daně) + ';
+              echo wc_price( $uctenka['Data']['dan1'] ) . ' (daň) = ';
+              echo '<strong>' . wc_price( $uctenka['Data']['zakl_dan1'] + $uctenka['Data']['dan1'] ) . '</strong> (celkem)<br>';
+            }
+            if ( array_key_exists( 'zakl_dan2', $uctenka['Data'] ) ) {
+              echo '<strong>DPH 15 %</strong>: ' . wc_price( $uctenka['Data']['zakl_dan2'] ) . ' (základ daně) + ';
+              echo wc_price( $uctenka['Data']['dan2'] ) . ' (daň) = ';
+              echo '<strong>' . wc_price( $uctenka['Data']['zakl_dan2'] + $uctenka['Data']['dan2'] ) . '</strong> (celkem)<br>';
+            }
+            if ( array_key_exists( 'zakl_dan3', $uctenka['Data'] ) ) {
+              echo '<strong>DPH 10 %</strong>: ' . wc_price( $uctenka['Data']['zakl_dan3'] ) . ' (základ daně) + ';
+              echo wc_price( $uctenka['Data']['dan3'] ) . ' (daň) = ';
+              echo '<strong>' . wc_price( $uctenka['Data']['zakl_dan3'] + $uctenka['Data']['dan3'] ) . '</strong> (celkem)<br>';
+            }
+            if ( array_key_exists( 'zakl_nepodl_dph', $uctenka['Data'] ) ) {
+              echo '<strong>Základ nepodléhající DPH</strong>: ' . wc_price( $uctenka['Data']['zakl_nepodl_dph'] ) . '<br>';
+            }
             echo '<strong>FIK</strong>: ' . $uctenka['Odpoved']['fik'] . '<br>';
             echo '<strong>BKP</strong>: ' . $uctenka['KontrolniKody']['bkp'] . '<br>';
             echo '</p>';
@@ -310,7 +331,6 @@ class Ceske_Sluzby_EET {
       $soapClient = new Ceske_Sluzby_EET_SoapClient( $wsdl, array( 'trace' => 1 ) );
       $values = $soapClient->OdeslaniTrzby( $parameters );
       $item_id = wc_add_order_item( $order->id, array( 'order_item_name' => 'EET (' . self::ziskat_poradove_cislo() . ')', 'order_item_type' => 'ceske_sluzby_eet' ) );
-      wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_poradove_cislo', self::ziskat_poradove_cislo() );
       wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_request', $soapClient->__getLastRequest() );
       wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_response', $soapClient->__getLastResponse() );
 
@@ -320,6 +340,7 @@ class Ceske_Sluzby_EET {
           $message = 'Testovací elektronická účtenka byla úspěšně odeslána.';
         } else {
           $message = 'Elekronická účtenka č. ' . self::ziskat_poradove_cislo() . ' byla úspěšně odeslána.';
+          wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_poradove_cislo', self::ziskat_poradove_cislo() );
           update_option( 'ceske_sluzby_eet_poradove_cislo', self::ziskat_poradove_cislo() );
         }
       }
