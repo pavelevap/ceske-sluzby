@@ -15,7 +15,7 @@ class Ceske_Sluzby_EET_SoapClient extends SoapClient {
       $dic_popl = get_option( 'wc_ceske_sluzby_eet_dic' );
       $certifikat = get_option( 'wc_ceske_sluzby_eet_certifikat' );
       $local_cert = "";
-      if ( $dic_popl = 'CZ1212121218' ) {
+      if ( $dic_popl == 'CZ1212121218' ) {
         // http://www.etrzby.cz/assets/cs/prilohy/EET_CA1_Playground_v1.zip
         $local_cert = dirname( dirname( __FILE__ ) ) . "/src/eet/EET_CA1_Playground-CZ1212121218.p12";
       } elseif ( ! empty( $certifikat ) ) {
