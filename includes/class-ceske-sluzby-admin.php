@@ -572,7 +572,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Elektronická evidence tržeb (EET)',
           'type' => 'title',
           'desc' => 'Nastavení potřebných informací pro odesílání elektronických účtenek.
-                     Součástí pluginu je i <strong>testovací certifikát</strong>, který bude automaticky použit pokud vyplníte pro DIČ hodnotu <code>CZ1212121218</code>.
+                     Součástí pluginu je i <strong>testovací certifikát</strong>, který bude automaticky použit pokud bude zvoleno <strong>testovací prostředí</strong>.
+                     Pokud chcete pouze testovat, tak nemusíte vyplňovat žádné údaje, protože budou použity automaticky (např. DIČ <code>CZ1212121218</code>).
                      V rámci testovacího režimu je možné účtenky následně mazat (nejsou oficiálně evidovány) a všechny mají stejné pořadové číslo (1).',
           'id' => 'wc_ceske_sluzby_eet_title'
         ),

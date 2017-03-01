@@ -57,6 +57,17 @@ class Ceske_Sluzby_EET {
   }
 
   public function ziskat_zakladni_data() {
+    $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
+    if ( ! empty( $prostredi ) ) {
+      if ( $prostredi == "test" ) {
+        $zakladni_data = array(
+          'dic_popl' => 'CZ1212121218',
+          'id_provoz' => '273',
+          'id_pokl' => '1',
+        );
+        return $zakladni_data;
+      }
+    }
     $dic_popl = get_option( 'wc_ceske_sluzby_eet_dic' );
     if ( empty( $dic_popl ) ) {
       return 'DIČ nebylo vyplněno.';
@@ -115,11 +126,11 @@ class Ceske_Sluzby_EET {
       $tax_rates = WC_Tax::get_rates();
       if ( ! empty( $tax_rates ) && is_array( $tax_rates ) ) {
         $zaklad_celkem = 0;
+        $decimals = get_option( 'woocommerce_price_num_decimals' );
         $objednavka_dane = $order->get_tax_totals();
         foreach ( $objednavka_dane as $code => $tax ) {
           if ( array_key_exists( $tax->rate_id, $tax_rates ) && array_key_exists( 'rate', $tax_rates[$tax->rate_id] ) ) {
             $sazba = (float)$tax_rates[$tax->rate_id]['rate'];
-            $decimals = get_option( 'woocommerce_price_num_decimals' );
             $zaklad_dane = number_format( (float)( round( $tax->amount / $sazba * 100, $decimals ) ), 2, '.', '' );
             $dan = number_format( (float)( round( $tax->amount, $decimals ) ), 2, '.', '' );
             if ( $sazba == 21 ) {
@@ -286,15 +297,19 @@ class Ceske_Sluzby_EET {
   function ceske_sluzby_ziskat_eet_uctenku( $order ) {
     // http://www.etrzby.cz/assets/cs/prilohy/EETServiceSOAP.wsdl
     $wsdl = dirname( dirname( __FILE__ ) ) . '/src/eet/EETServiceSOAP.wsdl';
-    $heslo = get_option( 'wc_ceske_sluzby_eet_heslo' );
-    $dic_popl = get_option( 'wc_ceske_sluzby_eet_dic' );
-    $certifikat = get_option( 'wc_ceske_sluzby_eet_certifikat' );
-    $local_cert = "";
-    if ( $dic_popl == 'CZ1212121218' ) {
-      // http://www.etrzby.cz/assets/cs/prilohy/EET_CA1_Playground_v1.zip
-      $local_cert = dirname( dirname( __FILE__ ) ) . '/src/eet/EET_CA1_Playground-CZ1212121218.p12';
-    } elseif ( ! empty( $certifikat ) ) {
-      $local_cert = get_attached_file( $certifikat );
+    $heslo = "eet";
+    // http://www.etrzby.cz/assets/cs/prilohy/EET_CA1_Playground_v1.zip
+    $local_cert = dirname( dirname( __FILE__ ) ) . "/src/eet/EET_CA1_Playground-CZ1212121218.p12";
+    $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
+    if ( ! empty( $prostredi ) ) {
+      if ( $prostredi != "test" ) {
+        $certifikat = get_option( 'wc_ceske_sluzby_eet_certifikat' );
+        $ulozene_heslo = get_option( 'wc_ceske_sluzby_eet_heslo' );
+        if ( ! empty( $certifikat ) && ! empty( $ulozene_heslo ) ) {
+          $local_cert = get_attached_file( $certifikat );
+          $heslo = $ulozene_heslo;
+        }
+      }
     }
     // https://github.com/robrichards/xmlseclibs/blob/1.4/src/XMLSecurityDSig.php
     require_once( dirname( dirname( __FILE__ ) ) . '/src/eet/xmlseclibs/XMLSecurityDSig.php' );
@@ -305,6 +320,10 @@ class Ceske_Sluzby_EET {
     if ( openssl_pkcs12_read( file_get_contents( $local_cert ), $certs, $heslo ) ) {
       $objKey = new XMLSecurityKey( XMLSecurityKey::RSA_SHA256, array( 'type' => 'private' ) );
       $objKey->loadKey( $certs['pkey'] );
+    } else {
+      $message = 'Nepodařilo se načíst certifikát, patrně je špatně zadané heslo.';
+      $order->add_order_note( $message );
+      return;
     }
     // https://core.trac.wordpress.org/ticket/20973
     $date = date_create( 'now', timezone_open( 'Europe/Prague' ) );
@@ -350,13 +369,19 @@ class Ceske_Sluzby_EET {
         )
       );
 
-      $soapClient = new Ceske_Sluzby_EET_SoapClient( $wsdl, array( 'trace' => 1 ) );
+      $location = "https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3";
+      $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
+      if ( ! empty( $prostredi ) ) {
+        if ( $prostredi != "test" ) {
+          $location = "https://prod.eet.cz:443/eet/services/EETServiceSOAP/v3";
+        }
+      }
+      $soapClient = new Ceske_Sluzby_EET_SoapClient( $wsdl, array( 'trace' => 1, 'location' => $location ) );
       $values = $soapClient->OdeslaniTrzby( $parameters );
       $item_id = wc_add_order_item( $order->id, array( 'order_item_name' => 'EET (' . self::ziskat_poradove_cislo() . ')', 'order_item_type' => 'ceske_sluzby_eet' ) );
       wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_request', $soapClient->__getLastRequest() );
       wc_add_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_response', $soapClient->__getLastResponse() );
 
-      $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
       if ( ! empty( $prostredi ) ) {
         if ( $prostredi == "test" ) {
           $message = 'Testovací elektronická účtenka byla úspěšně odeslána.';
@@ -391,19 +416,39 @@ class Ceske_Sluzby_EET {
             }
           }
           if ( array_key_exists( 'zakl_dan2', $uctenka['Data'] ) ) {
-            $dane['zakl_dan2'] += $uctenka['Data']['zakl_dan2'];
+            if ( array_key_exists( 'zakl_dan2', $dane ) ) {
+              $dane['zakl_dan2'] += $uctenka['Data']['zakl_dan2'];
+            } else {
+              $dane['zakl_dan2'] = $uctenka['Data']['zakl_dan2'];
+            }
           }
           if ( array_key_exists( 'dan2', $uctenka['Data'] ) ) {
-            $dane['dan2'] += $uctenka['Data']['dan2'];
+            if ( array_key_exists( 'dan2', $dane ) ) {
+              $dane['dan2'] += $uctenka['Data']['dan2'];
+            } else {
+              $dane['dan2'] = $uctenka['Data']['dan2'];
+            }
           }
           if ( array_key_exists( 'zakl_dan3', $uctenka['Data'] ) ) {
-            $dane['zakl_dan3'] += $uctenka['Data']['zakl_dan3'];
+            if ( array_key_exists( 'zakl_dan3', $dane ) ) {
+              $dane['zakl_dan3'] += $uctenka['Data']['zakl_dan3'];
+            } else {
+              $dane['zakl_dan3'] = $uctenka['Data']['zakl_dan3'];
+            }
           }
           if ( array_key_exists( 'dan3', $uctenka['Data'] ) ) {
-            $dane['dan3'] += $uctenka['Data']['dan3'];
+            if ( array_key_exists( 'dan3', $dane ) ) {
+              $dane['dan3'] += $uctenka['Data']['dan3'];
+            } else {
+              $dane['dan3'] = $uctenka['Data']['dan3'];
+            }
           }
           if ( array_key_exists( 'zakl_nepodl_dph', $uctenka['Data'] ) ) {
-            $dane['zakl_nepodl_dph'] += $uctenka['Data']['zakl_nepodl_dph'];
+            if ( array_key_exists( 'zakl_nepodl_dph', $dane ) ) {
+              $dane['zakl_nepodl_dph'] += $uctenka['Data']['zakl_nepodl_dph'];
+            } else {
+              $dane['zakl_nepodl_dph'] = $uctenka['Data']['zakl_nepodl_dph'];
+            }
           }
         }
       }
