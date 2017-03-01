@@ -94,7 +94,23 @@ class Ceske_Sluzby_EET {
       'id_provoz' => $id_provoz,
       'id_pokl' => $id_pokl,
     );
-    return $zakladni_data;
+    return $zakladni_data;                                                                                
+  }
+
+  public function kontrolni_odkaz( $uctenka ) {
+    // https://github.com/jakubboucek/eet-check
+    if ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'fik', $uctenka['Odpoved'] ) ) {
+      $url = 'https://eet-check.appspot.com/check?';
+      $url .= 'dic=' . $uctenka['Data']['dic_popl'];
+      $date = date_create( $uctenka['Data']['dat_trzby'], timezone_open('Europe/Prague') );
+      $timezone_offset = timezone_offset_get( timezone_open( "Europe/Prague" ), $date );
+      $date->modify( '-' . $timezone_offset . ' seconds' );
+      $url .= '&date=' . $date->format( 'Y-m-d\TH:i:s\Z' );
+      $url .= '&price=' . $uctenka['Data']['celk_trzba'];
+      $url .= '&bkp=' . $uctenka['KontrolniKody']['bkp'];
+      $url .= '&fik=' . $uctenka['Odpoved']['fik'];
+    }
+    return $url;
   }
 
   public function odeslat_eet_uctenku( $actions ) {
@@ -253,7 +269,12 @@ class Ceske_Sluzby_EET {
               echo '<p><strong>Elektronická účtenka (EET)</strong>:<br>';
             }
             echo '<strong>DIČ</strong>: ' . $uctenka['Data']['dic_popl'] . ' - ';
-            echo '<strong>Číslo účtenky</strong>: ' . $uctenka['Data']['porad_cis'] . '<br>';
+            echo '<strong>Číslo účtenky</strong>: ' . $uctenka['Data']['porad_cis'];
+            if ( ! array_key_exists( 'test', $uctenka['Odpoved'] ) && $always ) {
+              echo ' (kontrolní <a target="_blank" href="' . self::kontrolni_odkaz( $uctenka ). '">odkaz</a>)<br>';
+            } else {
+              echo '<br>';
+            }
             echo '<strong>Provozovna</strong>: ' . $uctenka['Data']['id_provoz'] . ' - ';
             echo '<strong>Pokladna</strong>: ' . $uctenka['Data']['id_pokl'] . '<br>';
             echo '<strong>Datum</strong>: ' . $date->format( 'j.n.Y' ) . ' - ';
