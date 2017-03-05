@@ -9,6 +9,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_action( 'woocommerce_sections_ceske-sluzby', __CLASS__ . '::output_sections' );
     add_filter( 'woocommerce_admin_settings_sanitize_option', __CLASS__ . '::admin_settings_sanitize_option', 10, 3 );
     add_action( 'woocommerce_admin_field_upload', __CLASS__ . '::ceske_sluzby_upload_button_settings_field' );
+    add_action( 'woocommerce_update_options_checkout', __CLASS__ . '::ceske_sluzby_nastaveni_plateb' );
+    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_plateb', 100 );
   }
   
   public static function output_sections() {
@@ -65,6 +67,25 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $value = wp_kses( $raw_value, wp_kses_allowed_html( 'post' ) );
     }
     return $value; 
+  }
+
+  public static function ceske_sluzby_nastaveni_plateb() {
+    $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
+    if ( ! empty( $zaokrouhlovani ) && $zaokrouhlovani == 'custom' ) {
+      foreach ( WC()->payment_gateways()->payment_gateways() as $gateway_id => $gateway ) {
+        $form_fields['ceske_sluzby_zaokrouhleni'] = array(
+          'title' => 'Zaokrouhlování',
+          'type' => 'select',
+          'options' => array(
+            '' => '- Vyberte -',
+            'nahoru' => 'Zaokrouhlit nahoru'
+          ),
+          'default' => 'no',
+          'description' => 'Automatické zaokrouhlení celkové částky objednávky.',
+        );
+        $gateway->form_fields += $form_fields;
+      }
+    }
   }
 
   public static function ceske_sluzby_upload_button_settings_field( $value ) {
@@ -238,6 +259,19 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'checkbox',
           'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+        ),
+        array(
+          'title' => 'Zakrouhlování',
+          'type' => 'select',
+          'desc_tip' => 'Možnosti zaokrouhlení celkové částky objednávky.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            '' => '- Vyberte -',
+            'nahoru' => 'Zaokrouhlit nahoru',
+            'custom' => 'Nastavení v rámci platebních metod'
+          ),
+          'css' => 'width: 250px',
         ),
         array(
           'type' => 'sectionend',

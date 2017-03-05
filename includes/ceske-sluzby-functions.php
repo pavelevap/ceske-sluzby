@@ -410,3 +410,15 @@ function ceske_sluzby_ziskat_nastaveni_zbozi_extra_message() {
   );
   return $hodnoty;
 }
+
+function ceske_sluzby_ziskat_nastaveni_platebni_brany() {
+  $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
+  if ( $zaokrouhlovani == 'custom' ) {
+    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $current_gateway = WC()->session->chosen_payment_method;
+    if ( array_key_exists( 'ceske_sluzby_zaokrouhleni', $available_gateways[$current_gateway]->settings ) ) {
+      $zaokrouhlovani = $available_gateways[$current_gateway]->settings['ceske_sluzby_zaokrouhleni'];
+    }
+  }
+  return $zaokrouhlovani;
+}

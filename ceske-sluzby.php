@@ -283,6 +283,15 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
     add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
+
+    $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
+    if ( ! empty( $zaokrouhlovani ) ) {
+      add_action( 'woocommerce_cart_calculate_fees', 'ceske_sluzby_zaokrouhlovani_poplatek' );
+      add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
+      if ( $zaokrouhlovani == 'custom' ) {
+        add_action( 'wp_head', 'ceske_sluzby_aktualizovat_checkout_javascript' );
+      }
+    }
   }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -1227,4 +1236,70 @@ function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
 add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
 function ceske_sluzby_zobrazit_eet( $template_type, $order ) {
   Ceske_Sluzby_EET::ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+}
+
+function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
+  $zaokrouhlovani = ceske_sluzby_ziskat_nastaveni_platebni_brany();
+  if ( $zaokrouhlovani == 'nahoru' ) {
+    $cart->calculate_fees();
+    if ( $cart->round_at_subtotal ) {
+      $cart->tax_total = WC_Tax::get_tax_total( $cart->taxes );
+    } else {
+      $cart->tax_total = array_sum( $cart->taxes );
+    }
+  }
+}
+
+function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
+  $dane = false;
+  if ( $cart->total > 0 ) {
+    $zaokrouhlovani = ceske_sluzby_ziskat_nastaveni_platebni_brany();
+    if ( $zaokrouhlovani == 'nahoru' ) {
+      $celkem = $cart->total;
+      $zao_total = ceil( $cart->total ) - $celkem;
+      if ( wc_tax_enabled() ) {
+        $dane = true;
+        foreach ( $cart->taxes as $rate_id => $tax_rate ) {
+          if ( array_key_exists( $rate_id, $cart->shipping_taxes ) ) {
+            $tax_rate = $tax_rate + $cart->shipping_taxes[$rate_id];
+          }
+          $kompletni_dane[$rate_id] = $tax_rate;
+        }
+        $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
+        $sazba = 0;
+        $tax_rates = array();
+        $tax_class = '';
+        if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
+          foreach ( $max_dan as $rate_id ) {
+            $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
+            $tax_rates_tmp = WC_Tax::get_rates( $tax_class_tmp );
+            $sazba_tmp = $tax_rates_tmp[$rate_id]['rate'];
+            if ( $sazba_tmp >= $sazba ) {
+              $sazba = $sazba_tmp;
+              $tax_rates = $tax_rates_tmp;
+              $tax_class = $tax_class_tmp;
+            }
+          }
+        }
+        $zao_taxes = WC_Tax::calc_tax( $zao_total, $tax_rates, true );
+        $zao = $zao_total - reset( $zao_taxes );
+      } else {
+        $zao = $zao_total;
+      }
+      $cart->add_fee( 'Zaokrouhlení', $zao, $dane, $tax_class );
+      $cart->total += $zao_total;
+    }
+  }
+}
+
+function ceske_sluzby_aktualizovat_checkout_javascript() {
+  if ( is_checkout() ) { ?>
+    <script type="text/javascript">
+      jQuery(document).ready(function($){
+        $(document.body).on('change', 'input[name="payment_method"]', function() {
+          $('body').trigger('update_checkout');
+        });
+      });
+    </script><?php
+  } 
 }
