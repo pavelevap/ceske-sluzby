@@ -49,19 +49,23 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
 
 add_action( 'woocommerce_save_product_variation', 'ceske_sluzby_save_variation_settings_fields', 10, 2 );
 function ceske_sluzby_save_variation_settings_fields( $variation_id, $i ) {
-  $dodaci_doba = isset( $_POST['ceske_sluzby_dodaci_doba'] ) ? $_POST['ceske_sluzby_dodaci_doba'][$i] : '';
-  $dodaci_doba_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', true );
-  if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
-    update_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
-  } elseif ( isset( $dodaci_doba_ulozeno ) ) {
-    delete_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba' );  
+  if ( isset ( $_POST['ceske_sluzby_dodaci_doba'] ) ) {
+    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'][$i];
+    $dodaci_doba_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', true );
+    if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
+      update_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+    } elseif ( isset( $dodaci_doba_ulozeno ) ) {
+      delete_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba' );  
+    }
   }
 
-  $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean'][$i];
-  $hodnota_ean_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', true );
-  if ( ! empty ( $hodnota_ean ) ) {
-    update_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', $hodnota_ean );
-  } elseif ( isset( $hodnota_ean_ulozeno ) ) {
-    delete_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean' );  
+  if ( isset ( $_POST['ceske_sluzby_hodnota_ean'] ) ) {
+    $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean'][$i];
+    $hodnota_ean_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', true );
+    if ( ! empty ( $hodnota_ean ) ) {
+      update_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', $hodnota_ean );
+    } elseif ( isset( $hodnota_ean_ulozeno ) ) {
+      delete_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean' );  
+    }
   }
 }
