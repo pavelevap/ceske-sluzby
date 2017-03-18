@@ -7,7 +7,6 @@ if ( version_compare( WOOCOMMERCE_VERSION, '2.5', '>=' ) ) {
 }
 
 function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variation ) {
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
   $class = "";
   $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
   if ( empty ( $podpora_ean ) ) {
@@ -25,7 +24,10 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
     }
     woocommerce_wp_text_input( $params );
   }
-  if ( ! empty ( $dodaci_doba ) ) {
+  
+  $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
+  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+  if ( $aktivace_dodaci_doby == "yes" && ! empty ( $dodaci_doba ) ) {
     if ( empty ( $class ) ) {
       $class = "first";
     } else {
