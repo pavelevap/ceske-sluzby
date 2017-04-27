@@ -1235,7 +1235,10 @@ function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
 
 add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
 function ceske_sluzby_zobrazit_eet( $template_type, $order ) {
-  Ceske_Sluzby_EET::ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+  $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
+  if ( ! empty( $eet_format ) ) {
+    Ceske_Sluzby_EET::ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+  }
 }
 
 function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {

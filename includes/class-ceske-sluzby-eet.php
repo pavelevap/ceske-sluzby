@@ -117,21 +117,24 @@ class Ceske_Sluzby_EET {
     // https://www.skyverge.com/blog/add-woocommerce-custom-order-actions/
     global $theorder;
     $order = wc_get_order( $theorder );
-    if ( is_array( self::ziskat_zakladni_data() ) ) {
-      $eet_uctenky = self::ceske_sluzby_zpracovat_data_pro_eet_uctenky( $theorder );
-      if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
-        foreach ( $eet_uctenky as $item_id => $uctenka ) {
-          if ( array_key_exists( 'Odpoved', $uctenka ) ) {
-            if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
-              $actions['smazat_eet_uctenky'] = 'EET: Smazat testovací účtenky';
-            }
-            if ( ! array_key_exists( 'test', $uctenka['Odpoved'] ) && array_key_exists( 'chyba', $uctenka['Odpoved'] ) ) {
-              $actions['smazat_eet_uctenky'] = 'EET: Smazat chybné pokusy';
+    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+    if ( ! empty( $eet_podminka ) ) {
+      if ( is_array( self::ziskat_zakladni_data() ) ) {
+        $eet_uctenky = self::ceske_sluzby_zpracovat_data_pro_eet_uctenky( $theorder );
+        if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
+          foreach ( $eet_uctenky as $item_id => $uctenka ) {
+            if ( array_key_exists( 'Odpoved', $uctenka ) ) {
+              if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
+                $actions['smazat_eet_uctenky'] = 'EET: Smazat testovací účtenky';
+              }
+              if ( ! array_key_exists( 'test', $uctenka['Odpoved'] ) && array_key_exists( 'chyba', $uctenka['Odpoved'] ) ) {
+                $actions['smazat_eet_uctenky'] = 'EET: Smazat chybné pokusy';
+              }
             }
           }
         }
+        $actions['ziskat_eet_uctenku'] = 'EET: Získat účtenku';
       }
-      $actions['ziskat_eet_uctenku'] = 'EET: Získat účtenku';
     }
     return $actions;
   }
@@ -271,7 +274,7 @@ class Ceske_Sluzby_EET {
             echo '<strong>DIČ</strong>: ' . $uctenka['Data']['dic_popl'] . ' - ';
             echo '<strong>Číslo účtenky</strong>: ' . $uctenka['Data']['porad_cis'];
             if ( ! array_key_exists( 'test', $uctenka['Odpoved'] ) && $always ) {
-              echo ' (kontrolní <a target="_blank" href="' . self::kontrolni_odkaz( $uctenka ). '">odkaz</a>)<br>';
+              echo ' (kontrolní <a target="_blank" href="' . self::kontrolni_odkaz( $uctenka ) . '">odkaz</a>)<br>';
             } else {
               echo '<br>';
             }
@@ -520,58 +523,65 @@ class Ceske_Sluzby_EET {
   public function zobrazit_meta_box_eet( $post ) {
     $item_id = $post->ID;
     $order = wc_get_order( $post->ID );
-    $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
-    if ( ! empty( $prostredi ) ) {
-      if ( $prostredi == "test" ) {
-        echo '<p style="color:red;">Používáte testovací prostředí, účtenky jsou sice odesílány, ale nebudou oficiálně evidovány!</p>';
-      } else {
-        echo '<p style="color:green;">Jedeme naostro, účtenky jsou odesílány a budou oficiálně evidovány. Doporučujeme zkontrolovat odesílaná data!</p>';
-      }
-    }
-
-    $eet_uctenky = self::ceske_sluzby_zpracovat_data_pro_eet_uctenky( $item_id );
-    if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
-      foreach ( $eet_uctenky as $item_id => $uctenka ) {
-        if ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'fik', $uctenka['Odpoved'] ) ) {
-          if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
-            echo '<p>Testovací elektronická účtenka pro tuto objednávku <strong>byla úspěšně vytvořena</strong> a můžete ji stornovat nebo zcela smazat.</p>';
-          } else {
-            echo '<p>Elektronická účtenka pro tuto objednávku <strong>byla úspěšně vytvořena</strong>, v případě potřeby ji můžete stornovat.</p>';
-          }
-        } elseif ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'chyba', $uctenka['Odpoved'] ) ) {
-          if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
-            echo '<p>Testovací elektronickou účtenku pro tuto objednávku se <strong>nepodařilo vytvořit</strong>. Můžete ji smazat a zkusit to znovu.</p>';
-          } else {
-            echo '<p>Elektronickou účtenku pro tuto objednávku se <strong>nepodařilo vytvořit</strong>. Můžete ji smazat a zkusit to znovu.</p>';
-          }
-          echo '<p><strong>Chyba:</strong> ' . $uctenka['Odpoved']['chyba'] . '</p>';
+    
+    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+    if ( empty( $eet_podminka ) ) {
+      echo '<p style="color:red;">Pro tuto platební metodu není EET aktivováno!</p>';
+      echo '<p>Nastavení pro celý eshop můžete provést <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=eet">zde</a>, případně ho <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=checkout">upřesnit</a> podle jednotlivých platebních metod.</p>';
+    } else {
+      $prostredi = get_option( 'wc_ceske_sluzby_eet_prostredi' );
+      if ( ! empty( $prostredi ) ) {
+        if ( $prostredi == "test" ) {
+          echo '<p style="color:red;">Používáte testovací prostředí, účtenky jsou sice odesílány, ale nebudou oficiálně evidovány!</p>';
+        } else {
+          echo '<p style="color:green;">Jedeme naostro, účtenky jsou odesílány a budou oficiálně evidovány. Doporučujeme zkontrolovat odesílaná data!</p>';
         }
       }
-    }
 
-    $zakladni_data = self::ziskat_zakladni_data();
-    if ( ! is_array( $zakladni_data ) ) {
-      echo '<p style="color:red;">' . $zakladni_data . '</p>';
-    } else {
-      echo '<p>Kontrolní informace pro odeslání účtenky:<br>';
-      $date = date_create( 'now', timezone_open( 'Europe/Prague' ) );
-      $dat_trzby = $date->format( 'c' );
-      $celk_trzba = self::ziskat_odeslanou_trzbu( $order );
-      $pkp_data = array(
-        'porad_cis' => self::ziskat_poradove_cislo(),
-        'dat_trzby' => $dat_trzby,
-        'celk_trzba' => $celk_trzba,
-      );
-      $kompletni_data = $pkp_data;
-      $danova_data = self::ziskat_odeslane_danove_informace( $order );
-      if ( $danova_data && ! empty( $danova_data ) && is_array( $danova_data ) ) {
-        $kompletni_data = array_merge( $pkp_data, $danova_data );
+      $eet_uctenky = self::ceske_sluzby_zpracovat_data_pro_eet_uctenky( $item_id );
+      if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
+        foreach ( $eet_uctenky as $item_id => $uctenka ) {
+          if ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'fik', $uctenka['Odpoved'] ) ) {
+            if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
+              echo '<p>Testovací elektronická účtenka pro tuto objednávku <strong>byla úspěšně vytvořena</strong> a můžete ji stornovat nebo zcela smazat.</p>';
+            } else {
+              echo '<p>Elektronická účtenka pro tuto objednávku <strong>byla úspěšně vytvořena</strong>, v případě potřeby ji můžete stornovat.</p>';
+            }
+          } elseif ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'chyba', $uctenka['Odpoved'] ) ) {
+            if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
+              echo '<p>Testovací elektronickou účtenku pro tuto objednávku se <strong>nepodařilo vytvořit</strong>. Můžete ji smazat a zkusit to znovu.</p>';
+            } else {
+              echo '<p>Elektronickou účtenku pro tuto objednávku se <strong>nepodařilo vytvořit</strong>. Můžete ji smazat a zkusit to znovu.</p>';
+            }
+            echo '<p><strong>Chyba:</strong> ' . $uctenka['Odpoved']['chyba'] . '</p>';
+          }
+        }
       }
-      $kompletni_data['rezim'] = 'běžný';
-      foreach ( $kompletni_data as $key => $value ) {
-        echo "<strong>" . $key . ":</strong> " . $value . "<br>";
+
+      $zakladni_data = self::ziskat_zakladni_data();
+      if ( ! is_array( $zakladni_data ) ) {
+        echo '<p style="color:red;">' . $zakladni_data . '</p>';
+      } else {
+        echo '<p>Kontrolní informace pro odeslání účtenky:<br>';
+        $date = date_create( 'now', timezone_open( 'Europe/Prague' ) );
+        $dat_trzby = $date->format( 'c' );
+        $celk_trzba = self::ziskat_odeslanou_trzbu( $order );
+        $pkp_data = array(
+          'porad_cis' => self::ziskat_poradove_cislo(),
+          'dat_trzby' => $dat_trzby,
+          'celk_trzba' => $celk_trzba,
+        );
+        $kompletni_data = $pkp_data;
+        $danova_data = self::ziskat_odeslane_danove_informace( $order );
+        if ( $danova_data && ! empty( $danova_data ) && is_array( $danova_data ) ) {
+          $kompletni_data = array_merge( $pkp_data, $danova_data );
+        }
+        $kompletni_data['rezim'] = 'běžný';
+        foreach ( $kompletni_data as $key => $value ) {
+          echo "<strong>" . $key . ":</strong> " . $value . "<br>";
+        }
+        echo '</p>';
       }
-      echo '</p>';
     }
   }
 }
