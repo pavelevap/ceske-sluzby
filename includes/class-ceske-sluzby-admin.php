@@ -88,7 +88,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     if ( $settings == 'wc_ceske_sluzby_eet_podminka' ) {
       $options = array(
         '' => '- Vyberte -',
-        'manual' => 'Odesílat ručně v okamžiku platby',
+        'manual' => 'Odesílat pouze ručně',
         'dokonceno' => 'Dokončená objednávka',
         'platba' => 'Provedená platba'
       );

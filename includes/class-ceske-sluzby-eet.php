@@ -1,12 +1,16 @@
 <?php
 function spustit_Ceske_Sluzby_EET() {
-  new Ceske_Sluzby_EET();
+  $screen = get_current_screen();
+  if ( $screen->post_type == 'shop_order' ) {
+    new Ceske_Sluzby_EET();
+  }
 }
 
 if ( is_admin() ) {
   $eet_aktivace = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
   if ( $eet_aktivace == "yes" ) {
     add_action( 'load-post.php', 'spustit_Ceske_Sluzby_EET' );
+    add_action( 'load-edit.php', 'spustit_Ceske_Sluzby_EET' );
   }
 }
 
@@ -18,6 +22,7 @@ class Ceske_Sluzby_EET {
     add_action( 'woocommerce_order_action_ziskat_eet_uctenku', array( $this, 'ceske_sluzby_ziskat_eet_uctenku' ) );
     add_action( 'woocommerce_order_action_smazat_eet_uctenky', array( $this, 'ceske_sluzby_smazat_eet_uctenky' ) );
     add_action( 'woocommerce_admin_order_items_after_shipping', array( $this, 'ceske_sluzby_zobrazit_eet_uctenku_administrace' ) );
+    add_action( 'manage_shop_order_posts_custom_column' , array( $this, 'zobrazit_eet_uctenky_administrace_prehled' ), 10, 2 ); 
   }
 
   public function add_meta_box_eet( $post_type ) {
@@ -31,6 +36,37 @@ class Ceske_Sluzby_EET {
         'side',
         'high'
       );
+    }
+  }
+  
+  public function zobrazit_eet_uctenky_administrace_prehled( $column, $post_id ) {
+    if ( $column == 'order_notes' ) {
+      $eet_uctenky = $this->ceske_sluzby_zpracovat_data_pro_eet_uctenky( $post_id );
+      $celkem = count( $eet_uctenky );
+      $pocet = 0;
+      $test = '';
+      if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
+        foreach ( $eet_uctenky as $item_id => $uctenka ) {
+          $pocet = $pocet + 1;
+          if ( $pocet == $celkem ) {
+            if ( array_key_exists( 'Odpoved', $uctenka ) ) {
+              if ( array_key_exists( 'test', $uctenka['Odpoved'] ) ) {
+                $test = '(T)';
+              }
+              if ( array_key_exists( 'fik', $uctenka['Odpoved'] ) ) {
+                if ( $uctenka['Data']['celk_trzba'] > 0 ) {
+                  echo '<span class="eet" style="color: green; font-weight: bold;">EET' . $test . '</span>';
+                } else {
+                  echo '<span class="eet" style="color: orange; font-weight: bold;">EET' . $test . '</span>';
+                }
+              }
+              if ( array_key_exists( 'chyba', $uctenka['Odpoved'] ) ) {
+                echo '<span class="eet" style="color: red; font-weight: bold;">EET' . $test . '</span>';
+              }
+            }
+          }
+        }
+      }
     }
   }
 
