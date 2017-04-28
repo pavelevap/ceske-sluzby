@@ -27,5 +27,4 @@ jQuery(function($){
     return false;
   });
   $('select option[value=email]').attr('disabled', true);
-  $('select option[value=email_confirmation]').attr('disabled', true);
 });

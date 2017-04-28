@@ -76,11 +76,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $options = array(
         '' => '- Vyberte -',
         'email' => 'Odesílat jako samostatný email',
-        'email_confirmation' => 'Doplnit v rámci potvrzení objednávky'
+        'email-completed' => 'Doplnit do emailu (dokončená objednávka)',
+        'email-processing' => 'Doplnit do emailu (zaplacená objednávka)', // ???
+        'email-faktura' => 'Doplnit do emailu (faktura)',
       );
       // WooCommerce PDF Invoices & Packing Slips
       if ( class_exists( 'WooCommerce_PDF_Invoices' ) ) {
-        $options['faktura'] = 'Doplnit v rámci faktury';
+        $options['faktura-plugin'] = 'Doplnit v rámci faktury (externí plugin)';
       }
     }
     if ( $settings == 'wc_ceske_sluzby_eet_podminka' ) {

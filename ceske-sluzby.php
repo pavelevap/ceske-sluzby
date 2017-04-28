@@ -247,9 +247,10 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     if ( $aktivace_eet == "yes" ) {
       add_filter( 'upload_mimes', 'ceske_sluzby_povolit_nahravani_certifikatu' );
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-eet.php';
-      add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
+      add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet_faktura', 10, 2 );
       add_action( 'woocommerce_order_status_completed', 'ceske_sluzby_automaticky_ziskat_uctenku' );
       add_action( 'woocommerce_payment_complete', 'ceske_sluzby_automaticky_ziskat_uctenku' );
+      add_action( 'woocommerce_email_order_meta', 'ceske_sluzby_zobrazit_eet_email', 10, 4 );
     }
 
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
@@ -1236,9 +1237,23 @@ function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
   return $mime_types;
 }
 
-function ceske_sluzby_zobrazit_eet( $template_type, $order ) {
+function ceske_sluzby_zobrazit_eet_email( $order, $sent_to_admin, $plain_text, $email ) {
+  if ( $email->id == 'customer_completed_order' || $email->id == 'customer_processing_order' || $email->id == 'customer_invoice' ) {
+    $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
+    if ( ! empty( $eet_format ) && ( $eet_format == 'email-completed' || $eet_format == 'email-processing' || $eet_format == 'email-faktura' ) ) {
+      $eet = new Ceske_Sluzby_EET();
+      if ( $plain_text ) {
+        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false, '', '', true );
+      } else {
+        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false, '<br>' );
+      }
+    }
+  }
+}
+
+function ceske_sluzby_zobrazit_eet_faktura_externi( $template_type, $order ) {
   $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
-  if ( ! empty( $eet_format ) && $eet_format == 'faktura' ) {
+  if ( ! empty( $eet_format ) && $eet_format == 'faktura-plugin' ) {
     $eet = new Ceske_Sluzby_EET();
     $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
   }
