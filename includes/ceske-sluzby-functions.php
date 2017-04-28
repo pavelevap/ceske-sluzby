@@ -429,7 +429,7 @@ function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $checkout_opti
   $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
   if ( is_array( $moznosti_nastaveni ) && in_array( $checkout_option, $moznosti_nastaveni ) ) {
     $payment_gateway = wc_get_payment_gateway_by_order( $order );
-    if ( isset( $payment_gateway->settings[$payment_option] ) ) {
+    if ( isset( $payment_gateway->settings[$payment_option] ) && ! empty( $payment_gateway->settings[$payment_option] ) ) {
       $hodnota = $payment_gateway->settings[$payment_option];
     }
   }

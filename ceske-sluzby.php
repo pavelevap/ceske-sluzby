@@ -247,6 +247,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     if ( $aktivace_eet == "yes" ) {
       add_filter( 'upload_mimes', 'ceske_sluzby_povolit_nahravani_certifikatu' );
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-eet.php';
+      add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
+      add_action( 'woocommerce_order_status_completed', 'ceske_sluzby_automaticky_ziskat_uctenku' );
+      add_action( 'woocommerce_payment_complete', 'ceske_sluzby_automaticky_ziskat_uctenku' );
     }
 
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
@@ -1233,11 +1236,23 @@ function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
   return $mime_types;
 }
 
-add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet', 10, 2 );
 function ceske_sluzby_zobrazit_eet( $template_type, $order ) {
   $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
-  if ( ! empty( $eet_format ) ) {
-    Ceske_Sluzby_EET::ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+  if ( ! empty( $eet_format ) && $eet_format == 'faktura' ) {
+    $eet = new Ceske_Sluzby_EET();
+    $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+  }
+}
+
+function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
+  $order = wc_get_order( $order_id );
+  $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+  if ( ! empty( $eet_podminka ) && ( $eet_podminka == 'platba' || $eet_podminka == 'dokonceno' ) ) {
+    $eet = new Ceske_Sluzby_EET();
+    $odeslana_trzba = $eet->ziskat_odeslanou_trzbu( $order );
+    if ( $odeslana_trzba > 0 ) {
+      $eet->ceske_sluzby_ziskat_eet_uctenku( $order );
+    }
   }
 }
 

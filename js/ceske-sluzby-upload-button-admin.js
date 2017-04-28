@@ -28,6 +28,4 @@ jQuery(function($){
   });
   $('select option[value=email]').attr('disabled', true);
   $('select option[value=email_confirmation]').attr('disabled', true);
-  $('select option[value=dokonceno]').attr('disabled', true);
-  $('select option[value=platba]').attr('disabled', true);
 });
