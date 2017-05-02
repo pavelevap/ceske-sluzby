@@ -92,7 +92,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'dokonceno' => 'Dokončená objednávka',
         'platba' => 'Provedená platba'
       );
-    }     
+    }
+    if ( $settings == 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ) {
+      $options = array(
+        '' => '- Vyberte -',
+        'nahoru' => 'Zaokrouhlit nahoru'
+      );
+    }
     return $options;
   }
   
@@ -118,6 +124,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'eet_podminka' => 'EET: Podmínka odeslání'
       );
     }
+    $options['zaokrouhlovani'] = 'Zaokrouhlování celkové ceny objednávky';
     if ( ! empty( $options ) ) {
       $settings[] = array(
         'title' => __( 'České služby', 'woocommerce' ),
@@ -130,10 +137,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'desc' => 'Zvolte podporované funkce, které můžete následně nastavit na úrovni jednotlivých platebních metod.',
         'id' => 'wc_ceske_sluzby_nastaveni_pokladna',
         'class' => 'wc-enhanced-select',
-        'options' => array(
-          'eet_format' => 'EET: Formát účtenky',
-          'eet_podminka' => 'EET: Podmínka odeslání'
-        ),
+        'options' => $options,
         'custom_attributes' => array(
           'data-placeholder' => 'Nastavení na úrovni platebních metod'
         )
@@ -148,31 +152,24 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function ceske_sluzby_nastaveni_plateb() {
     $form_fields = array();
-    $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
-    if ( ! empty( $zaokrouhlovani ) && $zaokrouhlovani == 'custom' ) {
-      foreach ( WC()->payment_gateways()->payment_gateways() as $gateway_id => $gateway ) {
-        $form_fields['ceske_sluzby_zaokrouhleni'] = array(
-          'title' => 'Zaokrouhlování',
-          'type' => 'select',
-          'options' => array(
-            '' => '- Vyberte -',
-            'nahoru' => 'Zaokrouhlit nahoru'
-          ),
-          'default' => 'no',
-          'description' => 'Automatické zaokrouhlení celkové částky objednávky.',
-        );
-        $gateway->form_fields += $form_fields;
-      }
-    }
-
     $moznosti_nastaveni = array();
+    $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
-    if ( $aktivace_eet == "yes" ) {
+    if ( $aktivace_eet == "yes" || ! empty( $zaokrouhlovani ) ) {
       $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     }
-    if ( ! empty( $moznosti_nastaveni ) ) {
+    if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
       foreach ( WC()->payment_gateways()->payment_gateways() as $gateway_id => $gateway ) {
-        if ( is_array( $moznosti_nastaveni ) && in_array( 'eet_format', $moznosti_nastaveni ) ) {
+        if ( in_array( 'zaokrouhlovani', $moznosti_nastaveni ) ) {
+          $form_fields['ceske_sluzby_zaokrouhleni'] = array(
+            'title' => 'Zaokrouhlování',
+            'type' => 'select',
+            'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ),
+            'default' => 'no',
+            'description' => 'Automatické zaokrouhlení celkové částky objednávky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ),
+          );
+        }
+        if ( in_array( 'eet_format', $moznosti_nastaveni ) ) {
           $form_fields['ceske_sluzby_eet_format'] = array(
             'title' => 'EET: Formát účtenky',
             'type' => 'select',
@@ -182,7 +179,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
             'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
           );
         }
-        if ( is_array( $moznosti_nastaveni ) && in_array( 'eet_podminka', $moznosti_nastaveni ) ) {
+        if ( in_array( 'eet_podminka', $moznosti_nastaveni ) ) {
           $form_fields['ceske_sluzby_eet_podminka'] = array(
             'title' => 'EET: Podmínka odeslání',
             'type' => 'select',
@@ -375,11 +372,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'desc_tip' => 'Možnosti zaokrouhlení celkové částky objednávky.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni',
           'class' => 'wc-enhanced-select',
-          'options' => array(
-            '' => '- Vyberte -',
-            'nahoru' => 'Zaokrouhlit nahoru',
-            'custom' => 'Nastavení v rámci platebních metod'
-          ),
+          'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ),
           'css' => 'width: 300px',
         ),
         array(

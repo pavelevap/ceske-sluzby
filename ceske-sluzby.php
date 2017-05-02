@@ -288,14 +288,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
 
-    $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
-    if ( ! empty( $zaokrouhlovani ) ) {
-      add_action( 'woocommerce_cart_calculate_fees', 'ceske_sluzby_zaokrouhlovani_poplatek' );
-      add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
-      if ( $zaokrouhlovani == 'custom' ) {
-        add_action( 'wp_footer', 'ceske_sluzby_aktualizovat_checkout_javascript' );
-      }
-    }
+    add_action( 'woocommerce_cart_calculate_fees', 'ceske_sluzby_zaokrouhlovani_poplatek' );
+    add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
+    add_action( 'wp_footer', 'ceske_sluzby_aktualizovat_checkout_javascript' );
   }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -1272,7 +1267,7 @@ function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
 }
 
 function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
-  $zaokrouhlovani = ceske_sluzby_ziskat_nastaveni_platebni_brany();
+  $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_nastaveni_pokladna', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
   if ( $zaokrouhlovani == 'nahoru' ) {
     $cart->calculate_fees();
     if ( $cart->round_at_subtotal ) {
@@ -1287,7 +1282,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
   $dane = false;
   $decimals = get_option( 'woocommerce_price_num_decimals' );
   if ( $cart->total > 0 && $decimals > 0 ) {
-    $zaokrouhlovani = ceske_sluzby_ziskat_nastaveni_platebni_brany();
+    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_nastaveni_pokladna', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
     if ( $zaokrouhlovani == 'nahoru' ) {
       $celkem = $cart->total;
       $zao_total = ceil( $cart->total ) - $celkem;
@@ -1327,13 +1322,16 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
 }
 
 function ceske_sluzby_aktualizovat_checkout_javascript() {
-  if ( is_checkout() ) { ?>
-    <script type="text/javascript">
-      jQuery(document).ready(function($){
-        $(document.body).off().on('change', 'input[name="payment_method"]', function() {
-          $('body').trigger('update_checkout');
+  if ( is_checkout() ) {
+    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_nastaveni_pokladna', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
+    if ( ! empty( $zaokrouhlovani ) ) { ?>
+      <script type="text/javascript">
+        jQuery(document).ready(function($){
+          $(document.body).off().on('change', 'input[name="payment_method"]', function() {
+            $('body').trigger('update_checkout');
+          });
         });
-      });
-    </script><?php
+      </script><?php
+    }
   } 
 }

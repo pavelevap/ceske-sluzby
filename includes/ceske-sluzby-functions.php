@@ -411,26 +411,21 @@ function ceske_sluzby_ziskat_nastaveni_zbozi_extra_message() {
   return $hodnoty;
 }
 
-function ceske_sluzby_ziskat_nastaveni_platebni_brany() {
-  $zaokrouhlovani = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' );
-  if ( $zaokrouhlovani == 'custom' ) {
-    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-    $current_gateway = WC()->session->chosen_payment_method;
-    if ( ! empty( $current_gateway ) && array_key_exists( 'ceske_sluzby_zaokrouhleni', $available_gateways[$current_gateway]->settings ) ) {
-      $zaokrouhlovani = $available_gateways[$current_gateway]->settings['ceske_sluzby_zaokrouhleni'];
-    }
-  }
-  return $zaokrouhlovani;
-}
-
 function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $checkout_option, $payment_option ) {
-  $hodnota = '';
   $hodnota = get_option( $global_option );
   $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
   if ( is_array( $moznosti_nastaveni ) && in_array( $checkout_option, $moznosti_nastaveni ) ) {
-    $payment_gateway = wc_get_payment_gateway_by_order( $order );
-    if ( isset( $payment_gateway->settings[$payment_option] ) && ! empty( $payment_gateway->settings[$payment_option] ) ) {
-      $hodnota = $payment_gateway->settings[$payment_option];
+    if ( ! empty( $order ) ) {
+      $payment_gateway = wc_get_payment_gateway_by_order( $order );
+      if ( array_key_exists( $payment_option, $payment_gateway->settings ) && ! empty( $payment_gateway->settings[$payment_option] ) ) {
+        $hodnota = $payment_gateway->settings[$payment_option];
+      }
+    } else {
+      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      $current_gateway = WC()->session->chosen_payment_method;
+      if ( ! empty( $current_gateway ) && array_key_exists( $payment_option, $available_gateways[$current_gateway]->settings ) && ! empty( $available_gateways[$current_gateway]->settings[$payment_option] ) ) {
+        $hodnota = $available_gateways[$current_gateway]->settings[$payment_option];
+      }
     }
   }
   return $hodnota;
