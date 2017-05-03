@@ -26,5 +26,4 @@ jQuery(function($){
     $('.ceske_sluzby_upload_button').show();
     return false;
   });
-  $('select option[value=email]').attr('disabled', true);
 });
