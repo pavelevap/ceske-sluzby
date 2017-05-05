@@ -11,13 +11,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_action( 'woocommerce_admin_field_upload', __CLASS__ . '::ceske_sluzby_upload_button_settings_field' );
     add_action( 'woocommerce_update_options_checkout', __CLASS__ . '::ceske_sluzby_nastaveni_plateb' );
     add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_plateb', 100 );
-    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_shipping_zones' );
+    add_action( 'woocommerce_sections_shipping', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna_doprava' );
+    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna_doprava', 100 );
     add_filter( 'woocommerce_get_settings_checkout', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna' );
     add_action( 'woocommerce_settings_tabs_shipping', __CLASS__ . '::settings_tab_shipping' );
     add_action( 'woocommerce_update_options_shipping', __CLASS__ . '::update_settings_shipping' );
   }
 
-  public static function ceske_sluzby_zobrazeni_shipping_zones( $form_fields ) {
+  public static function ceske_sluzby_zobrazeni_pokladna_doprava( $form_fields ) {
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
     $options = self::dostupne_nastaveni( 'pokladna_doprava' );
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
@@ -127,7 +128,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $settings = array();
     $options = self::dostupne_nastaveni( 'pokladna_doprava' );
     if ( ! empty( $options ) ) {
-      if ( '' == $current_section && ! isset( $_GET['zone_id'] ) ) {
+      if ( '' == $current_section && ! isset( $_GET['zone_id'] ) && ! isset( $_GET['instance_id'] ) ) {
         $hide_save_button = false;
         $settings = array(
           array(
@@ -151,52 +152,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
             'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title'
           )
         );
-      } else { 
-        $available_shipping = WC()->shipping->load_shipping_methods();
-        foreach ( $available_shipping as $shipping ) {
-          if ( $current_section == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
-            if ( in_array( 'settings', $shipping->supports ) ) {
-              $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
-              $options = self::dostupne_nastaveni( 'pokladna_doprava' );
-              if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
-                $settings[] = array(
-                  'title' => 'České služby',
-                  'type' => 'title',
-                  'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
-                );
-                $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-                foreach ( $available_gateways as $gateway_id => $gateway ) {
-                  if ( in_array( 'eet_format', $moznosti_nastaveni ) && array_key_exists( 'eet_format', $options ) ) {
-                    $settings[] = array(
-                      'title' => 'EET: Formát účtenky (' . $gateway->title . ')',
-                      'type' => 'select',
-                      'id' => 'ceske_sluzby_eet_format' . $gateway_id,
-                      'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-                      'css' => 'width: 300px',
-                      'default' => 'no',
-                      'desc' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-                    );
-                  }
-                  if ( in_array( 'eet_podminka', $moznosti_nastaveni ) && array_key_exists( 'eet_podminka', $options ) ) {
-                    $settings[] = array(
-                      'title' => 'EET: Podmínka odeslání (' . $gateway->title . ')',
-                      'type' => 'select',
-                      'id' => 'ceske_sluzby_eet_podminka' . $gateway_id,
-                      'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-                      'css' => 'width: 300px',
-                      'default' => 'no',
-                      'desc' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-                    );
-                  }
-                }
-                $settings[] = array(
-                  'type' => 'sectionend',
-                  'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
-                );
-              }
-            }
-          }
-        }
       }
     }
     return $settings;
@@ -347,12 +302,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
   }
 
-  public static function ceske_sluzby_nastaveni_shipping_zones() {
+  public static function ceske_sluzby_nastaveni_pokladna_doprava() {
     $available_shipping = WC()->shipping->load_shipping_methods();
     foreach ( $available_shipping as $shipping ) {
       if ( isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
-        if ( in_array( 'shipping-zones', $shipping->supports ) ) {
-          add_filter( 'woocommerce_shipping_instance_form_fields_' . $shipping->id, __CLASS__ . '::ceske_sluzby_zobrazeni_shipping_zones' );
+        if ( in_array( 'shipping-zones', $shipping->supports ) && in_array( 'instance-settings-modal', $shipping->supports ) ) {
+          add_filter( 'woocommerce_shipping_instance_form_fields_' . $shipping->id, __CLASS__ . '::ceske_sluzby_zobrazeni_pokladna_doprava' );
+        } elseif ( in_array( 'settings', $shipping->supports ) ) {
+          add_filter( 'woocommerce_settings_api_form_fields_' . $shipping->id, __CLASS__ . '::ceske_sluzby_zobrazeni_pokladna_doprava' );
         }
       }
     }
