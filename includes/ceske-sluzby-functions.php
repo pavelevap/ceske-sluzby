@@ -411,20 +411,102 @@ function ceske_sluzby_ziskat_nastaveni_zbozi_extra_message() {
   return $hodnoty;
 }
 
-function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $checkout_option, $payment_option ) {
+function ceske_sluzby_ziskat_dopravni_oblasti() {
+  // http://www.ibenic.com/ultimate-guide-woocommerce-shipping-zones/
+  $zones = array();
+  $default_zone = WC_Shipping_Zones::get_zone( 0 );
+  $zone_id = $default_zone->get_zone_id();
+  $zones[ $zone_id ] = $default_zone->get_data();
+  $zones[ $zone_id ]['formatted_zone_location'] = $default_zone->get_formatted_location();
+  $zones[ $zone_id ]['shipping_methods'] = $default_zone->get_shipping_methods();
+  $zones = array_merge( $zones, WC_Shipping_Zones::get_zones() );
+  return $zones;
+}
+
+function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $settings_option, $specific_option ) {
   $hodnota = get_option( $global_option );
   $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
-  if ( is_array( $moznosti_nastaveni ) && in_array( $checkout_option, $moznosti_nastaveni ) ) {
+  if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) ) {
     if ( ! empty( $order ) ) {
       $payment_gateway = wc_get_payment_gateway_by_order( $order );
-      if ( array_key_exists( $payment_option, $payment_gateway->settings ) && ! empty( $payment_gateway->settings[$payment_option] ) ) {
-        $hodnota = $payment_gateway->settings[$payment_option];
-      }
     } else {
       $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
       $current_gateway = WC()->session->chosen_payment_method;
-      if ( ! empty( $current_gateway ) && array_key_exists( $payment_option, $available_gateways[$current_gateway]->settings ) && ! empty( $available_gateways[$current_gateway]->settings[$payment_option] ) ) {
-        $hodnota = $available_gateways[$current_gateway]->settings[$payment_option];
+      if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
+        $payment_gateway = $available_gateways[$current_gateway];
+      }
+    }
+    if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) && array_key_exists( $specific_option, $payment_gateway->settings ) && ! empty( $payment_gateway->settings[$specific_option] ) ) {
+      $hodnota = $payment_gateway->settings[$specific_option];
+    }
+  }
+  $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
+  if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) ) {
+    $available_shipping = WC()->shipping->load_shipping_methods();
+    if ( ! empty( $order ) ) {
+      $shipping_methods = $order->get_shipping_methods();
+      $payment_gateway = wc_get_payment_gateway_by_order( $order );
+    } else {
+      $shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      $current_gateway = WC()->session->chosen_payment_method;
+      if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
+        $payment_gateway = $available_gateways[$current_gateway];
+      }
+    }
+    if ( ! empty( $shipping_methods ) && is_array( $shipping_methods ) ) {
+      if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) ) {
+        foreach ( $shipping_methods as $shipping_method ) {
+          if ( ! empty( $order ) ) {
+            $shipping_id = $shipping_method['method_id'];
+          } else {
+            $shipping_id = $shipping_method;
+          }
+          if ( ! empty( $shipping_id ) ) {
+            if ( strpos( $shipping_id, ':' ) === false ) {
+              foreach ( $available_shipping as $shipping ) {
+                if ( $shipping_id == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                  if ( in_array( 'settings', $shipping->supports ) ) {
+                    if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $shipping->settings ) && ! empty( $shipping->settings[$specific_option. '_' . $payment_gateway->id] ) ) {
+                      $hodnota = $shipping->settings[$specific_option . '_' . $payment_gateway->id];
+                    }
+                  }
+                }
+              }
+            } else {
+              $pieces = explode( ":", $shipping_id );
+              if ( is_array( $pieces ) && ! empty( $pieces ) && count( $pieces ) == 2 ) {
+                $order_method = $pieces[0];
+                $order_instance = $pieces[1];
+                if ( is_numeric( $order_instance ) ) {
+                  $zones = ceske_sluzby_ziskat_dopravni_oblasti();
+                  foreach ( $zones as $zone ) {
+                    foreach ( $zone['shipping_methods'] as $instance => $method ) {
+                      if ( $instance == $order_instance && $order_method == $method->id && isset( $method->supports ) && is_array( $method->supports ) && ! empty( $method->supports ) ) {
+                        if ( in_array( 'shipping-zones', $method->supports ) ) {
+                          if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $method->instance_settings ) && ! empty( $method->instance_settings[$specific_option. '_' . $payment_gateway->id] ) ) {
+                            $hodnota = $method->instance_settings[$specific_option. '_' . $payment_gateway->id];
+                          }
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  // Stará možnost doplňkových cen poštovného, např. legacy_flat_rate:ppl-dobirka
+                  foreach ( $available_shipping as $shipping ) {
+                    if ( $order_method == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                      if ( in_array( 'settings', $shipping->supports ) ) {
+                        if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $shipping->settings ) && ! empty( $shipping->settings[$specific_option. '_' . $payment_gateway->id] ) ) {
+                          $hodnota = $shipping->settings[$specific_option . '_' . $payment_gateway->id];
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -335,14 +335,7 @@ function ceske_sluzby_xml_ziskat_hodnotu_dopravy_zdarma() {
   $doprava_zdarma = array();
   $doprava_zdarma_limit = 0;
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.6', '>=' ) ) {
-    // http://www.ibenic.com/ultimate-guide-woocommerce-shipping-zones/
-    $zones = array();
-    $default_zone = WC_Shipping_Zones::get_zone( 0 );
-    $zone_id = $default_zone->get_zone_id();
-    $zones[ $zone_id ] = $default_zone->get_data();
-    $zones[ $zone_id ]['formatted_zone_location'] = $default_zone->get_formatted_location();
-    $zones[ $zone_id ]['shipping_methods'] = $default_zone->get_shipping_methods();
-    $zones = array_merge( $zones, WC_Shipping_Zones::get_zones() );
+    $zones = ceske_sluzby_ziskat_dopravni_oblasti();
     foreach ( $zones as $zone ) {
       foreach ( $zone['shipping_methods'] as $instance => $method ) {
         if ( $method->id == "free_shipping" ) {
