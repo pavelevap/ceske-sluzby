@@ -1338,10 +1338,10 @@ function ceske_sluzby_aktualizovat_checkout_javascript() {
 }
 
 function ceske_sluzby_compare_sazba( $a, $b ) {
-  if ($a->sazba == $b->sazba) {
+  if ( $a->sazba == $b->sazba ) {
     return 0;
   }
-  return ($a->sazba > $b->sazba) ? -1 : 1;
+  return ( $a->sazba > $b->sazba ) ? -1 : 1;
 }
 
 function ceske_sluzby_doplnit_danovou_sazbu( $tax_totals ) {

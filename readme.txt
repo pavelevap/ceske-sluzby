@@ -60,9 +60,10 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 
 = 0.6 =
 * WooCommerce: Elektronická evidence tržeb (EET)
- * Odesílání elektronických účtenek finanční správě.
- * Možnost nastavení formátu účtenky a podmínek pro odeslání na úrovni eshopu i podle platebních metod.
- * Automatické odesílání účtenek pro zaplacené či dokončené objednávky (podle nastavení). 
+ * Odesílání elektronických účtenek finanční správě (možnost stornovat celou účtenku nebo jen částečně).
+ * Možnost nastavení formátu účtenky (např. součást emailu) a podmínek pro odeslání (dokončená objednávka) na úrovni eshopu i podle platebních metod.
+ * Automatické odesílání účtenek pro zaplacené či dokončené objednávky (podle nastavení).
+ * Jednoduché zobrazení účtenek v přehledu objednávek, snadné nahrání vlastního certifikátu.   
 * WooCommerce: Ověřeno zákazníky
  * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
  * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
@@ -72,6 +73,7 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Možnost nastavení intervalů a textů pro počet produktů skladem.
  * Možnost definování vlastního textu (a formátu pro zobrazení) pro dostupnost dodatečných produktů (nad rámec uvedených skladových zásob).
 * WooCommerce: Zaokrouhlování celkové ceny objednávky (možnost nastavení podle platebních metod).
+* WooCommerce: Možnosti nastavení různých hodnot podle platebních metod (a kombinace doručovacích a platebních metod).
 * WooCommerce: Sledování zásilek
  * Doplněn dopravce GLS.    
 * WooCommerce: XML feedy
