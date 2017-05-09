@@ -1,6 +1,9 @@
 <?php
 function spustit_Ceske_Sluzby_Sledovani_Zasilek() {
-  new Ceske_Sluzby_Sledovani_Zasilek();
+  $screen = get_current_screen();
+  if ( $screen->post_type == 'shop_order' ) {
+    new Ceske_Sluzby_Sledovani_Zasilek();
+  }
 }
 
 if ( is_admin() ) {
