@@ -175,57 +175,56 @@ class Ceske_Sluzby_EET {
     return $actions;
   }
 
+  public function eet_prehled_danovych_sazeb() {
+    $danove_sazby = array(
+      '21' => 'dan1',
+      '15' => 'dan2',
+      '10' => 'dan3'
+    );
+    return $danove_sazby;
+  }
+
   public function eet_uctenka_dane( $order, $dane_uctenky ) {
     $danova_data = array();
     if ( wc_tax_enabled() ) {
       $zaklad_celkem = 0;
       $decimals = get_option( 'woocommerce_price_num_decimals' );
       $objednavka_dane = $order->get_tax_totals();
+      $danove_sazby = $this->eet_prehled_danovych_sazeb();
       if ( ! empty( $objednavka_dane ) && is_array( $objednavka_dane ) ) {
         foreach ( $objednavka_dane as $code => $tax ) {
-          $tax_class = wc_get_tax_class_by_tax_id( $tax->rate_id );
-          $tax_rates = WC_Tax::get_rates( $tax_class );
-          if ( array_key_exists( $tax->rate_id, $tax_rates ) && array_key_exists( 'rate', $tax_rates[$tax->rate_id] ) ) {
-            $sazba = (float)$tax_rates[$tax->rate_id]['rate'];
+          if ( array_key_exists( 'sazba', $tax ) && ! empty( $tax->sazba ) ) {
+            $sazba = $tax->sazba;
             $zaklad_dane = number_format( (float)( round( $tax->amount / $sazba * 100, $decimals ) ), 2, '.', '' );
             $dan = number_format( (float)( round( $tax->amount, $decimals ) ), 2, '.', '' );
-            if ( $sazba == 21 ) {
-              if ( array_key_exists( 'zakl_dan1', $dane_uctenky ) && $zaklad_dane == $dane_uctenky['zakl_dan1'] ) {
-                $zaklad_dane = number_format( (float)( round( -$zaklad_dane, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['zakl_dan1'] = $zaklad_dane;
-              if ( array_key_exists( 'dan1', $dane_uctenky ) && $dan == $dane_uctenky['dan1'] ) {
-                $dan = number_format( (float)( round( -$dan, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['dan1'] = $dan;
-            } elseif ( $sazba == 15 ) {
-              if ( array_key_exists( 'zakl_dan2', $dane_uctenky ) && $zaklad_dane == $dane_uctenky['zakl_dan2'] ) {
-                $zaklad_dane = number_format( (float)( round( -$zaklad_dane, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['zakl_dan2'] = $zaklad_dane;
-              if ( array_key_exists( 'dan2', $dane_uctenky ) && $dan == $dane_uctenky['dan2'] ) {
-                $dan = number_format( (float)( round( -$dan, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['dan2'] = $dan;
-            } elseif ( $sazba == 10 ) {
-              if ( array_key_exists( 'zakl_dan3', $dane_uctenky ) && $zaklad_dane == $dane_uctenky['zakl_dan3'] ) {
-                $zaklad_dane = number_format( (float)( round( -$zaklad_dane, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['zakl_dan3'] = $zaklad_dane;
-              if ( array_key_exists( 'dan3', $dane_uctenky ) && $dan == $dane_uctenky['dan3'] ) {
-                $dan = number_format( (float)( round( -$dan, $decimals ) ), 2, '.', '' );
-              }
-              $danova_data['dan3'] = $dan;
+            if ( array_key_exists( (string)$sazba, $danove_sazby ) ) {
+              $eet_sazba = $danove_sazby[$sazba];
+              $danova_data['zakl_' . $eet_sazba] = $zaklad_dane;
+              $danova_data[$eet_sazba] = $dan;
             }
             $zaklad_celkem = $zaklad_celkem + $zaklad_dane;
           }
         }
         $zakl_nepodl_dph = $order->get_total() - $order->get_total_tax() - abs( $zaklad_celkem );
-        if ( array_key_exists( 'zakl_nepodl_dph', $dane_uctenky ) && $zakl_nepodl_dph == $dane_uctenky['zakl_nepodl_dph'] ) {
-          $zakl_nepodl_dph = -$zakl_nepodl_dph;
-        }
         if ( round( $zakl_nepodl_dph, $decimals ) > 0 ) {
           $danova_data['zakl_nepodl_dph'] = number_format( (float)( $zakl_nepodl_dph ), 2, '.', '' );
+        }
+        if ( ! empty( $dane_uctenky ) && ! empty( $danova_data ) ) {
+          if ( $danova_data != $dane_uctenky ) {
+            foreach ( $danova_data as $id => $hodnota ) {
+              $danova_data[$id] = number_format( (float)( round( $danova_data[$id] - $dane_uctenky[$id], $decimals ) ), 2, '.', '' );
+              if ( $danova_data[$id] == 0 ) {
+                unset( $danova_data[$id] );
+              }
+            }
+          } else {
+            foreach ( $danova_data as $id => $hodnota ) {
+              $danova_data[$id] = number_format( (float)( round( -$danova_data[$id], $decimals ) ), 2, '.', '' );
+              if ( $danova_data[$id] == 0 ) {
+                unset( $danova_data[$id] );
+              }
+            }
+          }
         }
       }
     }
@@ -518,46 +517,21 @@ class Ceske_Sluzby_EET {
     if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
       foreach ( $eet_uctenky as $item_id => $uctenka ) {
         if ( array_key_exists( 'Odpoved', $uctenka ) && array_key_exists( 'fik', $uctenka['Odpoved'] ) ) {
-          if ( array_key_exists( 'zakl_dan1', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'zakl_dan1', $dane ) ) {
-              $dane['zakl_dan1'] += $uctenka['Data']['zakl_dan1'];
-            } else {
-              $dane['zakl_dan1'] = $uctenka['Data']['zakl_dan1'];
+          $danove_sazby = $this->eet_prehled_danovych_sazeb();
+          foreach ( $danove_sazby as $sazba => $eet_sazba ) {
+            if ( array_key_exists( 'zakl_' . $eet_sazba, $uctenka['Data'] ) ) {
+              if ( array_key_exists( 'zakl_' . $eet_sazba, $dane ) ) {
+                $dane['zakl_' . $eet_sazba] += $uctenka['Data']['zakl_' . $eet_sazba];
+              } else {
+                $dane['zakl_' . $eet_sazba] = $uctenka['Data']['zakl_' . $eet_sazba];
+              }
             }
-          }
-          if ( array_key_exists( 'dan1', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'dan1', $dane ) ) {
-              $dane['dan1'] += $uctenka['Data']['dan1'];
-            } else {
-              $dane['dan1'] = $uctenka['Data']['dan1'];
-            }
-          }
-          if ( array_key_exists( 'zakl_dan2', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'zakl_dan2', $dane ) ) {
-              $dane['zakl_dan2'] += $uctenka['Data']['zakl_dan2'];
-            } else {
-              $dane['zakl_dan2'] = $uctenka['Data']['zakl_dan2'];
-            }
-          }
-          if ( array_key_exists( 'dan2', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'dan2', $dane ) ) {
-              $dane['dan2'] += $uctenka['Data']['dan2'];
-            } else {
-              $dane['dan2'] = $uctenka['Data']['dan2'];
-            }
-          }
-          if ( array_key_exists( 'zakl_dan3', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'zakl_dan3', $dane ) ) {
-              $dane['zakl_dan3'] += $uctenka['Data']['zakl_dan3'];
-            } else {
-              $dane['zakl_dan3'] = $uctenka['Data']['zakl_dan3'];
-            }
-          }
-          if ( array_key_exists( 'dan3', $uctenka['Data'] ) ) {
-            if ( array_key_exists( 'dan3', $dane ) ) {
-              $dane['dan3'] += $uctenka['Data']['dan3'];
-            } else {
-              $dane['dan3'] = $uctenka['Data']['dan3'];
+            if ( array_key_exists( $eet_sazba, $uctenka['Data'] ) ) {
+              if ( array_key_exists( $eet_sazba, $dane ) ) {
+                $dane[$eet_sazba] += $uctenka['Data'][$eet_sazba];
+              } else {
+                $dane[$eet_sazba] = $uctenka['Data'][$eet_sazba];
+              }
             }
           }
           if ( array_key_exists( 'zakl_nepodl_dph', $uctenka['Data'] ) ) {
