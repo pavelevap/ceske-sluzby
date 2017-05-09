@@ -251,6 +251,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_action( 'woocommerce_order_status_completed', 'ceske_sluzby_automaticky_ziskat_uctenku' );
       add_action( 'woocommerce_payment_complete', 'ceske_sluzby_automaticky_ziskat_uctenku' );
       add_action( 'woocommerce_email_order_meta', 'ceske_sluzby_zobrazit_eet_email', 10, 4 );
+      add_filter( 'woocommerce_order_tax_totals', 'ceske_sluzby_doplnit_danovou_sazbu' );
     }
 
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
@@ -1334,4 +1335,26 @@ function ceske_sluzby_aktualizovat_checkout_javascript() {
       </script><?php
     }
   } 
+}
+
+function ceske_sluzby_compare_sazba( $a, $b ) {
+  if ($a->sazba == $b->sazba) {
+    return 0;
+  }
+  return ($a->sazba > $b->sazba) ? -1 : 1;
+}
+
+function ceske_sluzby_doplnit_danovou_sazbu( $tax_totals ) {
+  $tax_totals = array();
+  foreach ( $tax_totals as $code => $tax ) {
+    $tax_class = wc_get_tax_class_by_tax_id( $tax->rate_id );
+    $tax_rates = WC_Tax::get_rates( $tax_class );
+    if ( array_key_exists( $tax->rate_id, $tax_rates ) && array_key_exists( 'rate', $tax_rates[$tax->rate_id] ) ) {
+      $tax_totals[ $code ]->sazba = (float)$tax_rates[$tax->rate_id]['rate'];
+    }
+  }
+  if ( ! empty( $tax_totals ) ) {
+    usort( $tax_totals, 'ceske_sluzby_compare_sazba' );
+  }
+  return $tax_totals;
 }
