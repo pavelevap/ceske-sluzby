@@ -341,13 +341,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     foreach ( $ukladana_data_text as $key ) {
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
-        $ulozeno = get_post_meta( $post_id, $key, true );
+        $ulozeno_text = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
           if ( $key == 'ceske_sluzby_xml_preorder_datum' ) {
             $value = strtotime( $value );
           }
           update_post_meta( $post_id, $key, esc_attr( $value ) );
-        } elseif ( ! empty( $ulozeno ) ) {
+        } elseif ( ! empty( $ulozeno_text ) ) {
           delete_post_meta( $post_id, $key );
         }
       }
@@ -358,13 +358,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_zbozi_extra_message'
     );
     foreach ( $ukladana_data_checkbox as $key ) {
+      $ulozeno_checkbox = get_post_meta( $post_id, $key, true );
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
-        $ulozeno = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
           update_post_meta( $post_id, $key, $value );
         }
-      } elseif ( ! empty( $ulozeno ) ) {
+      } elseif ( ! empty( $ulozeno_checkbox ) ) {
         delete_post_meta( $post_id, $key );
       }
     }

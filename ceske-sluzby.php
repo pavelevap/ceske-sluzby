@@ -980,28 +980,28 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
           $value = str_replace( 'Heureka.cz | ', '', $value );
           $value = str_replace( 'Heureka.sk | ', '', $value );
         }
-        $ulozeno = get_woocommerce_term_meta( $term_id, $key, true );
+        $ulozeno_text = get_woocommerce_term_meta( $term_id, $key, true );
         if ( ! empty( $value ) ) {
           update_woocommerce_term_meta( $term_id, $key, esc_attr( $value ) );
-        } elseif ( ! empty( $ulozeno ) ) {
+        } elseif ( ! empty( $ulozeno_text ) ) {
           delete_woocommerce_term_meta( $term_id, $key ); 
         }
       }
     }
-    
+
     $ukladana_data_checkbox = array(
       'ceske-sluzby-xml-vynechano',
       'ceske-sluzby-xml-erotika',
       'ceske-sluzby-xml-zbozi-extra-message'
     );
     foreach ( $ukladana_data_checkbox as $key ) {
+      $ulozeno_checkbox = get_woocommerce_term_meta( $term_id, $key, true );
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
-        $ulozeno = get_woocommerce_term_meta( $term_id, $key, true );
         if ( ! empty( $value ) ) {
           update_woocommerce_term_meta( $term_id, $key, $value );
         }
-      } elseif ( ! empty( $ulozeno ) ) {
+      } elseif ( ! empty( $ulozeno_checkbox ) ) {
         delete_woocommerce_term_meta( $term_id, $key ); 
       }
     }
