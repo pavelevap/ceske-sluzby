@@ -425,34 +425,30 @@ function ceske_sluzby_ziskat_dopravni_oblasti() {
 
 function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $settings_option, $specific_option ) {
   $hodnota = get_option( $global_option );
+  if ( ! empty( $order ) ) {
+    $payment_gateway = wc_get_payment_gateway_by_order( $order );
+  } else {
+    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $current_gateway = WC()->session->chosen_payment_method;
+    if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
+      $payment_gateway = $available_gateways[$current_gateway];
+    }
+  }
+
   $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
   if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) ) {
-    if ( ! empty( $order ) ) {
-      $payment_gateway = wc_get_payment_gateway_by_order( $order );
-    } else {
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-      $current_gateway = WC()->session->chosen_payment_method;
-      if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
-        $payment_gateway = $available_gateways[$current_gateway];
-      }
-    }
     if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) && array_key_exists( $specific_option, $payment_gateway->settings ) && ! empty( $payment_gateway->settings[$specific_option] ) ) {
       $hodnota = $payment_gateway->settings[$specific_option];
     }
   }
+
   $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
   if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) ) {
     $available_shipping = WC()->shipping->load_shipping_methods();
     if ( ! empty( $order ) ) {
       $shipping_methods = $order->get_shipping_methods();
-      $payment_gateway = wc_get_payment_gateway_by_order( $order );
     } else {
       $shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-      $current_gateway = WC()->session->chosen_payment_method;
-      if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
-        $payment_gateway = $available_gateways[$current_gateway];
-      }
     }
     if ( ! empty( $shipping_methods ) && is_array( $shipping_methods ) ) {
       if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) ) {
@@ -507,6 +503,15 @@ function zkontrolovat_nastavenou_hodnotu( $order, $global_option, $settings_opti
             }
           }
         }
+      }
+    }
+  }
+
+  if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) ) {
+    if ( $settings_option == 'zaokrouhlovani' && empty( $hodnota ) && $payment_gateway->id == 'cod' && GOOGLE_MENA == 'CZK' ) {
+      $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
+      if ( $aktivace_eet == "yes" ) {
+        $hodnota = 'nahoru';
       }
     }
   }
