@@ -260,11 +260,7 @@ class Ceske_Sluzby_EET {
     $eet_items = $order->get_items( 'ceske_sluzby_eet' );
     if ( ! empty( $eet_items ) && is_array( $eet_items ) ) {
       foreach ( $eet_items as $item_id => $item ) {
-        if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-          $response_data = $item['item_meta']['ceske_sluzby_eet_uctenka_response'][0];
-        } else {
-          $response_data = wc_get_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_response' );
-        }
+        $response_data = wc_get_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_response' );
         $response_xml = simplexml_load_string( $response_data );
         $chyba_text = $response_xml->children( 'soapenv', true )->Body->children( 'eet', true )->Odpoved->Chyba;
         if ( ! empty( $chyba_text ) ) {
@@ -288,11 +284,7 @@ class Ceske_Sluzby_EET {
             }
           }
         }
-        if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-          $request_data = $item['item_meta']['ceske_sluzby_eet_uctenka_request'][0];
-        } else {
-          $request_data = wc_get_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_request' );
-        }
+        $request_data = wc_get_order_item_meta( $item_id, 'ceske_sluzby_eet_uctenka_request' );
         $request_xml = simplexml_load_string( $request_data );
         $hlavicka = $request_xml->children( 'SOAP-ENV', true )->Body->children( 'ns1', true )->Trzba->Hlavicka->attributes();
         foreach ( $hlavicka as $key => $value ) {
@@ -442,11 +434,7 @@ class Ceske_Sluzby_EET {
   }
 
   function ceske_sluzby_ziskat_eet_uctenku( $order ) {
-    if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-      $order_id = $order->id;
-    } else {
-      $order_id = $order->get_id();
-    }
+    $order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
     // http://www.etrzby.cz/assets/cs/prilohy/EETServiceSOAP.wsdl
     $wsdl = dirname( dirname( __FILE__ ) ) . '/src/eet/EETServiceSOAP.wsdl';
     $heslo = "eet";
@@ -548,11 +536,7 @@ class Ceske_Sluzby_EET {
   }
 
   public function ziskat_odeslane_danove_informace( $order ) {
-    if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-      $order_id = $order->id;
-    } else {
-      $order_id = $order->get_id();
-    }
+    $order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
     $eet_uctenky = $this->ceske_sluzby_zpracovat_data_pro_eet_uctenky( $order_id );
     $dane = array();
     if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {
@@ -590,11 +574,7 @@ class Ceske_Sluzby_EET {
   }
 
   public function ziskat_odeslanou_trzbu( $order ) {
-    if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-      $order_id = $order->id;
-    } else {
-      $order_id = $order->get_id();
-    }
+    $order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
     $eet_uctenky = $this->ceske_sluzby_zpracovat_data_pro_eet_uctenky( $order_id );
     $celk_trzba = 0;
     if ( ! empty( $eet_uctenky ) && is_array( $eet_uctenky ) ) {

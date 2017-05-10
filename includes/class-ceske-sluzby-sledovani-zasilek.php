@@ -174,7 +174,11 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     }
     $id_zasilky = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
     $dopravce = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-    $zeme_doruceni = $order->shipping_country;
+    if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+      $zeme_doruceni = $order->shipping_country;
+    } else {
+      $zeme_doruceni = $order->get_shipping_country();
+    }
     $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $zeme_doruceni );
 
     if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {

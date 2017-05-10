@@ -121,15 +121,22 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
     return $dostupnost;
   }
   if ( get_class( $product ) == "WC_Product_Variation" ) {
-    $dodaci_doba_varianta = get_post_meta( $product->variation_id, 'ceske_sluzby_dodaci_doba', true );
+    $varianta_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+    $dodaci_doba_varianta = get_post_meta( $varianta_id, 'ceske_sluzby_dodaci_doba', true );
     if ( empty ( $dodaci_doba_varianta ) ) {
-      $dodaci_doba_produkt = get_post_meta( $product->parent->id, 'ceske_sluzby_dodaci_doba', true );
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $varianta_parent_id = $product->parent->id;
+      } else {
+        $varianta_parent_id = $product->get_parent_id();
+      }
+      $dodaci_doba_produkt = get_post_meta( $varianta_parent_id, 'ceske_sluzby_dodaci_doba', true );
     } else {
       $dodaci_doba_produkt = $dodaci_doba_varianta;
     }
   }
   elseif ( get_class( $product ) == "WC_Product_Simple" ) {
-    $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
+    $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+    $dodaci_doba_produkt = get_post_meta( $product_id, 'ceske_sluzby_dodaci_doba', true );
   }
   if ( ! empty ( $dodaci_doba_produkt ) ) {
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
@@ -158,7 +165,8 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
 
 function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
   $dostupnost = "";
-  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+  $predobjednavka = get_post_meta( $product_id, 'ceske_sluzby_xml_preorder_datum', true );
   if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
     if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
       $predobjednavka = date_i18n( 'j.n.Y', $predobjednavka );
@@ -415,7 +423,11 @@ function ceske_sluzby_ziskat_dopravni_oblasti() {
   // http://www.ibenic.com/ultimate-guide-woocommerce-shipping-zones/
   $zones = array();
   $default_zone = WC_Shipping_Zones::get_zone( 0 );
-  $zone_id = $default_zone->get_zone_id();
+  if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+    $zone_id = $default_zone->get_zone_id();
+  } else {
+    $zone_id = $default_zone->get_id();;
+  }
   $zones[ $zone_id ] = $default_zone->get_data();
   $zones[ $zone_id ]['formatted_zone_location'] = $default_zone->get_formatted_location();
   $zones[ $zone_id ]['shipping_methods'] = $default_zone->get_shipping_methods();
