@@ -5,14 +5,9 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
     'post_status' => 'publish',
     'meta_query' => array(
       array(
-        'key' => '_visibility',
-        'value' => 'hidden',
-        'compare' => '!=',
-      ),
-      array(
         'key' => 'ceske_sluzby_xml_vynechano',
         'compare' => 'NOT EXISTS',
-      ),
+      )
     ),
     'tax_query' => array(
       array(
@@ -21,10 +16,24 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
         'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
         'include_children' => false,
         'operator' => 'NOT IN',
-      ),
+      )
     ),
     'fields' => 'ids'
   );
+  if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+    $args['meta_query'][] = array(
+      'key' => '_visibility',
+      'value' => 'hidden',
+      'compare' => '!=',
+    );
+  } else {
+    $args['tax_query'][] = array(
+      'taxonomy' => 'product_visibility',
+      'field' => 'slug',
+      'terms' => array( 'exclude-from-search', 'exclude-from-catalog' ),
+      'operator' => 'NOT IN',
+    );
+  }
   if ( $limit ) {
     $args['posts_per_page'] = $limit;
   } else {
