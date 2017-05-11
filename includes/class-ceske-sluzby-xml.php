@@ -1806,8 +1806,8 @@ function pricemania_xml_feed_aktualizace() {
 
   foreach ( $products as $product_id ) {
 
-    $produkt = new WC_Product( $product_id );
-
+    $produkt = wc_get_product( $product_id );
+    $post_data = ceske_sluzby_xml_ziskat_post_data( $produkt );
     $ean = ceske_sluzby_xml_ziskat_ean_produktu( $global_data['podpora_ean'], $product_id, $produkt->get_sku(), false, false );
     $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $product_id, $produkt, '50', '100' );
     $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, false, false, '>' );
