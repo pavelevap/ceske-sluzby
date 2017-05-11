@@ -296,6 +296,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_cart_calculate_fees', 'ceske_sluzby_zaokrouhlovani_poplatek' );
     add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
     add_action( 'wp_footer', 'ceske_sluzby_aktualizovat_checkout_javascript' );
+    add_filter( 'woocommerce_available_payment_gateways', 'ceske_sluzby_dostupne_platebni_metody' );
   }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -1239,7 +1240,7 @@ function ceske_sluzby_povolit_nahravani_certifikatu( $mime_types ) {
 
 function ceske_sluzby_zobrazit_eet_email( $order, $sent_to_admin, $plain_text, $email ) {
   if ( $email->id == 'customer_completed_order' || $email->id == 'customer_processing_order' || $email->id == 'customer_invoice' ) {
-    $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
+    $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
     if ( ! empty( $eet_format ) && ( $eet_format == 'email-completed' || $eet_format == 'email-processing' || $eet_format == 'email-faktura' ) ) {
       $eet = new Ceske_Sluzby_EET();
       if ( $plain_text ) {
@@ -1252,7 +1253,7 @@ function ceske_sluzby_zobrazit_eet_email( $order, $sent_to_admin, $plain_text, $
 }
 
 function ceske_sluzby_zobrazit_eet_faktura_externi( $template_type, $order ) {
-  $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
+  $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
   if ( ! empty( $eet_format ) && $eet_format == 'faktura-plugin' ) {
     $eet = new Ceske_Sluzby_EET();
     $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
@@ -1261,7 +1262,7 @@ function ceske_sluzby_zobrazit_eet_faktura_externi( $template_type, $order ) {
 
 function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
   $order = wc_get_order( $order_id );
-  $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+  $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
   if ( ! empty( $eet_podminka ) && ( $eet_podminka == 'platba' || $eet_podminka == 'dokonceno' ) ) {
     $eet = new Ceske_Sluzby_EET();
     $odeslana_trzba = $eet->ziskat_odeslanou_trzbu( $order );
@@ -1272,7 +1273,7 @@ function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
 }
 
 function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
-  $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
+  $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
   if ( $zaokrouhlovani == 'nahoru' ) {
     $cart->calculate_fees();
     if ( $cart->round_at_subtotal ) {
@@ -1287,7 +1288,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
   $dane = false;
   $decimals = get_option( 'woocommerce_price_num_decimals' );
   if ( $cart->total > 0 && $decimals > 0 ) {
-    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
+    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
     if ( $zaokrouhlovani == 'nahoru' ) {
       $celkem = $cart->total;
       $zao_total = ceil( $cart->total ) - $celkem;
@@ -1328,7 +1329,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
 
 function ceske_sluzby_aktualizovat_checkout_javascript() {
   if ( is_checkout() ) {
-    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
+    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
     if ( ! empty( $zaokrouhlovani ) ) { ?>
       <script type="text/javascript">
         jQuery(document).ready(function($){
@@ -1360,4 +1361,18 @@ function ceske_sluzby_doplnit_danovou_sazbu( $tax_totals ) {
     usort( $tax_totals, 'ceske_sluzby_compare_sazba' );
   }
   return $tax_totals;
+}
+
+function ceske_sluzby_dostupne_platebni_metody( $available_gateways ) {
+  if ( ! is_admin() ) {
+    $platebni_metody = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_doprava' ), '', 'platebni_metody', 'ceske_sluzby_platebni_metody' );
+    if ( ! empty( $platebni_metody ) ) {
+      foreach ( $platebni_metody as $platebni_metoda ) {
+        if ( array_key_exists( $platebni_metoda, $available_gateways ) ) {
+          unset( $available_gateways[$platebni_metoda] );
+        }
+      }
+    }
+  }
+  return $available_gateways;
 }

@@ -19,14 +19,38 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function ceske_sluzby_zobrazeni_pokladna_doprava( $form_fields ) {
-    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
-    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_doprava' );
+    $options = self::dostupne_nastaveni( 'doprava' );
+    $zobrazeny_uvod = false;
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
       $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
         'title' => 'České služby',
         'type' => 'title',
         'default' => ''
-      );    
+      );
+      $zobrazeny_uvod = true;    
+      if ( in_array( 'platebni_metody', $moznosti_nastaveni ) && array_key_exists( 'platebni_metody', $options ) ) {
+        $settings = self::moznosti_nastaveni( 'wc_ceske_sluzby_platebni_metody' );
+        $form_fields['ceske_sluzby_platebni_metody'] = array(
+          'title' => 'Odstranit platební metody',
+          'type' => 'multiselect',
+          'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_platebni_metody' ),
+          'class' => 'wc-enhanced-select',
+          'default' => 'no',
+          'description' => 'Zvolte platební metody, které nebudou nadále dostupné.',
+        );
+      }
+    }
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
+    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+    if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
+      if ( ! $zobrazeny_uvod ) {
+        $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+          'title' => 'České služby',
+          'type' => 'title',
+          'default' => ''
+        );
+      }    
       $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
         if ( in_array( 'eet_format', $moznosti_nastaveni ) && array_key_exists( 'eet_format', $options ) ) {
@@ -126,33 +150,45 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   public static function get_settings_shipping( $current_section = '' ) {
     global $current_section, $hide_save_button;
     $settings = array();
-    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
-    if ( ! empty( $options ) ) {
-      if ( '' == $current_section && ! isset( $_GET['zone_id'] ) && ! isset( $_GET['instance_id'] ) ) {
-        $hide_save_button = false;
-        $settings = array(
-          array(
-            'title' => 'České služby',
-            'type' => 'title',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
-          ),
-          array(
-            'title' => 'Možnosti nastavení',
-            'type' => 'multiselect',
-            'desc' => 'Zvolte podporované funkce, které můžete následně nastavit v kombinaci jednotlivých platebních a dopravních metod.',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava',
-            'class' => 'wc-enhanced-select',
-            'options' => $options,
-            'custom_attributes' => array(
-              'data-placeholder' => 'Nastavení kombinace platebních a dopravních metod'
-            )
-          ),
-          array(
-            'type' => 'sectionend',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title'
+    if ( '' == $current_section && ! isset( $_GET['zone_id'] ) && ! isset( $_GET['instance_id'] ) ) {
+      $hide_save_button = false;
+      $settings[] = array(
+        'title' => 'České služby',
+        'type' => 'title',
+        'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
+      );
+      $options = self::dostupne_nastaveni( 'doprava' );
+      if ( ! empty( $options ) ) {
+        $settings[] = array(
+          'title' => 'Dopravní metody',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>na úrovni jednotlivých dopravních metod</strong>.',
+          'id' => 'wc_ceske_sluzby_nastaveni_doprava',
+          'class' => 'wc-enhanced-select',
+          'options' => $options,
+          'custom_attributes' => array(
+            'data-placeholder' => 'Nastavení na úrovni dopravních metod'
           )
         );
       }
+      $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+      if ( ! empty( $options ) ) {
+        $settings[] = array(
+          'title' => 'Kombinace dopravních a platebních metod',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>v kombinaci jednotlivých platebních a dopravních metod</strong>.',
+          'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava',
+          'class' => 'wc-enhanced-select',
+          'options' => $options,
+          'custom_attributes' => array(
+            'data-placeholder' => 'Nastavení kombinace platebních a dopravních metod'
+          )
+        );
+      }
+      $settings[] = array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title'
+      );
     }
     return $settings;
   }
@@ -185,11 +221,18 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'nahoru' => 'Zaokrouhlit nahoru'
       );
     }
+    if ( $settings == 'wc_ceske_sluzby_platebni_metody' ) {
+      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      foreach ( $available_gateways as $gateway_id => $gateway ) {
+        $options[$gateway_id] = $gateway->title;
+      }
+    }
     return $options;
   }
 
   public static function dostupne_nastaveni( $type ) {
     $options = array();
+    $reverse_type = '';
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
     if ( $aktivace_eet == "yes" && ( $type == 'pokladna' || $type == 'pokladna_doprava' ) ) {
       $options = array(
@@ -200,17 +243,22 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     if ( $type == 'pokladna' ) {
       $options['zaokrouhlovani'] = 'Zaokrouhlování celkové ceny objednávky';
     }
+    if ( $type == 'doprava' ) {
+      $options['platebni_metody'] = 'Dostupné platební metody';
+    }
     if ( $type == 'pokladna' ) {
       $reverse_type = 'pokladna_doprava';
     }
     if ( $type == 'pokladna_doprava' ) {
       $reverse_type = 'pokladna';
     }
-    $dalsi_moznosti = get_option( 'wc_ceske_sluzby_nastaveni_' . $reverse_type );
-    if ( ! empty( $dalsi_moznosti ) && is_array( $dalsi_moznosti ) ) {
-      foreach ( $dalsi_moznosti as $id ) {
-        if ( array_key_exists( $id, $options ) ) {
-          unset( $options[$id] );
+    if ( ! empty( $reverse_type ) ) {
+      $dalsi_moznosti = get_option( 'wc_ceske_sluzby_nastaveni_' . $reverse_type );
+      if ( ! empty( $dalsi_moznosti ) && is_array( $dalsi_moznosti ) ) {
+        foreach ( $dalsi_moznosti as $id ) {
+          if ( array_key_exists( $id, $options ) ) {
+            unset( $options[$id] );
+          }
         }
       }
     }
@@ -239,9 +287,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         'id' => 'wc_ceske_sluzby_nastaveni_pokladna_title',
       );
       $settings[] = array(
-        'title' => 'Možnosti nastavení',
+        'title' => 'Platební metody',
         'type' => 'multiselect',
-        'desc' => 'Zvolte podporované funkce, které můžete následně nastavit na úrovni jednotlivých platebních metod.',
+        'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>na úrovni jednotlivých platebních metod</strong>.',
         'id' => 'wc_ceske_sluzby_nastaveni_pokladna',
         'class' => 'wc-enhanced-select',
         'options' => $options,
