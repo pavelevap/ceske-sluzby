@@ -50,28 +50,37 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'title',
           'default' => ''
         );
-      }    
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-      foreach ( $available_gateways as $gateway_id => $gateway ) {
-        if ( in_array( 'eet_format', $moznosti_nastaveni ) && array_key_exists( 'eet_format', $options ) ) {
-          $form_fields['ceske_sluzby_eet_format_' . $gateway_id ] = array(
-            'title' => 'EET: Formát účtenky (' . $gateway->title . ')',
-            'type' => 'select',
-            'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-            'css' => 'width: 300px',
-            'default' => 'no',
-            'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-          );
-        }
-        if ( in_array( 'eet_podminka', $moznosti_nastaveni ) && array_key_exists( 'eet_podminka', $options ) ) {
-          $form_fields['ceske_sluzby_eet_podminka_' . $gateway_id ] = array(
-            'title' => 'EET: Podmínka odeslání (' . $gateway->title . ')',
-            'type' => 'select',
-            'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-            'css' => 'width: 300px',
-            'default' => 'no',
-            'description' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-          );
+      }
+      foreach ( $moznosti_nastaveni as $moznost_nastaveni ) {
+        $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+        foreach ( $available_gateways as $gateway_id => $gateway ) {
+          if ( $moznost_nastaveni == 'poplatek_platba' && array_key_exists( 'poplatek_platba', $options ) ) {
+            $form_fields['ceske_sluzby_poplatek_platba_' . $gateway_id ] = array(
+              'title' => 'Poplatek za platbu (' . $gateway->title . ')',
+              'type' => 'text',
+              'description' => 'Doplňte cenu poplatku za použitou platební metodu. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_doprava_poplatek_platba' ),
+            );
+          }
+          if ( $moznost_nastaveni == 'eet_format' && array_key_exists( 'eet_format', $options ) ) {
+            $form_fields['ceske_sluzby_eet_format_' . $gateway_id ] = array(
+              'title' => 'EET: Formát účtenky (' . $gateway->title . ')',
+              'type' => 'select',
+              'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
+              'css' => 'width: 300px',
+              'default' => 'no',
+              'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
+            );
+          }
+          if ( in_array( 'eet_podminka', $moznosti_nastaveni ) && array_key_exists( 'eet_podminka', $options ) ) {
+            $form_fields['ceske_sluzby_eet_podminka_' . $gateway_id ] = array(
+              'title' => 'EET: Podmínka odeslání (' . $gateway->title . ')',
+              'type' => 'select',
+              'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
+              'css' => 'width: 300px',
+              'default' => 'no',
+              'description' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
+            );
+          }
         }
       }
     }
@@ -237,7 +246,8 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     if ( $aktivace_eet == "yes" && ( $type == 'pokladna' || $type == 'pokladna_doprava' ) ) {
       $options = array(
         'eet_format' => 'EET: Formát účtenky',
-        'eet_podminka' => 'EET: Podmínka odeslání'
+        'eet_podminka' => 'EET: Podmínka odeslání',
+        'poplatek_platba' => 'Poplatek za platbu',
       );
     }
     if ( $type == 'pokladna' ) {
@@ -267,13 +277,17 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function zobrazit_zvolene_nastaveni( $settings ) {
     $description = 'Na úrovni eshopu zatím není nic nastaveno.';
-    $eet_format_nastaveni = get_option( $settings );
-    if ( ! empty( $eet_format_nastaveni ) ) {
-      $eet_format_array = self::moznosti_nastaveni( $settings );
-      if ( array_key_exists( $eet_format_nastaveni, $eet_format_array ) ) {
-        $eet_format = $eet_format_array[$eet_format_nastaveni];
-        $description = 'Na úrovni eshopu je nastaveno: <strong>' . $eet_format . '</strong>.';
+    $zvolene_nastaveni = get_option( $settings );
+    if ( ! empty( $zvolene_nastaveni ) ) {
+      $mozne_nastaveni_array = self::moznosti_nastaveni( $settings );
+      if ( ! empty( $mozne_nastaveni_array ) ) {
+        if ( array_key_exists( $zvolene_nastaveni, $mozne_nastaveni_array ) ) {
+          $nastaveni = $mozne_nastaveni_array[$zvolene_nastaveni];
+        }
+      } else {
+        $nastaveni = $zvolene_nastaveni;
       }
+      $description = 'Na úrovni eshopu je nastaveno: <strong>' . $nastaveni . '</strong>.';
     }
     return $description;
   }
@@ -316,6 +330,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'České služby',
           'type' => 'title',
         );
+        if ( in_array( 'poplatek_platba', $moznosti_nastaveni ) ) {
+          $form_fields['ceske_sluzby_poplatek_platba'] = array(
+            'title' => 'Poplatek za platbu',
+            'type' => 'text',
+            'description' => 'Doplňte cenu poplatku za použitou platební metodu. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_doprava_poplatek_platba' ),
+          );
+        }
         if ( in_array( 'zaokrouhlovani', $moznosti_nastaveni ) ) {
           $form_fields['ceske_sluzby_zaokrouhleni'] = array(
             'title' => 'Zaokrouhlování',
@@ -534,6 +555,18 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'checkbox',
           'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+        ),
+        array(
+          'title' => 'Poplatek za platbu',
+          'type' => 'text',
+          'desc' => 'Doplňkový poplatek k objednávce je možné upřesnit podle konkrétní platební metody či v kombinaci se způsobem dopravy.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba'
+        ),
+        array(
+          'title' => 'Název poplatku za platbu',
+          'type' => 'text',
+          'desc' => 'Název poplatku za způsob platby.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba_nazev'
         ),
         array(
           'title' => 'Zakrouhlování',

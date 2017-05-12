@@ -1275,8 +1275,19 @@ function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
 function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
   $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
   if ( $zaokrouhlovani == 'nahoru' ) {
+    $dalsi_poplatky = $cart->fees;
     $cart->calculate_fees();
-    if ( $cart->round_at_subtotal ) {
+    if ( ! empty( $dalsi_poplatky ) ) {
+      foreach ( $dalsi_poplatky as $poplatek ) {
+        if ( $poplatek->taxable ) {
+          $id_sazby = key( $poplatek->tax_data );
+          if ( array_key_exists( $id_sazby, $cart->taxes ) )  {
+            $cart->taxes[$id_sazby] = $cart->taxes[$id_sazby] - $poplatek->tax;
+          }
+        }
+      }
+    }
+    if ( $cart->round_at_subtotal && wc_tax_enabled() ) {
       $cart->tax_total = WC_Tax::get_tax_total( $cart->taxes );
     } else {
       $cart->tax_total = array_sum( $cart->taxes );
@@ -1287,6 +1298,48 @@ function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
 function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
   $dane = false;
   $decimals = get_option( 'woocommerce_price_num_decimals' );
+  $poplatek = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_doprava_poplatek_platba', 'poplatek_platba', 'ceske_sluzby_poplatek_platba' );
+  $poplatek = str_replace( ',', '.', $poplatek );
+  $poplatek = floatval( $poplatek );
+  if ( ! empty( $poplatek ) ) {
+    $nazev_poplatku = get_option( 'wc_ceske_sluzby_doprava_poplatek_platba_nazev' );
+    if ( empty( $nazev_poplatku ) ) {
+      $nazev_poplatku = 'Poplatek za způsob platby';
+    }
+    if ( wc_tax_enabled() ) {
+      $dane = true;
+      foreach ( $cart->taxes as $rate_id => $tax_rate ) {
+        if ( array_key_exists( $rate_id, $cart->shipping_taxes ) ) {
+          $tax_rate = $tax_rate + $cart->shipping_taxes[$rate_id];
+        }
+        $kompletni_dane[$rate_id] = $tax_rate;
+      }
+      $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
+      $sazba = 0;
+      $tax_rates = array();
+      $tax_class = '';
+      if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
+        foreach ( $max_dan as $rate_id ) {
+          $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
+          $tax_rates_tmp = WC_Tax::get_rates( $tax_class_tmp );
+          $sazba_tmp = $tax_rates_tmp[$rate_id]['rate'];
+          if ( $sazba_tmp >= $sazba ) {
+            $sazba = $sazba_tmp;
+            $tax_rates = $tax_rates_tmp;
+            $tax_class = $tax_class_tmp;
+          }
+        }
+      }
+      $cena_dan = get_option( 'woocommerce_prices_include_tax' );
+      if ( $cena_dan == 'yes' ) {
+        $dan_poplatek = WC_Tax::calc_tax( $poplatek, $tax_rates, true );
+        $poplatek_celkem = $poplatek - reset( $dan_poplatek );
+      } else {
+        $poplatek_celkem = $poplatek;
+      }
+    }  
+    $cart->add_fee( $nazev_poplatku, $poplatek_celkem, $dane, $tax_class );
+  }
   if ( $cart->total > 0 && $decimals > 0 ) {
     $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
     if ( $zaokrouhlovani == 'nahoru' ) {
@@ -1330,7 +1383,8 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
 function ceske_sluzby_aktualizovat_checkout_javascript() {
   if ( is_checkout() ) {
     $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
-    if ( ! empty( $zaokrouhlovani ) ) { ?>
+    $poplatek = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_doprava_poplatek_platba', 'poplatek_platba', 'ceske_sluzby_poplatek_platba' );
+    if ( ! empty( $zaokrouhlovani ) || ! empty( $poplatek ) ) { ?>
       <script type="text/javascript">
         jQuery(document).ready(function($){
           $(document.body).off().on('change', 'input[name="payment_method"]', function() {
