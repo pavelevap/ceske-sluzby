@@ -254,10 +254,10 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     global $thepostid;
     $global_dodaci_doba_text = '';
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
-    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
-    $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
 
     if ( $aktivace_dodaci_doby == "yes" ) {
+      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+      $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
       if ( ! empty ( $dodaci_doba ) || $predobjednavka == "yes" ) {
         echo '</div>';
         echo '<div class="options_group">';

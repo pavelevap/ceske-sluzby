@@ -24,28 +24,30 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
     }
     woocommerce_wp_text_input( $params );
   }
-  
+
   $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
-  $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
-  if ( $aktivace_dodaci_doby == "yes" && ! empty ( $dodaci_doba ) ) {
-    if ( empty ( $class ) ) {
-      $class = "first";
-    } else {
-      $class = "last";
+  if ( $aktivace_dodaci_doby == "yes" ) {
+    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+    if ( ! empty ( $dodaci_doba ) ) {
+      if ( empty ( $class ) ) {
+        $class = "first";
+      } else {
+        $class = "last";
+      }
+      $params = array( 
+        'id' => "ceske_sluzby_dodaci_doba[{$loop}]",
+        'label' => 'Dodací doba', 
+        'description' => 'Dostupnost pro jednotlivé varianty.',
+        'wrapper_class' => 'form-row form-row-' . $class,
+        'style' => 'width: 91%',
+        'value' => get_post_meta( $variation->ID, 'ceske_sluzby_dodaci_doba', true ),
+        'options' => $dodaci_doba
+      );
+      if ( version_compare( WOOCOMMERCE_VERSION, '2.5', '>=' ) ) {
+        $params = array ( 'desc_tip' => 'true' ) + $params;
+      }
+      woocommerce_wp_select( $params );
     }
-    $params = array( 
-      'id' => "ceske_sluzby_dodaci_doba[{$loop}]",
-      'label' => 'Dodací doba', 
-      'description' => 'Dostupnost pro jednotlivé varianty.',
-      'wrapper_class' => 'form-row form-row-' . $class,
-      'style' => 'width: 91%',
-      'value' => get_post_meta( $variation->ID, 'ceske_sluzby_dodaci_doba', true ),
-      'options' => $dodaci_doba
-    );
-    if ( version_compare( WOOCOMMERCE_VERSION, '2.5', '>=' ) ) {
-      $params = array ( 'desc_tip' => 'true' ) + $params;
-    }
-    woocommerce_wp_select( $params );
   }
 }
 
