@@ -369,17 +369,19 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
     }
 
-    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
-    $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
-    if ( is_array( $dodaci_doba_ulozeno ) ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
-    }
-    if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
-      if ( ! is_array( $dodaci_doba ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+    if ( isset ( $_POST['ceske_sluzby_dodaci_doba'] ) ) {
+      $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
+      $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
+      if ( is_array( $dodaci_doba_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
       }
-    } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
+      if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
+        if ( ! is_array( $dodaci_doba ) ) {
+          update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+        }
+      } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
+      }
     }
   }
 }
