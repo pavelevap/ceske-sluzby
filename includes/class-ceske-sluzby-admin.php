@@ -18,6 +18,21 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_action( 'woocommerce_update_options_shipping', __CLASS__ . '::update_settings_shipping' );
   }
 
+  public static function ceske_sluzby_ziskat_aktivovane_platebni_metody() {
+    $available_gateways = array();
+    if ( ! is_null( WC()->payment_gateways ) ) {
+      $gateways = WC()->payment_gateways->payment_gateways();
+      if ( ! empty( $gateways ) ) {
+        foreach ( $gateways as $gateway ) {
+          if ( $gateway->is_available() || ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) ) {
+            $available_gateways[ $gateway->id ] = $gateway;
+          }
+        }
+      }
+    }
+    return $available_gateways;
+  }
+
   public static function ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr ) {
     $shipping_method = '';
     if ( ! empty( $aktualni_filtr ) ) {
@@ -32,7 +47,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function ceske_sluzby_ziskat_povolenou_dopravu_cod() {
     $cod_shipping = array();
-    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
     if ( array_key_exists( 'cod', $available_gateways ) && isset( $available_gateways['cod']->enable_for_methods ) ) {
       $cod_shipping = $available_gateways['cod']->enable_for_methods;
     }
@@ -54,7 +69,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $settings = array();
       $shipping_method = self::ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr );
       $cod_shipping = self::ceske_sluzby_ziskat_povolenou_dopravu_cod();
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
         if ( $gateway_id != 'cod' || empty( $cod_shipping ) || ( $gateway_id == 'cod' && ! empty( $cod_shipping ) && in_array( $shipping_method, $cod_shipping ) ) ) {
           $settings[$gateway_id] = $gateway->title;
@@ -355,7 +370,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     $options = self::dostupne_nastaveni( 'pokladna' );
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
         $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
           'title' => 'České služby',
@@ -404,7 +419,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function ceske_sluzby_nastaveni_pokladna_doprava() {
     $available_shipping = WC()->shipping->load_shipping_methods();
-    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
     foreach ( $available_shipping as $shipping ) {
       if ( isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
         if ( in_array( 'shipping-zones', $shipping->supports ) && in_array( 'instance-settings-modal', $shipping->supports ) ) {
