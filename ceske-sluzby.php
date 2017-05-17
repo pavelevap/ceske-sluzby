@@ -1382,9 +1382,10 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
 
 function ceske_sluzby_aktualizovat_checkout_javascript() {
   if ( is_checkout() ) {
-    $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
-    $poplatek = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_doprava_poplatek_platba', 'poplatek_platba', 'ceske_sluzby_poplatek_platba' );
-    if ( ! empty( $zaokrouhlovani ) || ! empty( $poplatek ) ) { ?>
+    $nastaveni_pokladna = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
+    $nastaveni_pokladna_doprava = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
+    if ( ( is_array( $nastaveni_pokladna ) && ( in_array( 'zaokrouhlovani', $nastaveni_pokladna ) || in_array( 'poplatek_platba', $nastaveni_pokladna ) ) ) || 
+    ( is_array( $nastaveni_pokladna_doprava ) && in_array( 'poplatek_platba', $nastaveni_pokladna_doprava ) ) ) { ?>
       <script type="text/javascript">
         jQuery(document).ready(function($){
           $(document.body).off().on('change', 'input[name="payment_method"]', function() {
