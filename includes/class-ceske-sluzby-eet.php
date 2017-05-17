@@ -176,7 +176,7 @@ class Ceske_Sluzby_EET {
     // https://www.skyverge.com/blog/add-woocommerce-custom-order-actions/
     global $theorder;
     $order = wc_get_order( $theorder );
-    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
     if ( ! empty( $eet_podminka ) ) {
       if ( is_array( $this->ziskat_zakladni_data() ) ) {
         $eet_uctenky = $this->ceske_sluzby_zpracovat_data_pro_eet_uctenky( $theorder );
@@ -622,8 +622,8 @@ class Ceske_Sluzby_EET {
     $item_id = $post->ID;
     $order = wc_get_order( $post->ID );
     
-    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
-    $eet_format = zkontrolovat_nastavenou_hodnotu( $order, 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
+    $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
+    $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
     if ( empty( $eet_podminka ) ) {
       echo '<p style="color:red;">Pro tuto platební metodu není EET aktivováno!</p>';
     } else {
