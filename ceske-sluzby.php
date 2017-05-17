@@ -1297,11 +1297,13 @@ function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
 
 function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
   $dane = false;
+  $tax_class = '';
   $decimals = get_option( 'woocommerce_price_num_decimals' );
   $poplatek = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_doprava_poplatek_platba', 'poplatek_platba', 'ceske_sluzby_poplatek_platba' );
   $poplatek = str_replace( ',', '.', $poplatek );
   $poplatek = floatval( $poplatek );
   if ( ! empty( $poplatek ) ) {
+    $poplatek_celkem = $poplatek;
     $nazev_poplatku = get_option( 'wc_ceske_sluzby_doprava_poplatek_platba_nazev' );
     if ( empty( $nazev_poplatku ) ) {
       $nazev_poplatku = 'Poplatek za způsob platby';
@@ -1317,7 +1319,6 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
       $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
       $sazba = 0;
       $tax_rates = array();
-      $tax_class = '';
       if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
         foreach ( $max_dan as $rate_id ) {
           $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
@@ -1334,8 +1335,6 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
       if ( $cena_dan == 'yes' ) {
         $dan_poplatek = WC_Tax::calc_tax( $poplatek, $tax_rates, true );
         $poplatek_celkem = $poplatek - reset( $dan_poplatek );
-      } else {
-        $poplatek_celkem = $poplatek;
       }
     }  
     $cart->add_fee( $nazev_poplatku, $poplatek_celkem, $dane, $tax_class );
@@ -1345,6 +1344,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
     if ( $zaokrouhlovani == 'nahoru' ) {
       $celkem = $cart->total;
       $zao_total = ceil( $cart->total ) - $celkem;
+      $zao = $zao_total;
       if ( wc_tax_enabled() ) {
         $dane = true;
         foreach ( $cart->taxes as $rate_id => $tax_rate ) {
@@ -1371,8 +1371,6 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
         }
         $zao_taxes = WC_Tax::calc_tax( $zao_total, $tax_rates, true );
         $zao = $zao_total - reset( $zao_taxes );
-      } else {
-        $zao = $zao_total;
       }
       $cart->add_fee( 'Zaokrouhlení', $zao, $dane, $tax_class );
       $cart->total += $zao_total;
