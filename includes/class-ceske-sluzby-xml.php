@@ -68,7 +68,7 @@ function ceske_sluzby_xml_ziskat_globalni_hodnoty() {
     'zkracene_zapisy' => get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' ),
     'erotika' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' ),
     'postovne' => get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' ),
-    'extra_message' => ceske_sluzby_xml_extra_message_aktivni_hodnoty ( get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' ) )
+    'extra_message' => ceske_sluzby_xml_extra_message_aktivni_hodnoty( get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' ) )
   );
   return $data;
 }
@@ -689,11 +689,37 @@ function ceske_sluzby_xml_ziskat_dostupna_postmeta( $vyrobce, $custom_labels ) {
   return $dostupna_postmeta;
 }
 
-function heureka_xml_feed_zobrazeni() {
+function glami_xml_feed_nastaveni() {
+  $settings['dodaci_doba']['predbezna_objednavka'] = false;
+  $settings['dodaci_doba']['neni_skladem'] = false;
+  $settings['sku']['element'] = 'PRODUCTNO';
+  $settings['product']['element'] = false;
+  $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
+  $settings['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
+  xml_feed_zobrazeni( $settings );
+}
+
+function heureka_xml_feed_nastaveni() {
+  $settings['dodaci_doba']['predbezna_objednavka'] = '';
+  $settings['dodaci_doba']['neni_skladem'] = false;
+  $settings['sku']['element'] = false;
+  $settings['product']['element'] = 'PRODUCT';
+  $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}';
+  $settings['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
+  xml_feed_zobrazeni( $settings );
+}
+
+function xml_feed_zobrazeni( $settings ) {
   // http://codeinthehole.com/writing/creating-large-xml-files-with-php/
   $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
+  if ( empty( $global_data['nazev_produktu'] ) ) {
+    $global_data['nazev_produktu'] = $settings['nazev_produktu'];
+  }
+  if ( empty( $global_data['nazev_variant'] ) ) {
+    $global_data['nazev_variant'] = $settings['nazev_variant'];
+  }
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], false );
 
   $xmlWriter = new XMLWriter();
@@ -718,6 +744,7 @@ function heureka_xml_feed_zobrazeni() {
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
+    $sku_produkt = $produkt->get_sku();
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-heureka-productname' );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post_data->post_title, $feed_data );
 
@@ -725,8 +752,9 @@ function heureka_xml_feed_zobrazeni() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $sku_varianta = $varianta->get_sku();
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $global_data['podpora_ean'], $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
-          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $variation['variation_id'], $varianta, '', false );
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $variation['variation_id'], $varianta, $settings['dodaci_doba']['predbezna_objednavka'], $settings['dodaci_doba']['neni_skladem'] );
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta_only = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
           $popis_varianta = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, $varianta, $global_data['zkracene_zapisy'] );
@@ -745,6 +773,9 @@ function heureka_xml_feed_zobrazeni() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_varianta );
             $xmlWriter->endElement();
+          }
+          if ( ! empty( $settings['sku']['element'] ) && ! empty( $sku_varianta ) ) {
+            $xmlWriter->writeElement( $settings['sku']['element'], $sku_varianta );
           }
           if ( ! empty ( $popis_varianta ) ) {
             $xmlWriter->startElement( 'DESCRIPTION' );
@@ -790,16 +821,19 @@ function heureka_xml_feed_zobrazeni() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $global_data['podpora_ean'], $product_id, $produkt->get_sku(), false, false );
-        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $product_id, $produkt, '', false );
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $product_id, $produkt, $settings['dodaci_doba']['predbezna_objednavka'], $settings['dodaci_doba']['neni_skladem'] );
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
           if ( ! empty ( $nazev_produkt ) ) {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty ( $nazev_produkt_doplnek ) ) {
+            if ( ! empty( $settings['product']['element'] ) && ! empty ( $nazev_produkt_doplnek ) ) {
               $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
+          }
+          if ( ! empty( $settings['sku']['element'] ) && ! empty( $sku_produkt ) ) {
+            $xmlWriter->writeElement( $settings['sku']['element'], $sku_produkt );
           }
           if ( ! empty ( $popis_produkt ) ) {
             $xmlWriter->startElement( 'DESCRIPTION' );
