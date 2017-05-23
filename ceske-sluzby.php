@@ -15,10 +15,12 @@ define( 'CS_VERSION', '0.6-alpha' );
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
+  define( "HEUREKA_KONVERZE", "https://im9.cz/sk/js/ext/2-roi-async.js" );
   define( "GOOGLE_MENA", "EUR" );
 }
 else {
   define( "HEUREKA_URL", "heureka.cz" );
+  define( "HEUREKA_KONVERZE", "https://im9.cz/js/ext/1-roi-async.js" );
   define( "GOOGLE_MENA", "CZK" );
 }
 
@@ -60,10 +62,9 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
 function ceske_sluzby_heureka_mereni_konverzi( $order_id ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_konverze-api' );
   if ( ! empty( $api ) ) {
-  
     $order = new WC_Order( $order_id );
     $products = $order->get_items(); ?>
-    
+
 <script type="text/javascript">
 var _hrq = _hrq || [];
     _hrq.push(['setKey', '<?php echo $api; ?>']);
@@ -76,7 +77,7 @@ var _hrq = _hrq || [];
 
 (function() {
     var ho = document.createElement('script'); ho.type = 'text/javascript'; ho.async = true;
-    ho.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.<?php echo HEUREKA_URL; ?>/direct/js/ext/1-roi-async.js';
+    ho.src = '<?php echo HEUREKA_KONVERZE; ?>';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ho, s);
 })();
 </script>
