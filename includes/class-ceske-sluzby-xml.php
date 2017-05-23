@@ -196,11 +196,11 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_dat
     $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_varianty_vlastnosti( $vlastnosti );
     if ( empty( $global_data['nazev_variant'] ) ) {
       $global_nazev = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
-      if ( ! empty( $doplneny_nazev_produkt ) ) {
-        $global_nazev = str_replace( '{PRODUCTNAME} {VLASVAR}', $doplneny_nazev_produkt, $global_nazev );
-      }
     } else {
       $global_nazev = $global_data['nazev_variant'];
+    }
+    if ( ! empty( $doplneny_nazev_produkt ) && strpos( $doplneny_nazev_produkt, '{' ) !== false ) {
+      $global_nazev = str_replace( '{PRODUCTNAME} {VLASVAR}', $doplneny_nazev_produkt, $global_nazev );
     }
   }
   if ( ! empty( $doplneny_nazev_produkt ) ) {
