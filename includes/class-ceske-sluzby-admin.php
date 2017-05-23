@@ -289,10 +289,14 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $options = array();
     $reverse_type = '';
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
-    if ( $aktivace_eet == "yes" && ( $type == 'pokladna' || $type == 'pokladna_doprava' ) ) {
+    if ( $type == 'pokladna' || $type == 'pokladna_doprava' ) {
+      if ( $aktivace_eet == "yes" ) {
+        $options = array(
+          'eet_format' => 'EET: Formát účtenky',
+          'eet_podminka' => 'EET: Podmínka odeslání'
+        );
+      }
       $options = array(
-        'eet_format' => 'EET: Formát účtenky',
-        'eet_podminka' => 'EET: Podmínka odeslání',
         'poplatek_platba' => 'Poplatek za platbu',
       );
     }
