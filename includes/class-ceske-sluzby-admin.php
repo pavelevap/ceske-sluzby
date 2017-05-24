@@ -534,6 +534,23 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_heureka_title'
         ),
         array(
+          'title' => 'Zboží.cz',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_zbozi_title'
+        ),
+        array(
+          'title' => 'ID obchodu',
+          'type' => 'text',
+          'desc' => 'Identifikační číslo obchodu pro měření konverzí naleznete <a href="https://admin.zbozi.cz/premiseListScreen">zde</a>.',
+          'id'   => 'wc_ceske_sluzby_zbozi_konverze_id-obchodu',                                                             
+          'css'   => 'width: 300px'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_zbozi_title'
+        ),
+        array(
           'title' => 'Sklik.cz',
           'type' => 'title',
           'desc' => '',

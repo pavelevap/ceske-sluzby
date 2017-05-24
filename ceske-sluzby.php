@@ -27,7 +27,7 @@ else {
 function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
   if ( ! empty( $api ) ) {
-    $order = new WC_Order( $order_id );
+    $order = wc_get_order( $order_id );
     
     // https://github.com/heureka/heureka-overeno-php-api
     require_once( dirname( __FILE__ ) . '/src/heureka/HeurekaOvereno.php' );
@@ -62,7 +62,7 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
 function ceske_sluzby_heureka_mereni_konverzi( $order_id ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_konverze-api' );
   if ( ! empty( $api ) ) {
-    $order = new WC_Order( $order_id );
+    $order = wc_get_order( $order_id );
     $products = $order->get_items(); ?>
 
 <script type="text/javascript">
@@ -124,7 +124,7 @@ var _hwq = _hwq || [];
 function ceske_sluzby_sklik_mereni_konverzi( $order_id ) {
   $konverze = get_option( 'wc_ceske_sluzby_sklik_konverze-objednavky' );
   if ( ! empty( $konverze ) ) {
-    $order = new WC_Order( $order_id );
+    $order = wc_get_order( $order_id );
     $hodnota_objednavky = round( $order->get_subtotal() ); ?>
 <!-- Měřicí kód Sklik.cz -->
 <iframe width="119" height="22" frameborder="0" scrolling="no" src="//c.imedia.cz/checkConversion?c=<?php echo $konverze; ?>&color=ffffff&v=<?php echo $hodnota_objednavky; ?>"></iframe>
@@ -149,7 +149,7 @@ function ceske_sluzby_srovname_mereni_konverzi( $order_id ) {
   $klic = get_option( 'wc_ceske_sluzby_srovname_konverze-objednavky' );
   if ( ! empty( $klic ) ) {
   
-    $order = new WC_Order( $order_id );
+    $order = wc_get_order( $order_id );
     $products = $order->get_items(); ?>
 
 <script type="text/javascript">
@@ -170,6 +170,28 @@ var _srt = _srt || [];
     var x = document.getElementsByTagName("script")[0];
     x.parentNode.insertBefore(s, x);
 })();
+</script>
+
+<?php
+  }
+}
+
+function ceske_sluzby_zbozi_mereni_konverzi( $order_id ) {
+  $id_obchodu = get_option( 'wc_ceske_sluzby_zbozi_konverze_id-obchodu' );
+  if ( ! empty( $id_obchodu ) ) {
+    $order = wc_get_order( $order_id );
+    $hodnota_objednavky = number_format( (float)( $order->get_total() ), 2, '.', '' ); ?>
+
+<script>
+(function(w,d,s,u,n,k,c,t){w.ZboziConversionObject=n;w[n]=w[n]||function(){
+(w[n].q=w[n].q||[]).push(arguments)};w[n].key=k;c=d.createElement(s);
+t=d.getElementsByTagName(s)[0];c.async=1;c.src=u;t.parentNode.insertBefore(c,t)
+})(window,document,"script","https://www.zbozi.cz/conversion/js/conv.js","zbozi","<?php echo $id_obchodu; ?>");
+zbozi("setOrder",{
+"orderId": "<?php echo $order_id; ?>",
+"totalPrice": "<?php echo $hodnota_objednavky; ?>"
+});
+zbozi("send");
 </script>
 
 <?php
@@ -210,6 +232,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
 
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
+    add_action( 'woocommerce_thankyou', 'ceske_sluzby_zbozi_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_srovname_mereni_konverzi' );
     add_action( 'wp_footer', 'ceske_sluzby_sklik_retargeting' );
