@@ -604,7 +604,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Pouze doprava zdarma',
           'type' => 'checkbox',
-          'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
+          'desc' => 'Pokud je dostupná doprava zdarma, tak zobrazit pouze tuto možnost (+ nabídku vyzvednutí na pobočce).',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
         ),
         array(

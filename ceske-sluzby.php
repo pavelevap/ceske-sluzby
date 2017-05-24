@@ -633,19 +633,52 @@ function ceske_sluzby_pricemania_xml_feed_aktualizace() {
 function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
   $omezit_dopravu = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma' );
   if ( $omezit_dopravu == "yes" ) {
-    if ( isset( $rates['free_shipping'] ) ) {
-      $free_shipping = $rates['free_shipping'];
-      if ( isset( $rates['local_pickup'] ) ) {
-        $local_pickup = $rates['local_pickup'];
+    $rates_omezeno = array();
+    if ( version_compare( WC_VERSION, '2.6', '<' ) ) {
+      if ( isset( $rates['free_shipping'] ) ) {
+        $free_shipping = $rates['free_shipping'];
+        if ( isset( $rates['local_pickup'] ) ) {
+          $local_pickup = $rates['local_pickup'];
+        }
+        $rates_omezeno['free_shipping'] = $free_shipping;
+        if ( isset( $local_pickup ) ) {
+          $rates_omezeno['local_pickup'] = $local_pickup;
+        }
       }
-      $rates = array();
-      $rates['free_shipping'] = $free_shipping;
-      if ( isset( $local_pickup ) ) {
-        $rates['local_pickup'] = $local_pickup;
+    } else {
+      if ( isset( $rates['legacy_free_shipping'] ) ) {
+        $free_shipping = $rates['legacy_free_shipping'];
+        if ( isset( $rates['legacy_local_pickup'] ) ) {
+          $local_pickup = $rates['legacy_local_pickup'];
+        }
+        $rates_omezeno['legacy_free_shipping'] = $free_shipping;
+        if ( isset( $local_pickup ) ) {
+          $rates_omezeno['legacy_local_pickup'] = $local_pickup;
+        }
+        $free = $pickup = array();
+        foreach ( $rates as $rate_id => $rate ) {
+          if ( 'free_shipping' === $rate->method_id ) {
+            $rates_omezeno[ $rate_id ] = $rate;
+            $free[] = $rate_id;
+          }
+          if ( 'local_pickup' === $rate->method_id ) {
+            $rates_omezeno[ $rate_id ] = $rate;
+            $pickup[] = $rate_id;
+          }
+        }
+        if ( empty( $free ) && ! empty( $pickup ) ) {
+          foreach ( $pickup as $pickup_id => $pickup_rate ) {
+            unset( $rates_omezeno[ $pickup_id ] );
+          }
+        }
       }
     }
   }
-	return $rates;
+  if ( ! empty( $rates_omezeno ) ) {
+    return $rates_omezeno;
+  } else {
+    return $rates;
+  }
 }
 
 function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
