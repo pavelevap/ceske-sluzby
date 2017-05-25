@@ -55,6 +55,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function ceske_sluzby_zobrazeni_pokladna_doprava( $form_fields ) {
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_doprava' );
     $options = self::dostupne_nastaveni( 'doprava' );
     $zobrazeny_uvod = false;
@@ -69,7 +70,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
       $settings = array();
       $shipping_method = self::ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr );
       $cod_shipping = self::ceske_sluzby_ziskat_povolenou_dopravu_cod();
-      $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
         if ( $gateway_id != 'cod' || empty( $cod_shipping ) || ( $gateway_id == 'cod' && ! empty( $cod_shipping ) && in_array( $shipping_method, $cod_shipping ) ) ) {
           $settings[$gateway_id] = $gateway->title;
