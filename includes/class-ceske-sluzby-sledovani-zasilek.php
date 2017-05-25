@@ -17,7 +17,7 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
   $dopravci = array(
     'CPOST' => array(
       'nazev' => 'Česká pošta',
-      'url' => 'http://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
+      'url' => 'https://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
       'lang' => 'CZ'
     ),
     'SPOST' => array(

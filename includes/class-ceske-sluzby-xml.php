@@ -873,7 +873,7 @@ function xml_feed_zobrazeni( $settings ) {
             $xmlWriter->writeElement( 'EAN', $ean );
           }
         $xmlWriter->endElement();
-      // http://narhinen.net/2011/01/15/Serving-large-xml-files.html
+        // https://nnarhinen.github.io/2011/01/15/Serving-large-xml-files.html
       }
     }
   }

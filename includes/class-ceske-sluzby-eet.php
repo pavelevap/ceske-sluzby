@@ -621,7 +621,7 @@ class Ceske_Sluzby_EET {
   public function zobrazit_meta_box_eet( $post ) {
     $item_id = $post->ID;
     $order = wc_get_order( $post->ID );
-    
+
     $eet_podminka = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_podminka', 'eet_podminka', 'ceske_sluzby_eet_podminka' );
     $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
     if ( empty( $eet_podminka ) ) {

@@ -1,5 +1,5 @@
 <?php
-// http://docs.woothemes.com/document/adding-a-section-to-a-settings-tab/
+// https://docs.woothemes.com/document/adding-a-section-to-a-settings-tab/
 class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function init() {
@@ -498,21 +498,21 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'API klíč: Ověřeno zákazníky',
           'type' => 'text',
-          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
+          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="https://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
           'id' => 'wc_ceske_sluzby_heureka_overeno-api',
           'css' => 'width: 300px'
         ),
         array(
           'title' => 'API klíč: Měření konverzí',
           'type' => 'text',
-          'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>. Heureka může ještě nějaký čas hlásit, že nebyla služba zprovozněna (dokud neproběhne nějaká objednávka zákazníka z Heureky).',
+          'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="https://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>. Heureka může ještě nějaký čas hlásit, že nebyla služba zprovozněna (dokud neproběhne nějaká objednávka zákazníka z Heureky).',
           'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
           'css'   => 'width: 300px'
         ),
         array(
           'title' => 'Aktivovat certifikát',
           'type' => 'checkbox',
-          'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
+          'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="https://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
           'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace'
         ),
         array(
@@ -581,7 +581,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Identifikační klíč',
           'type' => 'text',
-          'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="http://www.srovname.cz/muj-obchod">zde</a>.',
+          'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="https://www.srovname.cz/muj-obchod">zde</a>.',
           'id' => 'wc_ceske_sluzby_srovname_konverze-objednavky'
         ),
         array(
@@ -673,7 +673,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Heureka.cz (.sk)',
           'type' => 'title',
-          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
         ),
         array(
@@ -740,7 +740,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Zbozi.cz',
           'type' => 'title',
-          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
         ),
         array(
@@ -832,7 +832,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
-          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
+          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
                      Dostupné taxonomie: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'obecne', false ) . '
                      Dostupné vlastnosti v podobě taxonomií: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', false ) . '
                      Podporovány jsou také názvy jednoduchých textových vlastností nebo uživatelských polí.',
