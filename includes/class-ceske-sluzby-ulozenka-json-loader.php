@@ -1,11 +1,16 @@
 <?php
 // http://pressing-matters.io/building-an-object-oriented-wordpress-plugin-xkcd-shortcode-part-5/
-class Ceske_Sluzby_Json_Loader {
+class Ceske_Sluzby_Ulozenka_Json_Loader {
   function load( $params = null ) {
-    $url = $this->build( $params );
-    $result = $this->fetch( $url );
-    $body = $this->verify( $result );
-    return $this->parse( $body );
+    $json = get_transient( 'ceske_sluzby_ulozenka_pobocky' );
+    if (!$json) {  
+      $url = $this->build( $params );
+      $result = $this->fetch( $url );
+      $body = $this->verify( $result );
+      $json = $this->parse( $body );
+      set_transient( 'ceske_sluzby_ulozenka_pobocky', $json, 24 * 60 * 60);
+    }
+    return $json;
   }
 
   function fetch( $url ) {

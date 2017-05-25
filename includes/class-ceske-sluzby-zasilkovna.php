@@ -1,13 +1,13 @@
 <?php
-// https://docs.woothemes.com/document/settings-api/
+// http://docs.woothemes.com/document/settings-api/
 // http://speakinginbytes.com/2014/07/woocommerce-settings-tab/
-class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
+class WC_Shipping_Ceske_Sluzby_Zasilkovna extends WC_Shipping_Method {
 
   public function __construct() {
-     $this->id = 'ceske_sluzby_ulozenka';
-     $this->method_title = 'Uloženka';
+     $this->id = 'ceske_sluzby_zasilkovna';
+     $this->method_title = 'Zásilkovna';
      $this->method_description = 'Základní možnosti nastavení.';
-     $this->title = $this->get_option( 'ulozenka_nazev' );
+     $this->title = $this->get_option( 'zasilkovna_nazev' );
      $this->enabled = $this->get_option( 'enabled' );
      $this->init();
    }
@@ -20,8 +20,8 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
  
   public function calculate_shipping( $package = array() ) {
     $zeme = WC()->customer->get_shipping_country();
-    if ( $zeme == "CZ" ) { $cena = $this->get_option( 'ulozenka_zakladni-cena' ); }
-    if ( $zeme == "SK" ) { $cena = $this->get_option( 'ulozenka_zakladni-cena-slovensko' ); }
+    if ( $zeme == "CZ" ) { $cena = $this->get_option( 'zasilkovna_zakladni-cena' ); }
+    if ( $zeme == "SK" ) { $cena = $this->get_option( 'zasilkovna_zakladni-cena-slovensko' ); }
     $rate = array(
       'id' => $this->id,
       'label' => $this->title,
@@ -38,28 +38,28 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'label'   => 'Aktivovat a zobrazit v nabídce dostupných možností dopravy.',
 				'default' => 'no'
       ),
-      'ulozenka_nazev' => array(
+      'zasilkovna_nazev' => array(
 				'title'       => 'Název',
 				'type'        => 'text',
 				'description' => 'Název pro zobrazení v eshopu.',
-				'default'     => 'Uloženka',
+				'default'     => 'Zásilkovna',
 				'css'         => 'width: 300px;'
       ),
-      'ulozenka_id-obchodu' => array(
-				'title'       => 'ID obchodu',
+      'zasilkovna_api-klic' => array(
+				'title'       => 'API klíč',
 				'type'        => 'text',
-				'description' => 'Zadejte ID obchodu z administrace Uloženka.',
+				'description' => 'Zadejte API klíč z administrace Zásilkovna.',
 				'default'     => '',
 				'css'         => 'width: 100px;'
       ),
-      'ulozenka_logo'       => array(
+      'zasilkovna_logo'       => array(
 				'title'       => 'Logo',
 				'type'        => 'text',
-				'description' => 'Zadejte URL na logo Uloženky',
-				'default'     => 'https://www.ulozenka.cz/logo/ulozenka.png',
+				'description' => 'Zadejte URL na logo Zásilkovny',
+				'default'     => '//www.zasilkovna.cz/images/page/Zasilkovna_logo_inverzni_WEB.png',
 				'css'         => 'width: 500px;'
       ),       
-      'ulozenka_zakladni-cena' => array(
+      'zasilkovna_zakladni-cena' => array(
 				'title'       => 'Základní cena',
 				'type'        => 'price',
 				'description' => 'Pokud nebude cena vyplněna, tak bude nulová.',
@@ -67,7 +67,7 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'css'         => 'width: 100px;',
 				'placeholder' => wc_format_localized_price( 0 )
       ),
-      'ulozenka_dobirka' => array(
+      'zasilkovna_dobirka' => array(
 				'title'       => 'Poplatek za dobírku',
 				'type'        => 'price',
 				'description' => 'Pro fungování dodatečného poplatku za dobírku je třeba použít plugin <a href="https://wordpress.org/plugins/woocommerce-pay-for-payment/">WooCommerce Pay for Payment</a> a nastavit u něj stejný poplatek za dobírku (menu Pokladna - Hotově při doručení).',
@@ -78,7 +78,7 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
     );
     
     $slovensko = array(
-      'ulozenka_zakladni-cena-slovensko' => array(
+      'zasilkovna_zakladni-cena-slovensko' => array(
 				'title'       => 'Základní cena (Slovensko)',
 				'type'        => 'price',
 				'description' => 'Pokud nebude cena vyplněna, tak bude nulová.',
@@ -86,7 +86,7 @@ class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 				'css'         => 'width: 100px;',
 				'placeholder' => wc_format_localized_price( 0 )
       ),
-      'ulozenka_dobirka-slovensko' => array(
+      'zasilkovna_dobirka-slovensko' => array(
 				'title'       => 'Poplatek za dobírku (Slovensko)',
 				'type'        => 'price',
 				'description' => 'Pro fungování dodatečného poplatku za dobírku je třeba použít plugin <a href="https://wordpress.org/plugins/woocommerce-pay-for-payment/">WooCommerce Pay for Payment</a> a nastavit u něj stejný poplatek za dobírku (menu Pokladna - Hotově při doručení).',

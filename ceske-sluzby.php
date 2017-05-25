@@ -227,6 +227,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_ulozenka_init' );
     add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_ulozenka' );
 
+    add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_zasilkovna_init' );
+    add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_zasilkovna' );
+    
     add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_dpd_parcelshop_init' );
     add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_dpd_parcelshop' );
 
@@ -246,6 +249,13 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
 
+    add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_zasilkovna_zobrazit_pobocky' );
+    add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_zasilkovna_ulozeni_pobocky', 10, 2 );
+    add_action( 'woocommerce_checkout_process', 'ceske_sluzby_zasilkovna_overit_pobocku' );
+    add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_zasilkovna_pobocka_email' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_zasilkovna_pobocka_email' );
+    
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
     add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
@@ -254,6 +264,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
 
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
+    add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_zasilkovna_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
 
     $aktivace_recenzi = get_option( 'wc_ceske_sluzby_heureka_recenze_obchodu-aktivace' );
@@ -328,6 +339,7 @@ add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
 function ceske_sluzby_doprava_ulozenka_init() {
   if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Ulozenka' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka-json-loader.php';
   }
 }
  
@@ -349,7 +361,7 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
 
       if ( $settings['enabled'] == "yes" && ! empty ( $settings['ulozenka_id-obchodu'] ) ) {
 
-        $pobocky = new Ceske_Sluzby_Json_Loader();
+        $pobocky = new Ceske_Sluzby_Ulozenka_Json_Loader();
         // http://docs.ulozenkav3.apiary.io/#pepravnsluby
 
         $zeme = WC()->customer->get_shipping_country();
@@ -361,7 +373,7 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
     
         <tr class="ulozenka">
           <td>
-            <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
+            <img src="<?php echo $settings['ulozenka_logo']; ?>" width="140" border="0">
           </td>
           <td>
             <font size="2">Uloženka - výběr pobočky:</font><br>
@@ -443,10 +455,130 @@ function ceske_sluzby_ulozenka_pobocka_email( $order ) {
   }
 }
 
+function ceske_sluzby_doprava_zasilkovna_init() {
+  if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Zasilkovna' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-zasilkovna.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-zasilkovna-json-loader.php';    
+  }
+}
+
+function ceske_sluzby_doprava_zasilkovna( $methods ) {
+  $methods[] = 'WC_Shipping_Ceske_Sluzby_Zasilkovna';
+  return $methods;
+}
+
+function ceske_sluzby_zasilkovna_zobrazit_pobocky() {
+    if ( is_ajax() ) {
+    // Do budoucna možná použít spíše woocommerce_checkout_update_order_review
+    parse_str( $_POST['post_data'] );
+    $available_shipping = WC()->shipping->load_shipping_methods();
+    $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+    $settings = array();
+
+    if ( $chosen_shipping_method[0] == "ceske_sluzby_zasilkovna" ) {
+      $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
+
+      if ( $settings['enabled'] == "yes" && ! empty ( $settings['zasilkovna_api-klic'] ) ) {
+
+        $pobocky = new Ceske_Sluzby_Zasilkovna_Json_Loader();
+
+        $zeme = WC()->customer->get_shipping_country();
+        if ( $zeme == "CZ" ) { $zeme_code = "cz"; }
+        if ( $zeme == "SK" ) { $zeme_code = "sk"; }
+
+        $parametry = array();
+        ?>
+    
+        <tr class="zasilkovna">
+          <td>
+            <img src="<?php echo $settings['zasilkovna_logo']; ?>" width="160" border="0">
+          </td>
+          <td>
+            <font size="2">Zásilkovna - výběr pobočky:</font><br>
+            <div id="zasilkovna-branch-select-options">
+              <select name="zasilkovna_branches">
+              <option>Vyberte pobočku</option>
+    
+        <?php
+        foreach ( $pobocky->load( $parametry )->data as $pobocka_id => $pobocka ) {
+          if ( ! empty ( $zasilkovna_branches ) && $zasilkovna_branches == $pobocka_id ) {
+            $selected = ' selected="selected"';
+          } else {
+            $selected = "";
+          }
+          if ( $pobocka->country == $zeme_code ) {
+            echo '<option value="' . $pobocka_id . '"' . $selected . '>' . $pobocka->name . '</option>';
+          }
+        } ?>
+    
+            </div>
+          </td>
+        </tr>
+    
+      <?php }
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_ulozeni_pobocky( $order_id, $item_id ) {
+  if ( isset( $_POST["zasilkovna_branches"] ) ) {
+    if ( $_POST["zasilkovna_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_zasilkovna" ) {
+      wc_add_order_item_meta( $item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', esc_attr( $_POST['zasilkovna_branches'] ), true );
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_overit_pobocku() {
+  if ( isset( $_POST["zasilkovna_branches"] ) ) {
+    if ( $_POST["zasilkovna_branches"] == "Vyberte pobočku" && $_POST["shipping_method"][0] == "ceske_sluzby_zasilkovna" ) {
+      wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Zásilkovny, zvolte prosím pobočku.', 'error' );
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku( $order ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_zasilkovna' ) ) {
+    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+      echo "<p><strong>Zásilkovna:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', true ) . "</p>";
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_dobirka_pay4pay( $amount ) {
+  $available_shipping = WC()->shipping->load_shipping_methods();
+  $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+  if ( $chosen_shipping_method[0] == "ceske_sluzby_zasilkovna" ) {
+    $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
+    $zeme = WC()->customer->get_shipping_country();
+    if ( $zeme == "CZ" ) {
+      if ( ! empty( $settings['zasilkovna_dobirka'] ) ) {
+        $amount = $settings['zasilkovna_dobirka'];
+      } 
+    }
+    if ( $zeme == "SK" ) {
+      if ( ! empty( $settings['zasilkovna_dobirka-slovensko'] ) ) {
+        $amount = $settings['zasilkovna_dobirka-slovensko'];
+      }
+    }
+    if ( class_exists( 'WOOCS' ) ) {
+      $amount = apply_filters( 'woocs_exchange_value', $amount );
+    }
+  }
+  return $amount;
+}
+
+function ceske_sluzby_zasilkovna_pobocka_email( $order ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_zasilkovna' ) ) {
+    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+      echo "<p><strong>Zásilkovna:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', true ) . "</p>";
+    }
+  }
+}
+
 function ceske_sluzby_doprava_dpd_parcelshop_init() {
   if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-dpd-parcelshop.php';
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-json-loader.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka-json-loader.php';
   }
 }
  
@@ -467,7 +599,7 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
 
       if ( $settings['enabled'] == "yes" ) {
 
-        $pobocky = new Ceske_Sluzby_Json_Loader();
+        $pobocky = new Ceske_Sluzby_Ulozenka_Json_Loader();
 
         $zeme = WC()->customer->get_shipping_country();
         if ( $zeme == "CZ" ) { $zeme_code = "CZE"; }
