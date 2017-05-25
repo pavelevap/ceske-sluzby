@@ -243,15 +243,15 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_new_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
-    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
-    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
 
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
     add_action( 'woocommerce_new_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
-    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
-    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
 
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
@@ -414,7 +414,14 @@ function ceske_sluzby_ulozenka_overit_pobocku() {
 function ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku( $order ) {
   if ( $order->has_shipping_method( 'ceske_sluzby_ulozenka' ) ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-      echo "<p><strong>Uloženka:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true ) . "</p>";
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $pobocka = $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true );
+      } else {
+        $pobocka = wc_get_order_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true );
+      }
+      if ( ! empty( $pobocka ) ) {
+        echo "<p><strong>Uloženka:</strong> " . $pobocka . "</p>";
+      }
     }
   }
 }
@@ -440,14 +447,6 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
     }
   }
   return $amount;
-}
-
-function ceske_sluzby_ulozenka_pobocka_email( $order ) {
-  if ( $order->has_shipping_method( 'ceske_sluzby_ulozenka' ) ) {
-    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-      echo "<p><strong>Uloženka:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', true ) . "</p>";
-    }
-  }
 }
 
 function ceske_sluzby_doprava_dpd_parcelshop_init() {
@@ -538,7 +537,14 @@ function ceske_sluzby_dpd_parcelshop_overit_pobocku() {
 function ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku( $order ) {
   if ( $order->has_shipping_method( 'ceske_sluzby_dpd_parcelshop' ) ) {
     foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-      echo "<p><strong>DPD ParcelShop:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true ) . "</p>";
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $pobocka = $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true );
+      } else {
+        $pobocka = wc_get_order_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true );
+      }
+      if ( ! empty( $pobocka ) ) {
+        echo "<p><strong>DPD ParcelShop:</strong> " . $pobocka . "</p>";
+      }
     }
   }
 }
@@ -564,14 +570,6 @@ function ceske_sluzby_dpd_parcelshop_dobirka_pay4pay( $amount ) {
     }
   }
   return $amount;
-}
-
-function ceske_sluzby_dpd_parcelshop_pobocka_email( $order ) {
-  if ( $order->has_shipping_method( 'ceske_sluzby_dpd_parcelshop' ) ) {
-    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-      echo "<p><strong>DPD ParcelShop:</strong> " . $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', true ) . "</p>";
-    }
-  }
 }
 
 function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
@@ -1315,10 +1313,11 @@ function ceske_sluzby_zobrazit_eet_email( $order, $sent_to_admin, $plain_text, $
     $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
     if ( ! empty( $eet_format ) && ( $eet_format == 'email-completed' || $eet_format == 'email-processing' || $eet_format == 'email-faktura' ) ) {
       $eet = new Ceske_Sluzby_EET();
+      $order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
       if ( $plain_text ) {
-        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false, '', '', true );
+        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order_id, false, '', '', true );
       } else {
-        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false, '<br>' );
+        $eet->ceske_sluzby_zobrazit_eet_uctenku( $order_id, false, '<br>' );
       }
     }
   }
@@ -1328,7 +1327,8 @@ function ceske_sluzby_zobrazit_eet_faktura_externi( $template_type, $order ) {
   $eet_format = zkontrolovat_nastavenou_hodnotu( $order, array( 'wc_ceske_sluzby_nastaveni_pokladna', 'wc_ceske_sluzby_nastaveni_pokladna_doprava' ), 'wc_ceske_sluzby_eet_format', 'eet_format', 'ceske_sluzby_eet_format' );
   if ( ! empty( $eet_format ) && $eet_format == 'faktura-plugin' ) {
     $eet = new Ceske_Sluzby_EET();
-    $eet->ceske_sluzby_zobrazit_eet_uctenku( $order->id, false );
+    $order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
+    $eet->ceske_sluzby_zobrazit_eet_uctenku( $order_id, false );
   }
 }
 
