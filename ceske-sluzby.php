@@ -240,14 +240,14 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'woocommerce_package_rates', 'ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma', 10, 2 );
 
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
-    add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
+    add_action( 'woocommerce_new_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_pobocka_email' );
 
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
-    add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
+    add_action( 'woocommerce_new_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_pobocka_email' );
@@ -388,10 +388,17 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   }
 }
 
-function ceske_sluzby_ulozenka_ulozeni_pobocky( $order_id, $item_id ) {
+function ceske_sluzby_ulozenka_ulozeni_pobocky( $item_id, $item ) {
   if ( isset( $_POST["ulozenka_branches"] ) ) {
     if ( $_POST["ulozenka_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_ulozenka" ) {
-      wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $item_type = $item['order_item_type'];
+      } else {
+        $item_type = $item->get_type();
+      }
+      if ( $item_type == 'shipping' ) {
+        wc_add_order_item_meta( $item_id, 'ceske_sluzby_ulozenka_pobocka_nazev', esc_attr( $_POST['ulozenka_branches'] ), true );
+      }
     }
   }
 }
@@ -505,10 +512,17 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
   }
 }
 
-function ceske_sluzby_dpd_parcelshop_ulozeni_pobocky( $order_id, $item_id ) {
+function ceske_sluzby_dpd_parcelshop_ulozeni_pobocky( $item_id, $item ) {
   if ( isset( $_POST["dpd_parcelshop_branches"] ) ) {
     if ( $_POST["dpd_parcelshop_branches"] && $_POST["shipping_method"][0] == "ceske_sluzby_dpd_parcelshop" ) {
-      wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $item_type = $item['order_item_type'];
+      } else {
+        $item_type = $item->get_type();
+      }
+      if ( $item_type == 'shipping' ) {
+        wc_add_order_item_meta( $item_id, 'ceske_sluzby_dpd_parcelshop_pobocka_nazev', esc_attr( $_POST['dpd_parcelshop_branches'] ), true );
+      }
     }
   }
 }
