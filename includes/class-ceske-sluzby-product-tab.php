@@ -27,6 +27,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+    $xml_feed_glami = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
     if ( ! empty( $global_data['stav_produktu'] ) ) {
       if ( $global_data['stav_produktu'] == 'used' ) {
         $global_stav_produktu_hodnota = 'Použité (bazar)';
@@ -247,6 +248,34 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
       echo '</div>';
     }
+
+    if ( $xml_feed_glami == "yes" ) {
+      echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://info.' . GLAMI_URL . '/feed/" target="_blank">obecný manuál</a>)</div>';
+      $kategorie_glami = "";
+      foreach ( $product_categories as $kategorie_produktu ) {
+        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
+        if ( ! empty( $kategorie ) ) {
+          if ( empty( $kategorie_glami ) ) {
+            $kategorie_glami = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+            $nazev_kategorie_glami = $kategorie;
+          }
+        }
+      }
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_glami_kategorie', 
+          'label' => 'Kategorie (<a href="https://www.' . GLAMI_URL . '/category-xml/" target="_blank">přehled</a>)', 
+          'placeholder' => 'CATEGORYTEXT',
+          'desc_tip' => 'true',
+          'description' => 'Příklad: Dámské oblečení a obuv | Dámské boty | Dámské outdoorové boty' 
+        )
+      );
+      if ( ! empty( $kategorie_glami ) ) {
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_glami . ': <code>' . $nazev_kategorie_glami . '</code></p>';
+      }
+      echo '</div>';
+    }
     echo '</div>';
   }
 
@@ -335,6 +364,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_heureka_kategorie',
       'ceske_sluzby_xml_zbozi_productname',
       'ceske_sluzby_xml_zbozi_kategorie',
+      'ceske_sluzby_xml_glami_kategorie',
       'ceske_sluzby_xml_stav_produktu',
       'ceske_sluzby_xml_preorder_datum'
     );

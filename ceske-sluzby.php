@@ -15,11 +15,13 @@ define( 'CS_VERSION', '0.6-alpha' );
 $language = get_locale();
 if ( $language == "sk_SK" ) {
   define( "HEUREKA_URL", "heureka.sk" );
+  define( "GLAMI_URL", "glami.sk" );
   define( "HEUREKA_KONVERZE", "https://im9.cz/sk/js/ext/2-roi-async.js" );
   define( "GOOGLE_MENA", "EUR" );
 }
 else {
   define( "HEUREKA_URL", "heureka.cz" );
+  define( "GLAMI_URL", "glami.cz" );
   define( "HEUREKA_KONVERZE", "https://im9.cz/js/ext/1-roi-async.js" );
   define( "GOOGLE_MENA", "CZK" );
 }
@@ -783,6 +785,7 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
   $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+  $xml_feed_glami = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
   if ( $xml_feed_heureka == "yes" ) { ?>
     <div style="font-size: 14px; font-weight: bold;">České služby: Heureka</div>
     <div class="form-field">
@@ -849,7 +852,19 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
         <?php } ?>
       <?php }
     }
-  } ?>
+  }
+  if ( $xml_feed_glami == "yes" ) { ?>
+    <div style="font-size: 14px; font-weight: bold;">České služby: Glami</div>
+    <div class="form-field">
+      <label for="ceske-sluzby-xml-glami-kategorie">Kategorie</label>
+      <input name="ceske-sluzby-xml-glami-kategorie" id="ceske-sluzby-xml-glami-kategorie" type="text" value="" placeholder="CATEGORYTEXT" size="70"/>
+      <p>
+        Zatím je nutné doplnit příslušnou kategorii z Glami ručně (aktuální přehled naleznete <a href="https://www.<?php echo GLAMI_URL; ?>/category-xml/">zde</a>).<br />
+        Příklad: <strong>Dámské oblečení a obuv | Dámské boty | Dámské outdoorové boty</strong><br />
+        Poznámka: Z <code>CATEGORY_FULLNAME</code> je třeba vynechat část <code><?php echo ucfirst( GLAMI_URL ); ?> | </code>.
+      </p>
+    </div>
+  <?php } ?>
   <div style="font-size: 14px; font-weight: bold;">České služby: XML feedy</div>
   <div class="form-field">
     <label for="ceske-sluzby-xml-vynechano">Odebrat z XML</label>
@@ -897,12 +912,14 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $heureka_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-productname', true );
   $zbozi_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
   $zbozi_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-productname', true );
+  $glami_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
   $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
   $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
   $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
   $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
+  $xml_feed_glami = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
   if ( $xml_feed_heureka == "yes" ) { ?>
     <tr>
       <th scope="row" valign="top"><strong>České služby: Heureka</strong></th>
@@ -990,7 +1007,23 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
         <?php }
       }
     }
-  } ?>
+  }
+  if ( $xml_feed_glami == "yes" ) { ?>
+    <tr>
+      <th scope="row" valign="top"><strong>České služby: Glami</strong></th>
+    </tr>
+    <tr class="form-field">
+      <th scope="row" valign="top"><label>Kategorie</label></th>
+      <td> 
+        <input name="ceske-sluzby-xml-glami-kategorie" id="ceske-sluzby-xml-glami-kategorie" type="text" value="<?php echo esc_attr( $glami_kategorie ); ?>" placeholder="CATEGORYTEXT" />
+        <p class="description">
+          Zatím je nutné doplnit příslušnou kategorii z Glami ručně (aktuální přehled naleznete <a href="http://www.<?php echo GLAMI_URL; ?>/category-xml/">zde</a>).<br />
+          Příklad: <strong>Dámské oblečení a obuv | Dámské boty | Dámské outdoorové boty</strong><br />
+          Poznámka: Z <code>CATEGORY_FULLNAME</code> je třeba vynechat část <code><?php echo ucfirst( GLAMI_URL ); ?> | </code>.
+        </p>
+      </td>
+    </tr>
+  <?php } ?>
   <tr>
     <th scope="row" valign="top"><strong>České služby: XML feedy</strong></th>
   </tr>
@@ -1046,6 +1079,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
       'ceske-sluzby-xml-heureka-productname',
       'ceske-sluzby-xml-zbozi-kategorie',
       'ceske-sluzby-xml-zbozi-productname',
+      'ceske-sluzby-xml-glami-kategorie',
       'ceske-sluzby-xml-stav-produktu'
     );
     foreach ( $ukladana_data_text as $key ) {
@@ -1054,6 +1088,10 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
         if ( $key == 'ceske-sluzby-xml-heureka-kategorie' ) {
           $value = str_replace( 'Heureka.cz | ', '', $value );
           $value = str_replace( 'Heureka.sk | ', '', $value );
+        }
+        if ( $key == 'ceske-sluzby-xml-glami-kategorie' ) {
+          $value = str_replace( 'Glami.cz | ', '', $value );
+          $value = str_replace( 'Glami.sk | ', '', $value );
         }
         $ulozeno_text = get_woocommerce_term_meta( $term_id, $key, true );
         if ( ! empty( $value ) ) {
@@ -1124,6 +1162,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         $zbozi_nazev = true;
       }
     }
+    $glami_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-glami-kategorie', true );
     $extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
     $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-extra-message', true );
     if ( ! empty( $kategorie_extra_message_ulozeno ) ) {
@@ -1141,6 +1180,12 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
           $columns .= 'Zboží: <a href="#" title="' . $kategorie_extra_message_text . '">EM</a>';
         }
       }
+    }
+    if ( $glami_kategorie ) {
+      if ( ! empty( $columns ) ) {
+        $columns .= '<br />';
+      }
+      $columns .= 'Glami: <a href="#" title="' . $glami_kategorie . '">KA</a>';
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
     if ( $kategorie_vynechano ) {

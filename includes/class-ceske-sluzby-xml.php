@@ -697,6 +697,8 @@ function glami_xml_feed_nastaveni() {
   $settings['product']['element'] = false;
   $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
   $settings['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
+  $settings['kategorie']['produkt'] = 'ceske_sluzby_xml_glami_kategorie';
+  $settings['kategorie']['kategorie'] = 'ceske-sluzby-xml-glami-kategorie';
   xml_feed_zobrazeni( $settings );
 }
 
@@ -707,6 +709,8 @@ function heureka_xml_feed_nastaveni() {
   $settings['product']['element'] = 'PRODUCT';
   $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}';
   $settings['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
+  $settings['kategorie']['produkt'] = 'ceske_sluzby_xml_heureka_kategorie';
+  $settings['kategorie']['kategorie'] = 'ceske-sluzby-xml-heureka-kategorie';
   xml_feed_zobrazeni( $settings );
 }
 
@@ -735,7 +739,7 @@ function xml_feed_zobrazeni( $settings ) {
     $post_data = ceske_sluzby_xml_ziskat_post_data( $produkt );
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_heureka_kategorie', 'ceske-sluzby-xml-heureka-kategorie', '|' );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, $settings['kategorie']['produkt'], $settings['kategorie']['kategorie'], '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );

@@ -819,6 +819,23 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
         ),
         array(
+          'title' => 'Glami.cz (.sk)',
+          'type' => 'title',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=glami">zde</a>. Podrobný manuál naleznete <a href="https://info.' . GLAMI_URL . '/feed/" target="_blank">zde</a>.
+                     Automaticky je použito nastavení z ostatních feedů.',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami_title'
+        ),
+        array(
+          'title' => 'Aktivovat feed',
+          'type' => 'checkbox',
+          'desc' => 'Zobrazí příslušná nastavení v administraci.',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami_title'
+        ),
+        array(
           'title' => 'Google.cz (.sk)',
           'type' => 'title',
           'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=google">zde</a>. Podrobný manuál naleznete <a href="https://support.google.com/merchants/answer/7052112">zde</a>.
