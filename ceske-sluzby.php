@@ -835,7 +835,7 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
           <div class="form-field">
             <label for="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]"><?php echo $extra_message_array[ $extra_message ]; ?></label>
             <span>
-              Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.
+              Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.
             </span>
           </div>
         <?php } else { ?>
@@ -843,7 +843,7 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
             <label for="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]"><?php echo $extra_message_array[ $extra_message ]; ?></label>
             <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" />
             <span>
-              Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.
+              Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.
             </span>
           </div>
         <?php } ?>
@@ -969,7 +969,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
             <th scope="row" valign="top"><label><?php echo $extra_message_array[ $extra_message ]; ?></label></th>
             <td> 
               <span class="description">
-                Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.
+                Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.
               </span>
             </td>
           </tr>
@@ -983,7 +983,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
             <td> 
               <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" <?php echo $checked; ?>/>
               <span class="description">
-                Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.
+                Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.
               </span>
             </td>
           </tr>
@@ -1112,7 +1112,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
     $zbozi_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
     $zbozi_nazev = false;
     if ( $zbozi_kategorie ) {
-      $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_kategorie . '">KA</a>';
+      $columns .= 'Zboží: <a href="#" title="' . $zbozi_kategorie . '">KA</a>';
       $zbozi_nazev = true;
     }
     $zbozi_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-productname', true );
@@ -1120,7 +1120,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       if ( $zbozi_nazev ) {
         $columns .= ' <a href="#" title="' . $zbozi_productname . '">PR</a>';
       } else {
-        $columns .= 'Zboží.cz: <a href="#" title="' . $zbozi_productname . '">PR</a>';
+        $columns .= 'Zboží: <a href="#" title="' . $zbozi_productname . '">PR</a>';
         $zbozi_nazev = true;
       }
     }
@@ -1138,7 +1138,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         if ( $zbozi_nazev ) {
           $columns .= ' <a href="#" title="' . $kategorie_extra_message_text . '">EM</a>';
         } else {
-          $columns .= 'Zboží.cz: <a href="#" title="' . $kategorie_extra_message_text . '">EM</a>';
+          $columns .= 'Zboží: <a href="#" title="' . $kategorie_extra_message_text . '">EM</a>';
         }
       }
     }
