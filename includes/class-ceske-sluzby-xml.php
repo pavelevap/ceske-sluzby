@@ -1,5 +1,6 @@
 <?php
 function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
+  $kategorie = ceske_sluzby_xml_ziskat_vynechane_kategorie();
   $args = array(
     'post_type' => 'product',
     'post_status' => 'publish',
@@ -9,29 +10,29 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
         'compare' => 'NOT EXISTS',
       )
     ),
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => ceske_sluzby_xml_ziskat_vynechane_kategorie(),
-        'include_children' => false,
-        'operator' => 'NOT IN',
-      )
-    ),
     'fields' => 'ids'
   );
+  if ( ! empty( $kategorie ) ) {
+    $args['tax_query'][] = array(
+      'taxonomy' => 'product_cat',
+      'field' => 'term_id',
+      'terms' => $kategorie,
+      'include_children' => false,
+      'operator' => 'NOT IN'
+    );
+  }
   if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
     $args['meta_query'][] = array(
       'key' => '_visibility',
       'value' => 'hidden',
-      'compare' => '!=',
+      'compare' => '!='
     );
   } else {
     $args['tax_query'][] = array(
       'taxonomy' => 'product_visibility',
       'field' => 'slug',
       'terms' => array( 'exclude-from-search', 'exclude-from-catalog' ),
-      'operator' => 'NOT IN',
+      'operator' => 'NOT IN'
     );
   }
   if ( $limit ) {
