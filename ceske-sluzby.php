@@ -341,26 +341,20 @@ function ceske_sluzby_doprava_ulozenka( $methods ) {
 function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   if ( is_ajax() ) {
     // Do budoucna možná použít spíše woocommerce_checkout_update_order_review
+    $ulozenka_branches = '';
     parse_str( $_POST['post_data'] );
     $available_shipping = WC()->shipping->load_shipping_methods();
     $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
     $settings = array();
-
     if ( $chosen_shipping_method[0] == "ceske_sluzby_ulozenka" ) {
       $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
-
       if ( $settings['enabled'] == "yes" && ! empty ( $settings['ulozenka_id-obchodu'] ) ) {
-
-        $pobocky = new Ceske_Sluzby_Json_Loader();
+        $json_class = new Ceske_Sluzby_Json_Loader();
         // http://docs.ulozenkav3.apiary.io/#pepravnsluby
-
         $zeme = WC()->customer->get_shipping_country();
         if ( $zeme == "CZ" ) { $zeme_code = "CZE"; }
         if ( $zeme == "SK" ) { $zeme_code = "SVK"; }
-
-        $parametry = array( 'provider' => 1, 'country' => $zeme_code );
-        ?>
-    
+        $parametry = array( 'provider' => 1, 'country' => $zeme_code ); ?>
         <tr class="ulozenka">
           <td>
             <img src="https://www.ulozenka.cz/logo/ulozenka.png" width="140" border="0">
@@ -369,22 +363,18 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
             <font size="2">Uloženka - výběr pobočky:</font><br>
             <div id="ulozenka-branch-select-options">
               <select name="ulozenka_branches">
-              <option>Vyberte pobočku</option>
-    
-        <?php
-        foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
-          if ( ! empty ( $ulozenka_branches ) && $ulozenka_branches == $pobocka->name ) {
-            $selected = ' selected="selected"';
-          } else {
-            $selected = "";
-          }
-          echo '<option value="' . $pobocka->name . '"' . $selected . '>' . $pobocka->name . '</option>';
-        } ?>
-    
+                <option>Vyberte pobočku</option>
+                <?php $json = $json_class->load( $parametry );
+                if ( isset( $json->data->destination ) && ! empty( $json->data->destination ) ) {
+                  $pobocky = $json_class->sortName( $json->data->destination );
+                  foreach ( $pobocky as $pobocka ) {
+                    echo '<option value="' . $pobocka . '"' . selected( $pobocka, $ulozenka_branches ) . '>' . $pobocka . '</option>';
+                  }
+                } ?>
+              </select>
             </div>
           </td>
         </tr>
-    
       <?php }
     }
   }
@@ -465,25 +455,19 @@ function ceske_sluzby_doprava_dpd_parcelshop( $methods ) {
 
 function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
   if ( is_ajax() ) {
+    $dpd_parcelshop_branches = '';
     parse_str( $_POST['post_data'] );
     $available_shipping = WC()->shipping->load_shipping_methods();
     $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
     $settings = array();
-
     if ( $chosen_shipping_method[0] == "ceske_sluzby_dpd_parcelshop" ) {
       $settings = $available_shipping[ $chosen_shipping_method[0] ]->settings;
-
       if ( $settings['enabled'] == "yes" ) {
-
-        $pobocky = new Ceske_Sluzby_Json_Loader();
-
+        $json_class = new Ceske_Sluzby_Json_Loader();
         $zeme = WC()->customer->get_shipping_country();
         if ( $zeme == "CZ" ) { $zeme_code = "CZE"; }
         if ( $zeme == "SK" ) { $zeme_code = "SVK"; }
-
-        $parametry = array( 'provider' => 5, 'country' => $zeme_code );
-        ?>
-    
+        $parametry = array( 'provider' => 5, 'country' => $zeme_code ); ?>
         <tr class="dpd-parcelshop">
           <td>
             <img src="http://www.dpdparcelshop.cz/images/DPD-logo.png" width="140" border="0">
@@ -492,22 +476,18 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
             <font size="2">DPD ParcelShop - výběr pobočky:</font><br>
             <div id="dpd-parcelshop-branch-select-options">
               <select name="dpd_parcelshop_branches">
-              <option>Vyberte pobočku</option>
-
-        <?php
-        foreach ( $pobocky->load( $parametry )->data->destination as $pobocka ) {
-          if ( ! empty ( $dpd_parcelshop_branches ) && $dpd_parcelshop_branches == $pobocka->name ) {
-            $selected = ' selected="selected"';
-          } else {
-            $selected = '';
-          }
-          echo '<option value="' . $pobocka->name . '"' . $selected . '>' . $pobocka->name . '</option>';
-        } ?>
-    
+                <option>Vyberte pobočku</option>
+                <?php $json = $json_class->load( $parametry );
+                if ( isset( $json->data->destination ) && ! empty( $json->data->destination ) ) {
+                  $pobocky = $json_class->sortName( $json->data->destination );
+                  foreach ( $pobocky as $pobocka ) {
+                    echo '<option value="' . $pobocka . '"' . selected( $pobocka, $dpd_parcelshop_branches ) . '>' . $pobocka . '</option>';
+                  }
+                } ?>
+              </select>
             </div>
           </td>
         </tr>
-    
       <?php }
     }
   }
