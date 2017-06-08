@@ -323,6 +323,12 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
     add_action( 'wp_footer', 'ceske_sluzby_aktualizovat_checkout_javascript' );
     add_filter( 'woocommerce_available_payment_gateways', 'ceske_sluzby_dostupne_platebni_metody' );
+
+    $nepresne_zaokrouhleni = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_nepresne-zaokrouhleni' );
+    if ( $nepresne_zaokrouhleni == "yes" ) {
+      add_filter( 'woocommerce_calc_tax', 'ceske_sluzby_zmena_kalkulace_dani' );
+      add_filter( 'woocommerce_tax_round', 'ceske_sluzby_zmena_zaokrouhlovani_dani' );
+    }
   }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -1525,4 +1531,17 @@ function ceske_sluzby_dostupne_platebni_metody( $available_gateways ) {
     }
   }
   return $available_gateways;
+}}
+
+function ceske_sluzby_zmena_zaokrouhlovani_dani( $in ) {
+  return round( $in, wc_get_price_decimals() );
 }
+
+function ceske_sluzby_zmena_kalkulace_dani( $taxes ) {
+  $taxes = array_map( 'ceske_sluzby_rounding', $taxes );
+  return $taxes;
+};
+
+function ceske_sluzby_rounding( $in ) {
+  return round( $in, wc_get_price_decimals() );
+} 

@@ -646,6 +646,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 300px',
         ),
         array(
+          'title' => 'Nepřesné zaokrouhlení',
+          'type' => 'checkbox',
+          'desc' => 'Pokud se v košíku a objednávkách objevují nepřesně vypočtené daně a součty, tak můžete zkusit aktivovat tuto experimentální opravnou funkci.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_nepresne-zaokrouhleni'
+        ),
+        array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
         )
