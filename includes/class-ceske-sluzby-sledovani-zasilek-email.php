@@ -35,7 +35,7 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
       return;
     }
     $this->object = wc_get_order( $order_id );
-    $this->recipient = $this->object->billing_email;
+    $this->recipient = is_callable( array( $this->object, 'get_billing_email' ) ) ? $this->object->get_billing_email() : $this->object->billing_email;
     $this->find[] = '{order_number}';
     $this->replace[] = $this->object->get_order_number();
     if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
