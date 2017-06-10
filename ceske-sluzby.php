@@ -1531,7 +1531,7 @@ function ceske_sluzby_dostupne_platebni_metody( $available_gateways ) {
     }
   }
   return $available_gateways;
-}}
+}
 
 function ceske_sluzby_zmena_zaokrouhlovani_dani( $in ) {
   return round( $in, wc_get_price_decimals() );
