@@ -273,7 +273,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     if ( $aktivace_eet == "yes" ) {
       add_filter( 'upload_mimes', 'ceske_sluzby_povolit_nahravani_certifikatu' );
       require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-eet.php';
-      add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet_faktura', 10, 2 );
+      add_action( 'wpo_wcpdf_after_order_details', 'ceske_sluzby_zobrazit_eet_faktura_externi', 10, 2 );
       add_action( 'woocommerce_order_status_completed', 'ceske_sluzby_automaticky_ziskat_uctenku' );
       add_action( 'woocommerce_payment_complete', 'ceske_sluzby_automaticky_ziskat_uctenku' );
       add_action( 'woocommerce_email_order_meta', 'ceske_sluzby_zobrazit_eet_email', 10, 4 );
