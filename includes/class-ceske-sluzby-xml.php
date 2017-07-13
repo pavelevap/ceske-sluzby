@@ -311,6 +311,9 @@ function ceske_sluzby_xml_ziskat_ean_produktu( $podpora_ean, $product_id, $produ
   } else {
     if ( $varianta_id ) {
       $ean = get_post_meta( $varianta_id, $podpora_ean, true );
+      if ( empty( $ean ) ) {
+        $ean = get_post_meta( $product_id, $podpora_ean, true );
+      }
     } else {
       $ean = get_post_meta( $product_id, $podpora_ean, true );
     }
