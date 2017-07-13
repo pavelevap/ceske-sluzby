@@ -367,7 +367,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
         } else {
           $vlastnosti_varianta = $vlastnosti_varianta_only;
         }
-        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
+        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
         echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code></div>';
       }
       echo '<div style="margin-left: 161px;">Dostupné vlastnosti: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', $attributes_produkt ) . '</div>';
