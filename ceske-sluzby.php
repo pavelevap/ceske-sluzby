@@ -678,21 +678,21 @@ function ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma( $rates, $package ) {
         if ( isset( $local_pickup ) ) {
           $rates_omezeno['legacy_local_pickup'] = $local_pickup;
         }
-        $free = $pickup = array();
-        foreach ( $rates as $rate_id => $rate ) {
-          if ( 'free_shipping' === $rate->method_id ) {
-            $rates_omezeno[ $rate_id ] = $rate;
-            $free[] = $rate_id;
-          }
-          if ( 'local_pickup' === $rate->method_id ) {
-            $rates_omezeno[ $rate_id ] = $rate;
-            $pickup[] = $rate_id;
-          }
+      }
+      $free = $pickup = array();
+      foreach ( $rates as $rate_id => $rate ) {
+        if ( 'free_shipping' === $rate->method_id ) {
+          $rates_omezeno[ $rate_id ] = $rate;
+          $free[] = $rate_id;
         }
-        if ( empty( $free ) && ! empty( $pickup ) ) {
-          foreach ( $pickup as $pickup_id => $pickup_rate ) {
-            unset( $rates_omezeno[ $pickup_id ] );
-          }
+        if ( 'local_pickup' === $rate->method_id ) {
+          $rates_omezeno[ $rate_id ] = $rate;
+          $pickup[] = $rate_id;
+        }
+      }
+      if ( empty( $free ) && ! empty( $pickup ) ) {
+        foreach ( $pickup as $pickup_id ) {
+          unset( $rates_omezeno[ $pickup_id ] );
         }
       }
     }
