@@ -223,6 +223,12 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
         require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-product-tab.php';
         require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-varianty.php';
         new WC_Product_Tab_Ceske_Sluzby_Admin();
+        add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
+        add_action( 'product_cat_edit_form_fields', 'ceske_sluzby_xml_kategorie_upravit_pole', 99 );
+        add_action( 'created_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
+        add_action( 'edit_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
+        add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
+        add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
       }
     }
 
@@ -310,15 +316,8 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       }
     }
 
-    add_action( 'product_cat_add_form_fields', 'ceske_sluzby_xml_kategorie_pridat_pole', 99 );
-    add_action( 'product_cat_edit_form_fields', 'ceske_sluzby_xml_kategorie_upravit_pole', 99 );
-    add_action( 'created_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
-    add_action( 'edit_term', 'ceske_sluzby_xml_kategorie_ulozit', 20, 3 );
-    add_filter( 'manage_edit-product_cat_columns', 'ceske_sluzby_xml_kategorie_pridat_sloupec' );
-    add_filter( 'manage_product_cat_custom_column', 'ceske_sluzby_xml_kategorie_sloupec', 10, 3 );
     add_action( 'admin_enqueue_scripts', 'ceske_sluzby_load_admin_scripts' );
     add_action( 'wp_footer', 'ceske_sluzby_heureka_certifikat_spokojenosti' ); // Pouze pro eshop nebo na celém webu?
-
     add_action( 'woocommerce_cart_calculate_fees', 'ceske_sluzby_zaokrouhlovani_poplatek' );
     add_action( 'woocommerce_after_calculate_totals', 'ceske_sluzby_spustit_zaokrouhlovani' );
     add_action( 'wp_footer', 'ceske_sluzby_aktualizovat_checkout_javascript' );

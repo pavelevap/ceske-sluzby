@@ -46,34 +46,6 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
   return $args;
 }
 
-function ceske_sluzby_xml_extra_message_aktivni_hodnoty( $data ) {
-  if ( ! empty( $data ) ) {
-    $data = array_filter( $data, function( $v, $k ) {
-      return $v == 'yes';
-    }, ARRAY_FILTER_USE_BOTH );
-  } else {
-    $data = array();
-  }
-  return $data;
-}
-
-function ceske_sluzby_xml_ziskat_globalni_hodnoty() {
-  $data = array(
-    'dodaci_doba' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' ),
-    'vlastni_dodaci_doba' => get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' ),
-    'podpora_ean' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' ),
-    'podpora_vyrobcu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' ),
-    'stav_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ),
-    'nazev_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu' ),
-    'nazev_variant' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant' ),
-    'zkracene_zapisy' => get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' ),
-    'erotika' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' ),
-    'postovne' => get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' ),
-    'extra_message' => ceske_sluzby_xml_extra_message_aktivni_hodnoty( get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' ) )
-  );
-  return $data;
-}
-
 function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
   $vynechane_kategorie = array();
   $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
