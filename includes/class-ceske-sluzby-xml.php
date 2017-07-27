@@ -1663,14 +1663,21 @@ function google_xml_feed_zobrazeni() {
                 $xmlWriter->endElement();
               }
               $xmlWriter->writeElement( 'g:price', ceske_sluzby_xml_ziskat_cenu( $varianta ) . ' ' . GOOGLE_MENA );
+              $identifier = 0;
               if ( ! empty( $vyrobce_varianta ) ) {
                 $xmlWriter->writeElement( 'g:brand', $vyrobce_varianta );
+                $identifier = $identifier + 1;
               }
               if ( ! empty( $ean ) ) {
                 $xmlWriter->writeElement( 'g:gtin', $ean );
+                $identifier = $identifier + 1;
               }
               if ( $global_data['podpora_ean'] != 'SKU' && ! empty( $sku_varianta ) ) {
                 $xmlWriter->writeElement( 'g:mpn', $sku_varianta );
+                $identifier = $identifier + 1;
+              }
+              if ( $identifier <= 1 ) {
+                $xmlWriter->writeElement( 'g:identifier_exists', 'no' );
               }
               if ( ! empty( $erotika_produkt ) ) {
                 $xmlWriter->writeElement( 'g:adult', $erotika_produkt );
@@ -1731,14 +1738,21 @@ function google_xml_feed_zobrazeni() {
             $xmlWriter->endElement();
           }
           $xmlWriter->writeElement( 'g:price', ceske_sluzby_xml_ziskat_cenu( $produkt ) . ' ' . GOOGLE_MENA );
+          $identifier = 0;
           if ( ! empty( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'g:brand', $vyrobce_produkt );
+            $identifier = $identifier + 1;
           }
           if ( ! empty( $ean ) ) {
             $xmlWriter->writeElement( 'g:gtin', $ean );
+            $identifier = $identifier + 1;
           }
           if ( $global_data['podpora_ean'] != 'SKU' && ! empty( $sku_produkt ) ) {
             $xmlWriter->writeElement( 'g:mpn', $sku_produkt );
+            $identifier = $identifier + 1;
+          }
+          if ( $identifier <= 1 ) {
+            $xmlWriter->writeElement( 'g:identifier_exists', 'no' );
           }
           if ( ! empty( $erotika_produkt ) ) {
             $xmlWriter->writeElement( 'g:adult', $erotika_produkt );
