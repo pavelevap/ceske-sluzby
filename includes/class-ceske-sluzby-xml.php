@@ -177,13 +177,20 @@ function ceske_sluzby_xml_ziskat_nazev_produktu( $druh, $product_id, $global_dat
     }
   }
   if ( ! empty( $doplneny_nazev_produkt ) ) {
-    $global_nazev = str_replace( '{PRODUCTNAME}', $doplneny_nazev_produkt, $global_nazev );
+    if ( strpos( $doplneny_nazev_produkt, '{' ) === false ) {
+      $global_nazev = str_replace( '{PRODUCTNAME}', $doplneny_nazev_produkt, $global_nazev );
+    } else {
+      $global_nazev = str_replace( '{PRODUCTNAME}', '{NAZEV}', $doplneny_nazev_produkt );
+    }
   }
   if ( ! empty( $doplneny_nazev_kategorie ) ) {
     $nazev_kategorie = ceske_sluzby_xml_zpracovat_hodnoty_kategorie( $doplneny_nazev_kategorie );
-    $global_nazev = str_replace( '{KATEGORIE}', $nazev_kategorie, $global_nazev );
+    if ( strpos( $nazev_kategorie, '{' ) === false ) {
+      $global_nazev = str_replace( '{KATEGORIE}', $nazev_kategorie, $global_nazev );
+    } else {
+      $global_nazev = $nazev_kategorie;
+    }
   }
-
   $variables = array(
     'NAZEV' => $nazev_prispevku,
     'VLASTAX' => ceske_sluzby_xml_ziskat_nazev_produktu_vlastnosti( $rozsirene_vlastnosti, false ),
