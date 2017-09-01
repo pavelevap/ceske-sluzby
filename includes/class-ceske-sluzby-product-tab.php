@@ -3,8 +3,11 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
   public function __construct() {
     if ( is_admin() ) {
-      add_filter( 'woocommerce_product_data_tabs', array( $this, 'ceske_sluzby_product_tab' ) );
-      add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
+      $xml_feed = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+      if ( $xml_feed == "yes" ) {
+        add_filter( 'woocommerce_product_data_tabs', array( $this, 'ceske_sluzby_product_tab' ) );
+        add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
+      }
       add_action( 'woocommerce_process_product_meta', array( $this, 'ceske_sluzby_product_tab_ulozeni' ) );
       add_action( 'woocommerce_product_options_stock_status', array( $this, 'ceske_sluzby_zobrazit_nastaveni_dodaci_doby' ) );
       add_action( 'woocommerce_product_options_sku', array( $this, 'ceske_sluzby_zobrazit_nastaveni_ean' ) );
