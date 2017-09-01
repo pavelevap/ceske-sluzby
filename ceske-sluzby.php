@@ -1225,6 +1225,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
 
 function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
   global $product;
+  $format = "";
   if ( $product->is_type( 'variable' ) ) {
     return;
   }
@@ -1232,7 +1233,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
     $dodaci_doba_text = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 99 );
     if ( ! empty ( $dodaci_doba_text ) ) {
       $dostupnost['value'] = 99;
-      $dostupnost['text'] = $dodaci_doba_text;
+      $dostupnost['text'] = $dodaci_doba_text['text'];
       $format = ceske_sluzby_ziskat_format_dodaci_doby( $dostupnost );
     }
     echo $format;
