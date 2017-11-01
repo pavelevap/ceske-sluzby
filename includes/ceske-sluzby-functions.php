@@ -105,10 +105,10 @@ function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
         $format = str_replace( '{' . $key . '}', $value, $format );
       }
     } else {
-      $format = '<p class=dodaci-doba">' . $availability['text'] . '</p>';
+      $format = '<p class="dodaci-doba">' . $availability['text'] . '</p>';
     }
   } else {
-    $format = '<p class=dodaci-doba">' . $availability . '</p>';
+    $format = '<p class="dodaci-doba">' . $availability . '</p>';
   }
   return $format;
 }
