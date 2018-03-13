@@ -1170,7 +1170,7 @@ function ceske_sluzby_nahradit_zobrazeny_text( $html, $availability, $product ) 
   return $html;
 }
 
-function ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr( $data, $this, $variation ) {
+function ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr( $data, $instance, $variation ) {
   $dostupnost = ceske_sluzby_ziskat_predobjednavku( $variation, false );
   if ( ! empty ( $dostupnost ) ) {
     return $data;
