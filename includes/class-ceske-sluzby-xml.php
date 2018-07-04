@@ -1869,7 +1869,11 @@ function pricemania_xml_feed_aktualizace() {
     if ( $global_data['postovne'] != "" ) {
       $xmlWriter->writeElement( 'shipping', $global_data['postovne'] );
     }
-    $xmlWriter->writeElement( 'price', wc_get_price_including_tax( $produkt ) );
+    if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+      $xmlWriter->writeElement( 'price', wc_get_price_including_tax( $produkt ) );
+    } else {
+      $xmlWriter->writeElement( 'price', $produkt->get_price_including_tax() );
+    }
     if ( ! empty ( $ean ) ) {
       $xmlWriter->writeElement( 'ean', $ean );
     }
