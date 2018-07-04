@@ -738,7 +738,11 @@ function heureka_xml_feed_zobrazeni() {
             }
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-          $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $varianta ) );
+          if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+            $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $varianta ) );
+          } else {
+            $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
+          }
           $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
           if ( $viditelne_vlastnosti_varianta ) {
             foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
@@ -794,7 +798,11 @@ function heureka_xml_feed_zobrazeni() {
             }
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+            $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          } else {
+            $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
+          }
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
@@ -949,7 +957,11 @@ function heureka_xml_feed_aktualizace() {
               }
             }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
-            $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $varianta ) );
+            if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+              $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $varianta ) );
+            } else {
+              $xmlWriter->writeElement( 'PRICE_VAT', $varianta->get_price_including_tax() );
+            }
             $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
             if ( $viditelne_vlastnosti_varianta ) {
               foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
@@ -1006,7 +1018,11 @@ function heureka_xml_feed_aktualizace() {
             }
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+            $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          } else {
+            $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
+          }
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
@@ -1077,7 +1093,11 @@ function zbozi_xml_feed_zobrazeni() {
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-productname' );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
     $kategorie_extra_message = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-extra-message' );
-    $extra_message_produkt = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, wc_get_price_including_tax( $produkt ) );
+    if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+      $extra_message_produkt = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, wc_get_price_including_tax( $produkt ) );
+    } else {
+      $extra_message_varianta = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, $varianta->get_price_including_tax() );
+    }
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
@@ -1200,7 +1220,11 @@ function zbozi_xml_feed_zobrazeni() {
             }
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
-          $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+            $xmlWriter->writeElement( 'PRICE_VAT', wc_get_price_including_tax( $produkt ) );
+          } else {
+            $xmlWriter->writeElement( 'PRICE_VAT', $produkt->get_price_including_tax() );
+          }
           $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
@@ -1332,7 +1356,11 @@ function zbozi_xml_feed_aktualizace() {
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-productname' );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $produkt->post->post_title, $feed_data );
     $kategorie_extra_message = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-zbozi-extra-message' );
-    $extra_message_produkt = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, wc_get_price_including_tax( $produkt ) );
+    if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+      $extra_message_produkt = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, wc_get_price_including_tax( $produkt ) );
+    } else {
+      $extra_message_produkt = ceske_sluzby_xml_ziskat_extra_message( $product_id, 'ceske_sluzby_xml_zbozi_extra_message', $global_data['extra_message'], $kategorie_extra_message, $produkt->get_price_including_tax() );
+    }
 
     if ( $produkt->is_type( 'variable' ) ) {
       foreach( $produkt->get_available_variations() as $variation ) {
