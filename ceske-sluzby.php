@@ -265,6 +265,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
     }
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
+    add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
+    add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
 
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );

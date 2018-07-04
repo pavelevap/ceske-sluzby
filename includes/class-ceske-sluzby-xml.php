@@ -1716,7 +1716,7 @@ function google_xml_feed_zobrazeni() {
                 $xmlWriter->writeElement( 'g:price', $varianta->get_price_including_tax() . ' ' . GOOGLE_MENA );
               }
               $identifier = 0;
-              if ( ! empty ( $vyrobce_varianta ) ) {
+              if ( ! empty( $vyrobce_varianta ) ) {
                 $xmlWriter->writeElement( 'g:brand', $vyrobce_varianta );
                 $identifier = $identifier + 1;
               }
@@ -1795,7 +1795,7 @@ function google_xml_feed_zobrazeni() {
             $xmlWriter->writeElement( 'g:price', $produkt->get_price_including_tax() . ' ' . GOOGLE_MENA );
           }
           $identifier = 0;
-          if ( ! empty ( $vyrobce_produkt ) ) {
+          if ( ! empty( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'g:brand', $vyrobce_produkt );
             $identifier = $identifier + 1;
           }
