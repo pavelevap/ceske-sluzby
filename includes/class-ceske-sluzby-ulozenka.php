@@ -1,5 +1,5 @@
 <?php
-// http://docs.woothemes.com/document/settings-api/
+// https://docs.woothemes.com/document/settings-api/
 // http://speakinginbytes.com/2014/07/woocommerce-settings-tab/
 class WC_Shipping_Ceske_Sluzby_Ulozenka extends WC_Shipping_Method {
 

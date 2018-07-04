@@ -36,12 +36,14 @@ Plugin zatím podporuje následující služby a pluginy:
 * WooCommerce: Předobjednávky
 * WooCommerce: Dodací doba
 * WooCommerce: Sledování zásilek
+* WooCommerce: Elektronická evidence tržeb (EET)
 * WooCommerce: XML feedy (Heureka.cz a Heureka.sk, Zbozi.cz, Google, Pricemania.cz a Pricemania.sk)
 * WooCommerce: Základní podpora variant a vlastností pro XML feedy (automatické generování parametrů)
 * WooCommerce: Průběžné generování velkého množství produktů do .xml souboru
 * WooCommerce: Možnost vynechání kategorií či produktů v XML feedech
 * WooCommerce: Speciální možnosti pro nastavení XML feedů (CATEGORYTEXT, DELIVERY_DATE, PRODUCTNAME, EAN, PRODUCT, MANUFACTURER, CUSTOM_LABEL, ITEM_TYPE, EXTRA_MESSAGE a další)
 * WooCommerce: Omezení nabídky dopravy, pokud je dostupná zdarma
+* WooCommerce: Zaokrouhlování celkové ceny objednávky
 * WooCommerce: Zobrazování recenzí ze služby Ověřeno zákazníky pomocí shortcode (Heureka.cz a Heureka.sk)
 
 == Oficiální podpora pluginu ==
@@ -57,6 +59,11 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
 == Changelog ==
 
 = 0.6 =
+* WooCommerce: Elektronická evidence tržeb (EET)
+ * Odesílání elektronických účtenek finanční správě (možnost stornovat celou účtenku nebo jen částečně).
+ * Možnost nastavení formátu účtenky (např. součást emailu) a podmínek pro odeslání (dokončená objednávka) na úrovni eshopu i podle platebních metod.
+ * Automatické odesílání účtenek pro zaplacené či dokončené objednávky (podle nastavení).
+ * Jednoduché zobrazení účtenek v přehledu objednávek, snadné nahrání vlastního certifikátu.   
 * WooCommerce: Ověřeno zákazníky
  * Pokud není správně nastaven API klíč, tak nebude přerušen objednávací proces.
  * Případná chyba bude uložena v podobě poznámky k příslušné objednávce.
@@ -65,6 +72,8 @@ Aktivovat plugin a přejít do menu WooCommerce - Nastavení - záložka České
  * Nastavení a zobrazení dodací doby pro varianty (napojení na XML feedy v podobě DELIVERY_DATE).
  * Možnost nastavení intervalů a textů pro počet produktů skladem.
  * Možnost definování vlastního textu (a formátu pro zobrazení) pro dostupnost dodatečných produktů (nad rámec uvedených skladových zásob).
+* WooCommerce: Zaokrouhlování celkové ceny objednávky (možnost nastavení podle platebních metod).
+* WooCommerce: Možnosti nastavení různých hodnot podle platebních metod (a kombinace doručovacích a platebních metod).
 * WooCommerce: Sledování zásilek
  * Doplněn dopravce GLS.    
 * WooCommerce: XML feedy

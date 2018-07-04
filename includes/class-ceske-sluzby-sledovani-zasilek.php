@@ -1,6 +1,9 @@
 <?php
 function spustit_Ceske_Sluzby_Sledovani_Zasilek() {
-  new Ceske_Sluzby_Sledovani_Zasilek();
+  $screen = get_current_screen();
+  if ( $screen->post_type == 'shop_order' ) {
+    new Ceske_Sluzby_Sledovani_Zasilek();
+  }
 }
 
 if ( is_admin() ) {
@@ -14,7 +17,7 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
   $dopravci = array(
     'CPOST' => array(
       'nazev' => 'Česká pošta',
-      'url' => 'http://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
+      'url' => 'https://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
       'lang' => 'CZ'
     ),
     'SPOST' => array(
@@ -171,7 +174,7 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     }
     $id_zasilky = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
     $dopravce = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-    $zeme_doruceni = $order->shipping_country;
+    $zeme_doruceni = is_callable( array( $order, 'get_shipping_country' ) ) ? $order->get_shipping_country() : $order->shipping_country;
     $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $zeme_doruceni );
 
     if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {

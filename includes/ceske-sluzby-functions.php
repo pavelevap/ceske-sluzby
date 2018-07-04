@@ -121,15 +121,22 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
     return $dostupnost;
   }
   if ( get_class( $product ) == "WC_Product_Variation" ) {
-    $dodaci_doba_varianta = get_post_meta( $product->variation_id, 'ceske_sluzby_dodaci_doba', true );
+    $varianta_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+    $dodaci_doba_varianta = get_post_meta( $varianta_id, 'ceske_sluzby_dodaci_doba', true );
     if ( empty ( $dodaci_doba_varianta ) ) {
-      $dodaci_doba_produkt = get_post_meta( $product->parent->id, 'ceske_sluzby_dodaci_doba', true );
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $varianta_parent_id = $product->parent->id;
+      } else {
+        $varianta_parent_id = $product->get_parent_id();
+      }
+      $dodaci_doba_produkt = get_post_meta( $varianta_parent_id, 'ceske_sluzby_dodaci_doba', true );
     } else {
       $dodaci_doba_produkt = $dodaci_doba_varianta;
     }
   }
   elseif ( get_class( $product ) == "WC_Product_Simple" ) {
-    $dodaci_doba_produkt = get_post_meta( $product->id, 'ceske_sluzby_dodaci_doba', true );
+    $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+    $dodaci_doba_produkt = get_post_meta( $product_id, 'ceske_sluzby_dodaci_doba', true );
   }
   if ( ! empty ( $dodaci_doba_produkt ) ) {
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
@@ -158,7 +165,8 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
 
 function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
   $dostupnost = "";
-  $predobjednavka = get_post_meta( $product->id, 'ceske_sluzby_xml_preorder_datum', true );
+  $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+  $predobjednavka = get_post_meta( $product_id, 'ceske_sluzby_xml_preorder_datum', true );
   if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
     if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
       $predobjednavka = date_i18n( 'j.n.Y', $predobjednavka );
@@ -301,9 +309,9 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
   $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
   $doplneny_nazev_produkt = get_post_meta( $product_id, $postmeta_id, true );
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
-  $feed_data['MANUFACTURER'] = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], false );
+  $feed_data['MANUFACTURER'] = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
   if ( $produkt->is_type( 'simple' ) ) {
-    $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post->post_title, $feed_data );
+    $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post->post_title, $feed_data );
     if ( empty( $global_data['nazev_produktu'] ) ) {
       if ( empty( $aktualni_kategorie_nazev_produkt ) ) {
         if ( empty( $kategorie_url ) ) {
@@ -359,7 +367,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
         } else {
           $vlastnosti_varianta = $vlastnosti_varianta_only;
         }
-        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data['nazev_produktu'], $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
+        $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $post->ID, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post->post_title, $feed_data );
         echo '<div style="margin-left: 161px;"><code>' . $xml_productname . '</code></div>';
       }
       echo '<div style="margin-left: 161px;">Dostupné vlastnosti: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', $attributes_produkt ) . '</div>';
@@ -409,4 +417,217 @@ function ceske_sluzby_ziskat_nastaveni_zbozi_extra_message() {
     'voucher' => 'Voucher na další nákup'
   );
   return $hodnoty;
+}
+
+function ceske_sluzby_ziskat_dopravni_oblasti() {
+  // http://www.ibenic.com/ultimate-guide-woocommerce-shipping-zones/
+  $zones = array();
+  $default_zone = WC_Shipping_Zones::get_zone( 0 );
+  if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+    $zone_id = $default_zone->get_zone_id();
+  } else {
+    $zone_id = $default_zone->get_id();;
+  }
+  $zones[ $zone_id ] = $default_zone->get_data();
+  $zones[ $zone_id ]['formatted_zone_location'] = $default_zone->get_formatted_location();
+  $zones[ $zone_id ]['shipping_methods'] = $default_zone->get_shipping_methods();
+  $zones = array_merge( $zones, WC_Shipping_Zones::get_zones() );
+  return $zones;
+}
+
+function zkontrolovat_nastavenou_hodnotu( $order, $context, $global_option, $settings_option, $specific_option ) {
+  $hodnota = '';
+  if ( ! empty( $global_option ) ) {
+    $hodnota = get_option( $global_option );
+  }
+  if ( ! in_array( 'wc_ceske_sluzby_nastaveni_doprava', $context ) ) {
+    if ( ! empty( $order ) ) {
+      $payment_gateway = wc_get_payment_gateway_by_order( $order );
+    } else {
+      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      $current_gateway = WC()->session->chosen_payment_method;
+      if ( ! empty( $current_gateway ) && ! empty( $available_gateways ) && array_key_exists( $current_gateway, $available_gateways ) ) {
+        $payment_gateway = $available_gateways[$current_gateway];
+      }
+    }
+  }
+
+  if ( in_array( 'wc_ceske_sluzby_nastaveni_pokladna', $context ) ) {
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
+    if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) ) {
+      if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) && array_key_exists( $specific_option, $payment_gateway->settings ) && ! empty( $payment_gateway->settings[$specific_option] ) ) {
+        $hodnota = $payment_gateway->settings[$specific_option];
+      }
+    }
+  }
+
+  if ( in_array( 'wc_ceske_sluzby_nastaveni_doprava', $context ) ) {
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_doprava' );
+    if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) && in_array( 'wc_ceske_sluzby_nastaveni_doprava', $context ) ) {
+      $available_shipping = WC()->shipping->load_shipping_methods();
+      if ( ! empty( $order ) ) {
+        $shipping_methods = $order->get_shipping_methods();
+      } else {
+        $shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+      }
+      if ( ! empty( $shipping_methods ) && is_array( $shipping_methods ) ) {
+        foreach ( $shipping_methods as $shipping_method ) {
+          if ( ! empty( $order ) ) {
+            $shipping_id = $shipping_method['method_id'];
+          } else {
+            $shipping_id = $shipping_method;
+          }
+          if ( ! empty( $shipping_id ) ) {
+            if ( strpos( $shipping_id, ':' ) === false ) {
+              foreach ( $available_shipping as $shipping ) {
+                if ( $shipping_id == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                  if ( in_array( 'settings', $shipping->supports ) ) {
+                    if ( array_key_exists( $specific_option, $shipping->settings ) && ! empty( $shipping->settings[$specific_option] ) ) {
+                      $hodnota = $shipping->settings[$specific_option];
+                    }
+                  }
+                }
+              }
+            } else {
+              $pieces = explode( ":", $shipping_id );
+              if ( is_array( $pieces ) && ! empty( $pieces ) && count( $pieces ) == 2 ) {
+                $order_method = $pieces[0];
+                $order_instance = $pieces[1];
+                if ( is_numeric( $order_instance ) ) {
+                  $zones = ceske_sluzby_ziskat_dopravni_oblasti();
+                  foreach ( $zones as $zone ) {
+                    foreach ( $zone['shipping_methods'] as $instance => $method ) {
+                      if ( $instance == $order_instance && $order_method == $method->id && isset( $method->supports ) && is_array( $method->supports ) && ! empty( $method->supports ) ) {
+                        if ( in_array( 'shipping-zones', $method->supports ) ) {
+                          if ( array_key_exists( $specific_option, $method->instance_settings ) && ! empty( $method->instance_settings[$specific_option] ) ) {
+                            $hodnota = $method->instance_settings[$specific_option];
+                          }
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  // Stará možnost doplňkových cen poštovného, např. legacy_flat_rate:ppl-dobirka
+                  foreach ( $available_shipping as $shipping ) {
+                    if ( $order_method == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                      if ( in_array( 'settings', $shipping->supports ) ) {
+                        if ( array_key_exists( $specific_option, $shipping->settings ) && ! empty( $shipping->settings[$specific_option] ) ) {
+                          $hodnota = $shipping->settings[$specific_option];
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if ( in_array( 'wc_ceske_sluzby_nastaveni_pokladna_doprava', $context ) ) {
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
+    if ( is_array( $moznosti_nastaveni ) && in_array( $settings_option, $moznosti_nastaveni ) && in_array( 'wc_ceske_sluzby_nastaveni_pokladna_doprava', $context ) ) {
+      $available_shipping = WC()->shipping->load_shipping_methods();
+      if ( ! empty( $order ) ) {
+        $shipping_methods = $order->get_shipping_methods();
+      } else {
+        $shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+      }
+      if ( ! empty( $shipping_methods ) && is_array( $shipping_methods ) ) {
+        if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) ) {
+          foreach ( $shipping_methods as $shipping_method ) {
+            if ( ! empty( $order ) ) {
+              $shipping_id = $shipping_method['method_id'];
+            } else {
+              $shipping_id = $shipping_method;
+            }
+            if ( ! empty( $shipping_id ) ) {
+              if ( strpos( $shipping_id, ':' ) === false ) {
+                foreach ( $available_shipping as $shipping ) {
+                  if ( $shipping_id == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                    if ( in_array( 'settings', $shipping->supports ) ) {
+                      if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $shipping->settings ) && ! empty( $shipping->settings[$specific_option . '_' . $payment_gateway->id] ) ) {
+                        $hodnota = $shipping->settings[$specific_option . '_' . $payment_gateway->id];
+                      }
+                    }
+                  }
+                }
+              } else {
+                $pieces = explode( ":", $shipping_id );
+                if ( is_array( $pieces ) && ! empty( $pieces ) && count( $pieces ) == 2 ) {
+                  $order_method = $pieces[0];
+                  $order_instance = $pieces[1];
+                  if ( is_numeric( $order_instance ) ) {
+                    $zones = ceske_sluzby_ziskat_dopravni_oblasti();
+                    foreach ( $zones as $zone ) {
+                      foreach ( $zone['shipping_methods'] as $instance => $method ) {
+                        if ( $instance == $order_instance && $order_method == $method->id && isset( $method->supports ) && is_array( $method->supports ) && ! empty( $method->supports ) ) {
+                          if ( in_array( 'shipping-zones', $method->supports ) ) {
+                            if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $method->instance_settings ) && ! empty( $method->instance_settings[$specific_option . '_' . $payment_gateway->id] ) ) {
+                              $hodnota = $method->instance_settings[$specific_option . '_' . $payment_gateway->id];
+                            }
+                          }
+                        }
+                      }
+                    }
+                  } else {
+                    // Stará možnost doplňkových cen poštovného, např. legacy_flat_rate:ppl-dobirka
+                    foreach ( $available_shipping as $shipping ) {
+                      if ( $order_method == $shipping->id && isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
+                        if ( in_array( 'settings', $shipping->supports ) ) {
+                          if ( array_key_exists( $specific_option . '_' . $payment_gateway->id, $shipping->settings ) && ! empty( $shipping->settings[$specific_option . '_' . $payment_gateway->id] ) ) {
+                            $hodnota = $shipping->settings[$specific_option . '_' . $payment_gateway->id];
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if ( isset( $payment_gateway ) && ! empty( $payment_gateway ) ) {
+    if ( $settings_option == 'zaokrouhlovani' && empty( $hodnota ) && $payment_gateway->id == 'cod' && GOOGLE_MENA == 'CZK' ) {
+      $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
+      if ( $aktivace_eet == "yes" ) {
+        $hodnota = 'nahoru';
+      }
+    }
+  }
+  return $hodnota;
+}
+
+function ceske_sluzby_xml_extra_message_aktivni_hodnoty( $data ) {
+  if ( ! empty( $data ) ) {
+    $data = array_filter( $data, function( $v, $k ) {
+      return $v == 'yes';
+    }, ARRAY_FILTER_USE_BOTH );
+  } else {
+    $data = array();
+  }
+  return $data;
+}
+
+function ceske_sluzby_xml_ziskat_globalni_hodnoty() {
+  $data = array(
+    'dodaci_doba' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' ),
+    'vlastni_dodaci_doba' => get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' ),
+    'podpora_ean' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' ),
+    'podpora_vyrobcu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' ),
+    'stav_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ),
+    'nazev_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu' ),
+    'nazev_variant' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant' ),
+    'zkracene_zapisy' => get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' ),
+    'erotika' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' ),
+    'postovne' => get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' ),
+    'extra_message' => ceske_sluzby_xml_extra_message_aktivni_hodnoty( get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message' ) )
+  );
+  return $data;
 }
