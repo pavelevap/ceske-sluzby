@@ -1042,8 +1042,8 @@ function heureka_xml_feed_aktualizace() {
           if ( ! empty( $stav_produkt ) ) {
             $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
           }
-          if ( ! empty( $vyrobce ) ) {
-            $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce );
+          if ( ! empty( $vyrobce_produkt ) ) {
+            $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_produkt );
           }
           if ( ! empty( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
