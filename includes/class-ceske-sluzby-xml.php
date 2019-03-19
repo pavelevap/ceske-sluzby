@@ -885,7 +885,7 @@ function heureka_xml_feed_aktualizace() {
   }
   update_option( $lock_name, time() );
 
-  $limit = 1000; // Defaultní počet produktů zpracovaných najednou...
+  $limit = apply_filters( 'ceske_sluzby_heureka_xml_feed_limit', 1000 ); // Defaultní počet produktů zpracovaných najednou...
   $offset = 0;
   $progress = get_option( 'heureka_xml_progress' );
   if ( ! empty( $progress ) ) {
@@ -1310,7 +1310,7 @@ function zbozi_xml_feed_aktualizace() {
   }
   update_option( $lock_name, time() );
 
-  $limit = 1000; // Defaultní počet produktů zpracovaných najednou...
+  $limit = apply_filters( 'ceske_sluzby_zbozi_xml_feed_limit', 1000 ); // Defaultní počet produktů zpracovaných najednou...
   $offset = 0;
   $progress = get_option( 'zbozi_xml_progress' );
   if ( ! empty( $progress ) ) {
@@ -1792,7 +1792,7 @@ function pricemania_xml_feed_aktualizace() {
   }
   update_option( $lock_name, time() );
 
-  $limit = 1000; // Defaultní počet produktů zpracovaných najednou...
+  $limit = apply_filters( 'ceske_sluzby_pricemania_feed_limit', 1000 ); // Defaultní počet produktů zpracovaných najednou...
   $offset = 0;
   $progress = get_option( 'pricemania_xml_progress' );
   if ( ! empty( $progress ) ) {
