@@ -274,6 +274,16 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           'description' => 'Příklad: Dámské oblečení a obuv | Dámské boty | Dámské outdoorové boty' 
         )
       );
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_glami_cpc',
+          'data_type' => 'price',
+          'label' => 'CPC', 
+          'placeholder' => '0,00',
+          'desc_tip' => 'true',
+          'description' => 'Nastavení maximální ceny za proklik (Kč).' 
+        )
+      );
       if ( ! empty( $kategorie_glami ) ) {
         echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_glami . ': <code>' . $nazev_kategorie_glami . '</code></p>';
       }
@@ -368,6 +378,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_zbozi_productname',
       'ceske_sluzby_xml_zbozi_kategorie',
       'ceske_sluzby_xml_glami_kategorie',
+      'ceske_sluzby_xml_glami_cpc',
       'ceske_sluzby_xml_stav_produktu',
       'ceske_sluzby_xml_preorder_datum'
     );

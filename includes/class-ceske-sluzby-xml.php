@@ -677,6 +677,7 @@ function xml_feed_nastaveni( $feed ) {
   $settings['heureka']['dodaci_doba']['neni_skladem'] = false;
   $settings['heureka']['sku']['element'] = false;
   $settings['heureka']['product']['element'] = 'PRODUCT';
+  $settings['heureka']['cpc']['element'] = false;
   $settings['heureka']['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}';
   $settings['heureka']['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
   $settings['heureka']['kategorie']['produkt'] = 'ceske_sluzby_xml_heureka_kategorie';
@@ -685,6 +686,7 @@ function xml_feed_nastaveni( $feed ) {
   $settings['glami']['dodaci_doba']['neni_skladem'] = false;
   $settings['glami']['sku']['element'] = 'PRODUCTNO';
   $settings['glami']['product']['element'] = false;
+  $settings['glami']['cpc']['element'] = 'GLAMI_CPC';
   $settings['glami']['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
   $settings['glami']['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
   $settings['glami']['kategorie']['produkt'] = 'ceske_sluzby_xml_glami_kategorie';
@@ -737,6 +739,7 @@ function xml_feed_zobrazeni( $settings ) {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $cpc = get_post_meta( $product_id, 'ceske_sluzby_xml_glami_cpc', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, false, $global_data['zkracene_zapisy'] );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
@@ -813,6 +816,9 @@ function xml_feed_zobrazeni( $settings ) {
           if ( ! empty( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
           }
+          if ( ! empty( $settings['cpc']['element'] ) && ! empty( $cpc ) ) {
+            $xmlWriter->writeElement( $settings['cpc']['element'], $cpc );
+          }
           $xmlWriter->endElement();
         }
       }
@@ -869,6 +875,9 @@ function xml_feed_zobrazeni( $settings ) {
           }
           if ( ! empty( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
+          }
+          if ( ! empty( $settings['cpc']['element'] ) && ! empty( $cpc ) ) {
+            $xmlWriter->writeElement( $settings['cpc']['element'], $cpc );
           }
         $xmlWriter->endElement();
         // https://nnarhinen.github.io/2011/01/15/Serving-large-xml-files.html
@@ -961,6 +970,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
     $nazev_produkt_doplnek = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_product', true );
+    $cpc = get_post_meta( $product_id, 'ceske_sluzby_xml_glami_cpc', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, false, $global_data['zkracene_zapisy'] );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
@@ -1037,6 +1047,9 @@ function xml_feed_aktualizace( $settings, $feed ) {
             if ( ! empty( $ean ) ) {
               $xmlWriter->writeElement( 'EAN', $ean );
             }
+            if ( ! empty( $settings['cpc']['element'] ) && ! empty( $cpc ) ) {
+              $xmlWriter->writeElement( $settings['cpc']['element'], $cpc );
+            }
           $xmlWriter->endElement();
         }
         $prubezny_pocet = $prubezny_pocet + 1;
@@ -1095,6 +1108,9 @@ function xml_feed_aktualizace( $settings, $feed ) {
           }
           if ( ! empty( $ean ) ) {
             $xmlWriter->writeElement( 'EAN', $ean );
+          }
+          if ( ! empty( $settings['cpc']['element'] ) && ! empty( $cpc ) ) {
+            $xmlWriter->writeElement( $settings['cpc']['element'], $cpc );
           }
         $xmlWriter->endElement();
       }
