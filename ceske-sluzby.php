@@ -248,14 +248,22 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'woocommerce_package_rates', 'ceske_sluzby_omezit_dopravu_pokud_dostupna_zdarma', 10, 2 );
 
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_ulozenka_zobrazit_pobocky' );
-    add_action( 'woocommerce_new_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
+    if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+      add_action( 'woocommerce_new_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
+    } else {
+      add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_ulozenka_ulozeni_pobocky', 10, 2 );
+    }
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_ulozenka_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_ulozenka_objednavka_zobrazit_pobocku' );
 
     add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_dpd_parcelshop_zobrazit_pobocky' );
-    add_action( 'woocommerce_new_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
+    if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+      add_action( 'woocommerce_new_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
+    } else {
+      add_action( 'woocommerce_add_shipping_order_item', 'ceske_sluzby_dpd_parcelshop_ulozeni_pobocky', 10, 2 );
+    }
     add_action( 'woocommerce_checkout_process', 'ceske_sluzby_dpd_parcelshop_overit_pobocku' );
     add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
