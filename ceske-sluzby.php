@@ -614,6 +614,18 @@ function ceske_sluzby_aktivace_xml_feed() {
         wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml' );
       }
     }
+
+    $glami_xml = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
+    if ( $glami_xml == "yes" ) {
+      if ( ! wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' ) ) {
+        wp_schedule_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'daily', 'ceske_sluzby_glami_aktualizace_xml' );
+      }
+    } else {
+      if ( wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' ) ) {
+        $timestamp = wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' );
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_glami_aktualizace_xml' ); 
+      }
+    }
   } else {
     if ( wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml' ) ) {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml' );
@@ -627,6 +639,10 @@ function ceske_sluzby_aktivace_xml_feed() {
       $timestamp = wp_next_scheduled( 'ceske_sluzby_pricemania_aktualizace_xml' );
       wp_unschedule_event( $timestamp, 'ceske_sluzby_pricemania_aktualizace_xml' );
     }
+    if ( wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' ) ) {
+      $timestamp = wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' );
+      wp_unschedule_event( $timestamp, 'ceske_sluzby_glami_aktualizace_xml' );
+    }
   }
 }
 
@@ -634,7 +650,14 @@ add_action( 'ceske_sluzby_heureka_aktualizace_xml', 'ceske_sluzby_heureka_xml_fe
 add_action( 'ceske_sluzby_heureka_aktualizace_xml_batch', 'ceske_sluzby_heureka_xml_feed_aktualizace' );
 function ceske_sluzby_heureka_xml_feed_aktualizace() {
   require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
-  heureka_xml_feed_aktualizace();
+  xml_feed_aktualizace_nastaveni( 'heureka' );
+}
+
+add_action( 'ceske_sluzby_glami_aktualizace_xml', 'ceske_sluzby_glami_xml_feed_aktualizace' );
+add_action( 'ceske_sluzby_glami_aktualizace_xml_batch', 'ceske_sluzby_glami_xml_feed_aktualizace' );
+function ceske_sluzby_glami_xml_feed_aktualizace() {
+  require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
+  xml_feed_aktualizace_nastaveni( 'glami' );
 }
 
 add_action( 'ceske_sluzby_zbozi_aktualizace_xml', 'ceske_sluzby_zbozi_xml_feed_aktualizace' );

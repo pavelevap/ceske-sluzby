@@ -254,7 +254,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_glami == "yes" ) {
       echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://info.' . GLAMI_URL . '/feed/" target="_blank">obecný manuál</a>)</div>';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">obecný manuál</a>)</div>';
       $kategorie_glami = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );

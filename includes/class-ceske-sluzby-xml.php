@@ -672,28 +672,39 @@ function ceske_sluzby_xml_ziskat_dostupna_postmeta( $vyrobce, $custom_labels ) {
   return $dostupna_postmeta;
 }
 
-function glami_xml_feed_nastaveni() {
-  $settings['dodaci_doba']['predbezna_objednavka'] = false;
-  $settings['dodaci_doba']['neni_skladem'] = false;
-  $settings['sku']['element'] = 'PRODUCTNO';
-  $settings['product']['element'] = false;
-  $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
-  $settings['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
-  $settings['kategorie']['produkt'] = 'ceske_sluzby_xml_glami_kategorie';
-  $settings['kategorie']['kategorie'] = 'ceske-sluzby-xml-glami-kategorie';
-  xml_feed_zobrazeni( $settings );
+function xml_feed_nastaveni( $feed ) {
+  $settings['heureka']['dodaci_doba']['predbezna_objednavka'] = '';
+  $settings['heureka']['dodaci_doba']['neni_skladem'] = false;
+  $settings['heureka']['sku']['element'] = false;
+  $settings['heureka']['product']['element'] = 'PRODUCT';
+  $settings['heureka']['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}';
+  $settings['heureka']['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
+  $settings['heureka']['kategorie']['produkt'] = 'ceske_sluzby_xml_heureka_kategorie';
+  $settings['heureka']['kategorie']['kategorie'] = 'ceske-sluzby-xml-heureka-kategorie';
+  $settings['glami']['dodaci_doba']['predbezna_objednavka'] = false;
+  $settings['glami']['dodaci_doba']['neni_skladem'] = false;
+  $settings['glami']['sku']['element'] = 'PRODUCTNO';
+  $settings['glami']['product']['element'] = false;
+  $settings['glami']['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
+  $settings['glami']['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
+  $settings['glami']['kategorie']['produkt'] = 'ceske_sluzby_xml_glami_kategorie';
+  $settings['glami']['kategorie']['kategorie'] = 'ceske-sluzby-xml-glami-kategorie';
+  return $settings[$feed];
 }
 
 function heureka_xml_feed_nastaveni() {
-  $settings['dodaci_doba']['predbezna_objednavka'] = '';
-  $settings['dodaci_doba']['neni_skladem'] = false;
-  $settings['sku']['element'] = false;
-  $settings['product']['element'] = 'PRODUCT';
-  $settings['nazev_produktu'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}';
-  $settings['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
-  $settings['kategorie']['produkt'] = 'ceske_sluzby_xml_heureka_kategorie';
-  $settings['kategorie']['kategorie'] = 'ceske-sluzby-xml-heureka-kategorie';
+  $settings = xml_feed_nastaveni( 'heureka' );
   xml_feed_zobrazeni( $settings );
+}
+
+function glami_xml_feed_nastaveni() {
+  $settings = xml_feed_nastaveni( 'glami' );
+  xml_feed_zobrazeni( $settings );
+}
+
+function xml_feed_aktualizace_nastaveni( $feed ) {
+  $settings = xml_feed_nastaveni( $feed );
+  xml_feed_aktualizace( $settings, $feed );
 }
 
 function xml_feed_zobrazeni( $settings ) {
@@ -872,14 +883,14 @@ function xml_feed_zobrazeni( $settings ) {
   echo $xmlWriter->outputMemory();
 }
 
-function heureka_xml_feed_aktualizace() {
+function xml_feed_aktualizace( $settings, $feed ) {
   global $wpdb;
-  $lock_name = 'heureka_xml.lock';
+  $lock_name = $feed . '_xml.lock';
   $lock_result = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO `$wpdb->options` ( `option_name`, `option_value`, `autoload` ) VALUES (%s, %s, 'no') /* LOCK */", $lock_name, time() ) );
   if ( ! $lock_result ) {
     $lock_result = get_option( $lock_name );
     if ( ! $lock_result || ( $lock_result > ( time() - HOUR_IN_SECONDS ) ) ) {
-      wp_schedule_single_event( time() + ( 5 * MINUTE_IN_SECONDS ), 'ceske_sluzby_heureka_aktualizace_xml_batch' );
+      wp_schedule_single_event( time() + ( 5 * MINUTE_IN_SECONDS ), 'ceske_sluzby_' . $feed . '_aktualizace_xml_batch' );
       return;
     }
   }
@@ -887,7 +898,7 @@ function heureka_xml_feed_aktualizace() {
 
   $limit = 1000; // Defaultní počet produktů zpracovaných najednou...
   $offset = 0;
-  $progress = get_option( 'heureka_xml_progress' );
+  $progress = get_option( $feed . '_xml_progress' );
   if ( ! empty( $progress ) ) {
     $offset = $progress;
   }
@@ -903,29 +914,35 @@ function heureka_xml_feed_aktualizace() {
   $xmlWriter->startElement( 'SHOP' );
 
   if ( ! $products ) {
-    if ( wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml_batch' ) ) {
-      $timestamp = wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml_batch' );
-      wp_unschedule_event( $timestamp, 'ceske_sluzby_heureka_aktualizace_xml_batch' );
+    if ( wp_next_scheduled( 'ceske_sluzby_' . $feed . '_aktualizace_xml_batch' ) ) {
+      $timestamp = wp_next_scheduled( 'ceske_sluzby_' . $feed . '_aktualizace_xml_batch' );
+      wp_unschedule_event( $timestamp, 'ceske_sluzby_' . $feed . '_aktualizace_xml_batch' );
     }
     $xmlWriter->endElement();
     $xmlWriter->endDocument();
     $output = $xmlWriter->outputMemory();
     $output = substr( $output, strpos( $output, "\n" ) + 1 );
     $output = str_replace( '<SHOP/>', '</SHOP>', $output );
-    file_put_contents( WP_CONTENT_DIR . '/heureka-tmp.xml', $output, FILE_APPEND );
-    if ( file_exists( WP_CONTENT_DIR . '/heureka.xml' ) ) {
-      unlink( WP_CONTENT_DIR . '/heureka.xml' );
+    file_put_contents( WP_CONTENT_DIR . '/' . $feed . '-tmp.xml', $output, FILE_APPEND );
+    if ( file_exists( WP_CONTENT_DIR . '/' . $feed . '.xml' ) ) {
+      unlink( WP_CONTENT_DIR . '/' . $feed . '.xml' );
     }
-    if ( file_exists( WP_CONTENT_DIR . '/heureka-tmp.xml' ) ) {
-      rename( WP_CONTENT_DIR . '/heureka-tmp.xml', WP_CONTENT_DIR . '/heureka.xml' );
+    if ( file_exists( WP_CONTENT_DIR . '/' . $feed . '-tmp.xml' ) ) {
+      rename( WP_CONTENT_DIR . '/' . $feed . '-tmp.xml', WP_CONTENT_DIR . '/' . $feed . '.xml' );
     }
-    delete_option( 'heureka_xml_progress' );
+    delete_option( $feed . '_xml_progress' );
     delete_option( $lock_name );
     return;
   }
-  wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_heureka_aktualizace_xml_batch' );
+  wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_' . $feed . '_aktualizace_xml_batch' );
 
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
+  if ( empty( $global_data['nazev_produktu'] ) ) {
+    $global_data['nazev_produktu'] = $settings['nazev_produktu'];
+  }
+  if ( empty( $global_data['nazev_variant'] ) ) {
+    $global_data['nazev_variant'] = $settings['nazev_variant'];
+  }
   $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], false );
   $pocet_produkt = 0;
   $prubezny_pocet = 0;
@@ -939,7 +956,7 @@ function heureka_xml_feed_aktualizace() {
     $post_data = ceske_sluzby_xml_ziskat_post_data( $produkt );
     $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     $kategorie_stav_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-stav-produktu' );
-    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, 'ceske_sluzby_xml_heureka_kategorie', 'ceske-sluzby-xml-heureka-kategorie', '|' );
+    $strom_kategorie = ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, $settings['kategorie']['produkt'], $settings['kategorie']['kategorie'], '|' );
     $doplneny_nazev_produkt = get_post_meta( $product_id, 'ceske_sluzby_xml_heureka_productname', true );
     $attributes_produkt = $produkt->get_attributes();
     $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
@@ -949,6 +966,7 @@ function heureka_xml_feed_aktualizace() {
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
+    $sku_produkt = $produkt->get_sku();
     $kategorie_nazev_produkt = ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $prirazene_kategorie, 'ceske-sluzby-xml-heureka-productname' );
     $nazev_produkt = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post_data->post_title, $feed_data );
 
@@ -956,8 +974,9 @@ function heureka_xml_feed_aktualizace() {
       foreach( $produkt->get_available_variations() as $variation ) {
         $varianta = new WC_Product_Variation( $variation['variation_id'] );
         if ( $varianta->is_in_stock() && $varianta->variation_is_visible() ) {
+          $sku_varianta = $varianta->get_sku();
           $ean = ceske_sluzby_xml_ziskat_ean_produktu( $global_data['podpora_ean'], $product_id, $produkt->get_sku(), $variation['variation_id'], $varianta->get_sku() );
-          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $variation['variation_id'], $varianta, '', false );
+          $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $variation['variation_id'], $varianta, $settings['dodaci_doba']['predbezna_objednavka'], $settings['dodaci_doba']['neni_skladem'] );
           $attributes_varianta = $varianta->get_variation_attributes();
           $vlastnosti_varianta_only = ceske_sluzby_xml_ziskat_vlastnosti_varianty( $attributes_varianta, $attributes_produkt );
           $popis_varianta = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, $varianta, $global_data['zkracene_zapisy'] );
@@ -977,13 +996,16 @@ function heureka_xml_feed_aktualizace() {
                 $xmlWriter->text( $nazev_varianta );
               $xmlWriter->endElement();
             }
+            if ( ! empty( $settings['sku']['element'] ) && ! empty( $sku_varianta ) ) {
+              $xmlWriter->writeElement( $settings['sku']['element'], $sku_varianta );
+            }
             if ( ! empty( $popis_varianta ) ) {
               $xmlWriter->startElement( 'DESCRIPTION' );
                 $xmlWriter->text( $popis_varianta );
               $xmlWriter->endElement();
             }
             if ( ! empty( $stav_produkt ) ) {
-            $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
+              $xmlWriter->writeElement( 'ITEM_TYPE', $stav_produkt );
             }
             if ( ! empty( $vyrobce_varianta ) ) {
               $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_varianta );
@@ -1022,7 +1044,7 @@ function heureka_xml_feed_aktualizace() {
     } elseif ( $produkt->is_type( 'simple' ) ) {
       if ( $produkt->is_in_stock() ) {
         $ean = ceske_sluzby_xml_ziskat_ean_produktu( $global_data['podpora_ean'], $product_id, $produkt->get_sku(), false, false );
-        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $product_id, $produkt, '', false );
+        $dodaci_doba = ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $product_id, $produkt, $settings['dodaci_doba']['predbezna_objednavka'], $settings['dodaci_doba']['neni_skladem'] );
 
         $xmlWriter->startElement( 'SHOPITEM' );
           $xmlWriter->writeElement( 'ITEM_ID', $product_id );
@@ -1030,9 +1052,12 @@ function heureka_xml_feed_aktualizace() {
             $xmlWriter->startElement( 'PRODUCTNAME' );
               $xmlWriter->text( $nazev_produkt );
             $xmlWriter->endElement();
-            if ( ! empty( $nazev_produkt_doplnek ) ) {
-              $xmlWriter->writeElement( 'PRODUCT', $nazev_produkt . " " . $nazev_produkt_doplnek );
+            if ( ! empty( $settings['product']['element'] ) && ! empty ( $nazev_produkt_doplnek ) ) {
+              $xmlWriter->writeElement( $settings['product']['element'], $nazev_produkt . " " . $nazev_produkt_doplnek );
             }
+          }
+          if ( ! empty( $settings['sku']['element'] ) && ! empty( $sku_produkt ) ) {
+            $xmlWriter->writeElement( $settings['sku']['element'], $sku_produkt );
           }
           if ( ! empty( $popis_produkt ) ) {
             $xmlWriter->startElement( 'DESCRIPTION' );
@@ -1086,11 +1111,11 @@ function heureka_xml_feed_aktualizace() {
   else {
     header( 'Content-type: text/xml' );
   }
-  file_put_contents( WP_CONTENT_DIR . '/heureka-tmp.xml', $output, FILE_APPEND );
+  file_put_contents( WP_CONTENT_DIR . '/' . $feed . '-tmp.xml', $output, FILE_APPEND );
   $xmlWriter->flush( true );
   
   $offset = $offset + $pocet_produkt;
-  update_option( 'heureka_xml_progress', $offset );
+  update_option( $feed . '_xml_progress', $offset );
   delete_option( $lock_name );
 }
 
