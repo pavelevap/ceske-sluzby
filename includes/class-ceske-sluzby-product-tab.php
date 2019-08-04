@@ -130,7 +130,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
             'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
           )
         );
-        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_heureka_productname', $post->ID, $post, 'ceske-sluzby-xml-heureka-productname', $global_data, false );
+        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_heureka_productname', $post->ID, $post, 'ceske-sluzby-xml-heureka-productname', $global_data );
       }
       woocommerce_wp_text_input(
         array( 
@@ -169,7 +169,6 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     if ( $xml_feed_zbozi == "yes" ) {
       echo '<div class="options_group">';
       echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
-      $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
       if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{PRODUCTNAME}' ) !== false ) {
         woocommerce_wp_text_input(
           array( 
@@ -180,7 +179,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
             'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
           )
         );
-        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_zbozi_productname', $post->ID, $post, 'ceske-sluzby-xml-zbozi-productname', $global_data, $custom_labels_array );
+        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_zbozi_productname', $post->ID, $post, 'ceske-sluzby-xml-zbozi-productname', $global_data );
       }
       if ( $xml_feed_heureka != "yes" ) {
         woocommerce_wp_text_input(

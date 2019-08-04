@@ -1,9 +1,15 @@
 <?php
+// https://stackoverflow.com/questions/27525509/why-is-php-eol-adding-a-strange-character
+function ceske_sluzby_procistit_hodnoty( &$hodnota ) { 
+  $hodnota = trim( $hodnota ); 
+}
+
 function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
   $dodaci_doba_array = array();
   $dodaci_doba_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_hodnoty' );
   if ( ! empty ( $dodaci_doba_hodnoty ) ) {
     $dodaci_doba_tmp = array_values( array_filter( explode( PHP_EOL, $dodaci_doba_hodnoty ) ) );
+    array_walk( $dodaci_doba_tmp, 'ceske_sluzby_procistit_hodnoty' );
     foreach ( $dodaci_doba_tmp as $dodaci_doba_hodnota ) {
       $rozdeleno = explode( "|", $dodaci_doba_hodnota );
       if ( is_numeric( $rozdeleno[0] ) ) {
@@ -36,11 +42,31 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
   return $dodaci_doba_array;
 }
 
+function ceske_sluzby_xml_zpracovat_parametry( $parametry_hodnoty ) {
+  $parametry_array = array();
+  if ( ! empty ( $parametry_hodnoty ) ) {
+    $parametry_tmp = array_values( array_filter( explode( PHP_EOL, $parametry_hodnoty ) ) );
+    array_walk( $parametry_tmp, 'ceske_sluzby_procistit_hodnoty' );
+    $i = 0;
+    foreach ( $parametry_tmp as $parametr_hodnota ) {
+      $rozdeleno = explode( "|", $parametr_hodnota );
+      if ( ! empty ( $rozdeleno ) ) {
+        if ( ( $rozdeleno[0] == "-" && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "+" && count( $rozdeleno ) == 3 ) ) {
+          $parametry_array[$i] = $rozdeleno;
+          $i = $i + 1;
+        }
+      }
+    }
+  }
+  return $parametry_array;
+}
+
 function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
   $pocet_skladem_array = array();
   $pocet_skladem_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_intervaly' );
   if ( ! empty ( $pocet_skladem_hodnoty ) ) {
     $pocet_skladem_tmp = array_values( array_filter( explode( PHP_EOL, $pocet_skladem_hodnoty ) ) );
+    array_walk( $pocet_skladem_tmp, 'ceske_sluzby_procistit_hodnoty' );
     foreach ( $pocet_skladem_tmp as $pocet_skladem_hodnota ) {
       $rozdeleno = explode( "|", $pocet_skladem_hodnota );
       if ( count( $rozdeleno ) == 2 && is_numeric( $rozdeleno[0] ) ) {
@@ -288,7 +314,7 @@ function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
   return $dostupne_taxonomie;
 }
 
-function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $termmeta_id, $global_data, $custom_labels_array ) {
+function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $termmeta_id, $global_data ) {
   $kategorie_url = "";
   $produkt = wc_get_product( $product_id );
   $prirazene_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
@@ -308,7 +334,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
   $attributes_produkt = $produkt->get_attributes();
   $vlastnosti_produkt = ceske_sluzby_xml_ziskat_vlastnosti_produktu( $product_id, $attributes_produkt );
   $doplneny_nazev_produkt = get_post_meta( $product_id, $postmeta_id, true );
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
   $feed_data['MANUFACTURER'] = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
   if ( $produkt->is_type( 'simple' ) ) {
     $xml_productname = ceske_sluzby_xml_ziskat_nazev_produktu( 'produkt', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_produkt, false, $dostupna_postmeta, $post->post_title, $feed_data );
@@ -624,6 +650,7 @@ function ceske_sluzby_xml_ziskat_globalni_hodnoty() {
     'stav_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ),
     'nazev_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu' ),
     'nazev_variant' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant' ),
+    'parametry' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_params' ),
     'zkracene_zapisy' => get_option( 'wc_ceske_sluzby_xml_feed_shortcodes-aktivace' ),
     'erotika' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_erotika' ),
     'postovne' => get_option( 'wc_ceske_sluzby_xml_feed_pricemania_postovne' ),

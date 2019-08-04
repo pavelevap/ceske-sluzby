@@ -596,10 +596,29 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
         }
       }
     }
+    if ( $rozpoznano == false ) {
+      $taxonomy = strstr( $data, ':', true );
+      if ( $taxonomy != false ) {
+        $termmeta = str_replace( $taxonomy . ":", "", $data );
+        if ( $termmeta != false ) {
+          $terms = get_the_terms( $product_id, $taxonomy );
+          if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+            foreach ( $terms as $term ) {
+              $termmeta_value = get_woocommerce_term_meta( $term->term_id, $termmeta );
+              if ( ! empty( $termmeta_value ) ) {
+                // Pokud bude u produktu přiřazeno více položek ze stejné taxonomie, tak bude použita pouze poslední získaná hodnota.
+                $value = $termmeta_value;
+                $rozpoznano = true;
+              }
+            }
+          }
+        }
+      }
+    }
     // Kontrola dostupných textových vlastností u konkrétního produktu (hodnota postmeta _product_attributes).
     // Nelze snadno zjistit, zda se vlastnost nevyskytuje u nějakého jiného produktu a jde tedy vůbec o vlastnost.
     // Pokud tedy konkrétní produkt vlastnost neobsahuje, tak bude zobrazen název vlastnosti na základě vlastnosti $zobrazit_nazev.
-    if ( ! empty( $vlastnosti_produkt ) ) {
+    if ( ! empty( $vlastnosti_produkt ) && $rozpoznano == false ) {
       foreach ( $vlastnosti_produkt as $vlastnost ) {
         if ( $vlastnost['nazev'] == $data ) {
           $value = $vlastnost['hodnota'];
@@ -607,7 +626,7 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
         }
       }
     }
-    if ( ! empty( $dostupna_postmeta ) ) {
+    if ( ! empty( $dostupna_postmeta ) && $rozpoznano == false ) {
       if ( in_array( $data, $dostupna_postmeta ) ) {
         $value = get_post_meta( $product_id, $data, true );
         $rozpoznano = true;
@@ -630,14 +649,39 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
   return $value;
 }
 
-function ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt ) {
+function ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data ) {
   $viditelne_vlastnosti_produkt = array();
+  $i = 0;
   if ( ! empty( $vlastnosti_produkt ) ) {
-    $i = 0;
     foreach ( $vlastnosti_produkt as $vlastnost ) {
       if ( $vlastnost['viditelnost'] ) {
         $viditelne_vlastnosti_produkt[$i] = $vlastnost;
         $i = $i + 1;
+      }
+    }
+  }
+  $parametry = ceske_sluzby_xml_zpracovat_parametry( $global_data['parametry'] );
+  if ( ! empty( $parametry ) ) {
+    foreach ( $parametry as $parametr ) {
+      if ( $parametr[0] == "-" && ! empty( $viditelne_vlastnosti_produkt ) ) {
+        $hledat = array_search( $parametr[1], array_column( $viditelne_vlastnosti_produkt, 'nazev' ) );
+        if ( $hledat !== false && array_key_exists( $hledat, $viditelne_vlastnosti_produkt ) ) {
+          unset( $viditelne_vlastnosti_produkt[$hledat] );
+        }
+      }
+      if ( $parametr[0] == "+" ) {
+        if ( substr( $parametr[2], 0, 1 ) == "{" && substr( $parametr[2], -1 ) == "}" ) {
+          $parametr[2] = str_replace( array( "{", "}" ), "", $parametr[2] );
+          $hodnota = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $parametr[2], false );
+        } else {
+          $hodnota = $parametr[2];
+        }
+        if ( ! empty( $hodnota ) ) {
+          $viditelne_vlastnosti_produkt[$i]['nazev'] = $parametr[1];
+          $viditelne_vlastnosti_produkt[$i]['hodnota'] = $hodnota;
+          $viditelne_vlastnosti_produkt[$i]['viditelnost'] = 1;
+          $i = $i + 1;
+        }
       }
     }
   }
@@ -649,25 +693,24 @@ function ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky() {
   $custom_labels = get_option( 'wc_ceske_sluzby_xml_feed_dodatecne_oznaceni' );
   if ( ! empty( $custom_labels ) ) {
     $custom_labels_array = array_values( array_filter( explode( PHP_EOL, $custom_labels ) ) );
+    array_walk( $custom_labels_array, 'ceske_sluzby_procistit_hodnoty' );
   }
   return $custom_labels_array;
 }
 
-function ceske_sluzby_xml_ziskat_dostupna_postmeta( $vyrobce, $custom_labels ) {
+function ceske_sluzby_xml_ziskat_dostupna_postmeta() {
   global $wpdb;
   $dostupna_postmeta = array();
-  if ( ! empty( $vyrobce ) || ! empty( $custom_labels ) ) {
-    $dostupna_postmeta = get_transient( 'ceske_sluzby_dostupna_postmeta' );
-    // Dotaz z WP funkce meta_form(), do budoucna využít register_meta()...
-    if ( $dostupna_postmeta === false ) {
-      $sql = "SELECT DISTINCT meta_key
-        FROM $wpdb->postmeta
-        WHERE meta_key NOT BETWEEN '_' AND '_z'
-        HAVING meta_key NOT LIKE %s
-        ORDER BY meta_key";
-      $dostupna_postmeta = $wpdb->get_col( $wpdb->prepare( $sql, $wpdb->esc_like( '_' ) . '%' ) );
-      set_transient( 'ceske_sluzby_dostupna_postmeta', $dostupna_postmeta, WEEK_IN_SECONDS );
-    }
+  $dostupna_postmeta = get_transient( 'ceske_sluzby_dostupna_postmeta' );
+  // Dotaz z WP funkce meta_form(), do budoucna využít register_meta()...
+  if ( $dostupna_postmeta === false ) {
+    $sql = "SELECT DISTINCT meta_key
+      FROM $wpdb->postmeta
+      WHERE meta_key NOT BETWEEN '_' AND '_z'
+      HAVING meta_key NOT LIKE %s
+      ORDER BY meta_key";
+    $dostupna_postmeta = $wpdb->get_col( $wpdb->prepare( $sql, $wpdb->esc_like( '_' ) . '%' ) );
+    set_transient( 'ceske_sluzby_dostupna_postmeta', $dostupna_postmeta, WEEK_IN_SECONDS );
   }
   return $dostupna_postmeta;
 }
@@ -720,7 +763,7 @@ function xml_feed_zobrazeni( $settings ) {
   if ( empty( $global_data['nazev_variant'] ) ) {
     $global_data['nazev_variant'] = $settings['nazev_variant'];
   }
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], false );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
@@ -803,7 +846,7 @@ function xml_feed_zobrazeni( $settings ) {
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
           $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $varianta ) );
-          $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+          $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data );
           if ( $viditelne_vlastnosti_varianta ) {
             foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
               $xmlWriter->startElement( 'PARAM' ); 
@@ -864,7 +907,7 @@ function xml_feed_zobrazeni( $settings ) {
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $produkt ) );
-          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
               $xmlWriter->startElement( 'PARAM' ); 
@@ -952,7 +995,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
   if ( empty( $global_data['nazev_variant'] ) ) {
     $global_data['nazev_variant'] = $settings['nazev_variant'];
   }
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], false );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
   $pocet_produkt = 0;
   $prubezny_pocet = 0;
 
@@ -1034,7 +1077,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
             }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $varianta ) );
-            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data );
             if ( $viditelne_vlastnosti_varianta ) {
               foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
                 $xmlWriter->startElement( 'PARAM' ); 
@@ -1097,7 +1140,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $produkt ) );
-          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
               $xmlWriter->startElement( 'PARAM' ); 
@@ -1140,7 +1183,7 @@ function zbozi_xml_feed_zobrazeni() {
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
 
   $xmlWriter = new XMLWriter();
   $xmlWriter->openMemory();
@@ -1220,7 +1263,7 @@ function zbozi_xml_feed_zobrazeni() {
             }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $varianta ) ); 
-            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data );
             if ( $viditelne_vlastnosti_varianta ) {
               foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
                 $xmlWriter->startElement( 'PARAM' );  
@@ -1294,7 +1337,7 @@ function zbozi_xml_feed_zobrazeni() {
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $produkt ) );
-          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
               $xmlWriter->startElement( 'PARAM' ); 
@@ -1397,7 +1440,7 @@ function zbozi_xml_feed_aktualizace() {
   $xmlWriter->writeAttribute( 'xmlns', 'http://www.zbozi.cz/ns/offer/1.0' );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
   $pocet_produkt = 0;
   $prubezny_pocet = 0;
 
@@ -1475,7 +1518,7 @@ function zbozi_xml_feed_aktualizace() {
             }
             $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba );
             $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $varianta ) );
-            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_varianta );
+            $viditelne_vlastnosti_varianta = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data );
             if ( $viditelne_vlastnosti_varianta ) {
               foreach ( $viditelne_vlastnosti_varianta as $vlastnost_varianta ) {
                 $xmlWriter->startElement( 'PARAM' );  
@@ -1550,7 +1593,7 @@ function zbozi_xml_feed_aktualizace() {
           }
           $xmlWriter->writeElement( 'DELIVERY_DATE', $dodaci_doba ); // Doplnit nastavení produktů...
           $xmlWriter->writeElement( 'PRICE_VAT', ceske_sluzby_xml_ziskat_cenu( $produkt ) );
-          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $vlastnosti_produkt );
+          $viditelne_vlastnosti_produkt = ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data );
           if ( $viditelne_vlastnosti_produkt ) {
             foreach ( $viditelne_vlastnosti_produkt as $vlastnost_produkt ) {
               $xmlWriter->startElement( 'PARAM' ); 
@@ -1612,7 +1655,7 @@ function google_xml_feed_zobrazeni() {
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], $custom_labels_array );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
   $nazev_webu = get_bloginfo();
 
   $xmlWriter = new XMLWriter();
@@ -1878,7 +1921,7 @@ function pricemania_xml_feed_aktualizace() {
 
   wp_schedule_single_event( current_time( 'timestamp', 1 ) + ( 3 * MINUTE_IN_SECONDS ), 'ceske_sluzby_pricemania_aktualizace_xml_batch' );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
-  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta( $global_data['podpora_vyrobcu'], false );
+  $dostupna_postmeta = ceske_sluzby_xml_ziskat_dostupna_postmeta();
 
   foreach ( $products as $product_id ) {
 
