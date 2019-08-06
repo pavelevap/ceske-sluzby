@@ -304,7 +304,11 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
           }
           if ( $zobrazeni == 'before_add_to_cart_form' ) {
             add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodaci_dobu_akce' );
-            add_filter( 'woocommerce_stock_html', 'ceske_sluzby_nahradit_zobrazeny_text', 10, 3 );
+            if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+              add_filter( 'woocommerce_stock_html', 'ceske_sluzby_nahradit_zobrazeny_text_deprecated', 10, 3 );
+            } else {
+              add_filter( 'woocommerce_get_stock_html', 'ceske_sluzby_nahradit_zobrazeny_text', 10, 2 );
+            }
             add_action( 'woocommerce_before_add_to_cart_form', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_akce' );
             add_filter( 'woocommerce_available_variation', 'ceske_sluzby_zobrazit_dodatecnou_dodaci_dobu_filtr', 10, 3 );
           }
@@ -1233,7 +1237,7 @@ function ceske_sluzby_zobrazit_dodaci_dobu_filtr( $availability, $product ) {
     return $availability;
   }
   if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
-    $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), false );
+    $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity() );
     if ( ! empty ( $dostupnost ) ) {
       return $dostupnost;
     }
@@ -1269,8 +1273,8 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
   }
   $availability = $product->get_availability();
   if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
-    $format = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), true );
-    echo $format;
+    $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity() );
+    echo '<p class="skladem-' . $dostupnost['class']. '">' . $dostupnost['availability'] . '</p>';
     return;
   }
   $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, false );
@@ -1280,7 +1284,11 @@ function ceske_sluzby_zobrazit_dodaci_dobu_akce() {
   }
 }
 
-function ceske_sluzby_nahradit_zobrazeny_text( $html, $availability, $product ) {
+function ceske_sluzby_nahradit_zobrazeny_text_deprecated( $html, $availability, $product ) {
+  ceske_sluzby_nahradit_zobrazeny_text( $html, $product );
+}
+
+function ceske_sluzby_nahradit_zobrazeny_text( $html, $product ) {
   if ( get_class( $product ) == "WC_Product_Simple" ) {
     $html = "";
   }
@@ -1299,7 +1307,9 @@ function ceske_sluzby_nahradit_zobrazeny_text( $html, $availability, $product ) 
       return $html;
     }
     if ( $product->managing_stock() && (int)$product->get_stock_quantity() > 0 ) {
-      $html = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity(), true );
+      $availability = $product->get_availability();
+      $dostupnost = ceske_sluzby_ziskat_interval_pocet_skladem( $availability, (int)$product->get_stock_quantity() );
+      $html = '<p class="skladem-' . $dostupnost['class']. '">' . $dostupnost['availability'] . '</p>';
       return $html;
     }
     $dostupnost = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, false );

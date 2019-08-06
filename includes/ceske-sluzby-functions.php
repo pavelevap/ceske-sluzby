@@ -97,7 +97,7 @@ function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_d
   return $availability;
 }
 
-function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi, $format ) {
+function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi ) {
   $dostupnost = array();
   $actual_pocet_skladem = $mnozstvi;
   $pocet_skladem = ceske_sluzby_zpracovat_pocet_skladem( $mnozstvi );
@@ -112,11 +112,13 @@ function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi, $
     }
   }
   if ( ! empty ( $dostupnost ) ) {
-    if ( $format ) {
-      $availability = '<p class="skladem-' . $dostupnost['value']. '">' . $dostupnost['text'] . '</p>'; // A co možnost nastavení vlastního formátu?
-    } else {
-      $availability['class'] .= ' skladem-' . $dostupnost['value'];
-      $availability['availability'] = $dostupnost['text'];
+    $availability['class'] .= ' skladem-' . $dostupnost['value'];
+    $availability['availability'] = $dostupnost['text'];
+  } else {
+    $skladem = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 0 );
+    if ( ! empty ( $skladem ) ) {
+      $availability['class'] .= ' skladem-' . $skladem['value'];
+      $availability['availability'] = $skladem['text'];
     }
   }
   return $availability;
