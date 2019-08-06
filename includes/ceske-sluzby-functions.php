@@ -113,7 +113,7 @@ function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi, $
   }
   if ( ! empty ( $dostupnost ) ) {
     if ( $format ) {
-      $availability = '<p class=skladem-' . $dostupnost['value']. '">' . $dostupnost['text'] . '</p>'; // A co možnost nastavení vlastního formátu?
+      $availability = '<p class="skladem-' . $dostupnost['value']. '">' . $dostupnost['text'] . '</p>'; // A co možnost nastavení vlastního formátu?
     } else {
       $availability['class'] .= ' skladem-' . $dostupnost['value'];
       $availability['availability'] = $dostupnost['text'];
@@ -131,10 +131,10 @@ function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
         $format = str_replace( '{' . $key . '}', $value, $format );
       }
     } else {
-      $format = '<p class=dodaci-doba">' . $availability['text'] . '</p>';
+      $format = '<p class="dodaci-doba">' . $availability['text'] . '</p>';
     }
   } else {
-    $format = '<p class=dodaci-doba">' . $availability . '</p>';
+    $format = '<p class="dodaci-doba">' . $availability . '</p>';
   }
   return $format;
 }
@@ -204,7 +204,7 @@ function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
             $dostupnost = str_replace( '{' . $key . '}', $value, $format );
           }
         } else {
-          $dostupnost = '<p class=predobjednavka">Předobjednávka: ' . $predobjednavka . '</p>';
+          $dostupnost = '<p class="predobjednavka">Předobjednávka: ' . $predobjednavka . '</p>';
         }
       } else {
         $dostupnost = 'Předobjednávka: ' . $predobjednavka;
