@@ -663,7 +663,10 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'XML feed',
           'type' => 'title',
-          'desc' => 'Zde budou postupně přidávána další nastavení.',
+          'desc' => 'Pro každý XML feed existuje příslušná URL adresa podle jeho názvu: <code>' . site_url() . '/?feed=NAZEV</code>, kde <code>NAZEV</code> může nabývat hodnoty <code>heureka</code>, <code>zbozi</code>, <code>google</code> či <code>glami</code>.
+                     Pro větší eshopy je vhodné aktivovat a používat feed v podobě <code>.xml</code> souboru: <code>' . site_url() . '/wp-content/NAZEV.xml</code>.
+                     Pokud chcete otestovat jen část produktů, tak můžete použít parametr <code>limit</code>, např. <code>' . site_url() . '/?feed=heureka&limit=10</code> zobrazí 10 nejnovějších produktů v podobě XML feedu pro Heureka.cz.
+                     Otestovat můžete i jednotlivé produkty (konkrétní odkaz je dostupný vždy z administrace u každého produktu), stačí použít parametr <code>pid</code>, např. <code>' . site_url() . '/?feed=zbozi&pid=123</code> zobrazí produkt s ID = 123 v podobě feedu pro Zboží.cz.',
           'id' => 'wc_ceske_sluzby_xml_feed_title'
         ),
         array(

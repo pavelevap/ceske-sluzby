@@ -119,7 +119,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_heureka == "yes" ) {
       echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>)</div>';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=heureka&pid=' . $post->ID . '">XML produktu</a>)</div>';
       if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{PRODUCTNAME}' ) !== false ) {
         woocommerce_wp_text_input(
           array( 
@@ -168,7 +168,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_zbozi == "yes" ) {
       echo '<div class="options_group">';
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=zbozi&pid=' . $post->ID . '">XML produktu</a>)</div>';
       if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{PRODUCTNAME}' ) !== false ) {
         woocommerce_wp_text_input(
           array( 
@@ -253,7 +253,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_glami == "yes" ) {
       echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">obecný manuál</a>)</div>';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=glami&pid=' . $post->ID . '">XML produktu</a>)</div>';
       $kategorie_glami = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );

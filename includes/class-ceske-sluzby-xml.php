@@ -1,5 +1,17 @@
 <?php
 function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
+  if ( ! empty( $_GET ) ) {
+    if ( array_key_exists( 'limit', $_GET ) && ! $limit && $_GET['limit'] > 0 ) {
+      $limit = $_GET['limit'] + 1;
+    }
+    if ( array_key_exists( 'pid', $_GET ) && $_GET['pid'] > 0 ) {
+      $args = array();
+      $args['p'] = $_GET['pid'];
+      $args['fields'] = 'ids';
+      $args['post_type'] = 'product';
+      return $args;
+    }
+  }
   $kategorie = ceske_sluzby_xml_ziskat_vynechane_kategorie();
   $args = array(
     'post_type' => 'product',
@@ -737,22 +749,14 @@ function xml_feed_nastaveni( $feed ) {
   return $settings[$feed];
 }
 
-function heureka_xml_feed_nastaveni() {
-  $settings = xml_feed_nastaveni( 'heureka' );
-  xml_feed_zobrazeni( $settings );
-}
-
-function glami_xml_feed_nastaveni() {
-  $settings = xml_feed_nastaveni( 'glami' );
-  xml_feed_zobrazeni( $settings );
-}
-
 function xml_feed_aktualizace_nastaveni( $feed ) {
   $settings = xml_feed_nastaveni( $feed );
   xml_feed_aktualizace( $settings, $feed );
 }
 
-function xml_feed_zobrazeni( $settings ) {
+function xml_feed_zobrazeni() {
+  $feed = get_query_var( 'feed' );
+  $settings = xml_feed_nastaveni( $feed );
   // http://codeinthehole.com/writing/creating-large-xml-files-with-php/
   $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
   $products = get_posts( $args );

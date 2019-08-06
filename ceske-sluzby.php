@@ -574,8 +574,8 @@ function ceske_sluzby_aktivace_xml_feed() {
   $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
   if ( $aktivace_xml == "yes" ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-xml.php';
-    add_feed( 'heureka', 'heureka_xml_feed_nastaveni' );
-    add_feed( 'glami', 'glami_xml_feed_nastaveni' );
+    add_feed( 'heureka', 'xml_feed_zobrazeni' );
+    add_feed( 'glami', 'xml_feed_zobrazeni' );
     add_feed( 'zbozi', 'zbozi_xml_feed_zobrazeni' );
     add_feed( 'google', 'google_xml_feed_zobrazeni' );
 
