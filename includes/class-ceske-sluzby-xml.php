@@ -1,17 +1,5 @@
 <?php
 function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
-  if ( ! empty( $_GET ) ) {
-    if ( array_key_exists( 'limit', $_GET ) && ! $limit && $_GET['limit'] > 0 ) {
-      $limit = $_GET['limit'] + 1;
-    }
-    if ( array_key_exists( 'pid', $_GET ) && $_GET['pid'] > 0 ) {
-      $args = array();
-      $args['p'] = $_GET['pid'];
-      $args['fields'] = 'ids';
-      $args['post_type'] = 'product';
-      return $args;
-    }
-  }
   $kategorie = ceske_sluzby_xml_ziskat_vynechane_kategorie();
   $args = array(
     'post_type' => 'product',
@@ -46,6 +34,14 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
       'terms' => array( 'exclude-from-search', 'exclude-from-catalog' ),
       'operator' => 'NOT IN'
     );
+  }
+  if ( ! empty( $_GET ) ) {
+    if ( array_key_exists( 'limit', $_GET ) && ! $limit && $_GET['limit'] > 0 ) {
+      $limit = $_GET['limit'];
+    }
+    if ( array_key_exists( 'pid', $_GET ) && $_GET['pid'] > 0 ) {
+      $args['p'] = $_GET['pid'];
+    }
   }
   if ( $limit ) {
     $args['posts_per_page'] = $limit;
