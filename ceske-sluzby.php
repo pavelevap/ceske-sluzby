@@ -351,7 +351,12 @@ function ceske_sluzby_ulozenka_zobrazit_pobocky() {
   if ( is_ajax() ) {
     // Do budoucna možná použít spíše woocommerce_checkout_update_order_review
     $ulozenka_branches = '';
-    parse_str( $_POST['post_data'] );
+    if ( isset( $_POST['post_data'] ) ) {
+      parse_str( $_POST['post_data'], $post_data );
+      if ( isset( $post_data['ulozenka_branches'] ) ) {
+        $ulozenka_branches = $post_data['ulozenka_branches'];
+      }
+    }
     $available_shipping = WC()->shipping->load_shipping_methods();
     $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
     $settings = array();
@@ -465,7 +470,12 @@ function ceske_sluzby_doprava_dpd_parcelshop( $methods ) {
 function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
   if ( is_ajax() ) {
     $dpd_parcelshop_branches = '';
-    parse_str( $_POST['post_data'] );
+    if ( isset( $_POST['post_data'] ) ) {
+      parse_str( $_POST['post_data'], $post_data );
+      if ( isset( $post_data['dpd_parcelshop_branches'] ) ) {
+        $dpd_parcelshop_branches = $post_data['dpd_parcelshop_branches'];
+      }
+    }
     $available_shipping = WC()->shipping->load_shipping_methods();
     $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
     $settings = array();
