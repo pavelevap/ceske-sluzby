@@ -51,7 +51,7 @@ function ceske_sluzby_xml_zpracovat_parametry( $parametry_hodnoty ) {
     foreach ( $parametry_tmp as $parametr_hodnota ) {
       $rozdeleno = explode( "|", $parametr_hodnota );
       if ( ! empty ( $rozdeleno ) ) {
-        if ( ( $rozdeleno[0] == "-" && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "+" && count( $rozdeleno ) == 3 ) ) {
+        if ( ( mb_strlen( $rozdeleno[0] ) > 1 && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "-" && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "+" && count( $rozdeleno ) == 3 ) ) {
           $parametry_array[$i] = $rozdeleno;
           $i = $i + 1;
         }

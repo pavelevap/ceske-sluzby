@@ -739,10 +739,11 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
                      Pro <strong>názvy produktů</strong> je ve výchozím nastavení automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}</code>, což je název doplněný o přiřazené (viditelné) vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie.
                      Pro <strong>názvy variant</strong> je ve výchozím nastavení automaticky použita hodnota <code>{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}</code>, což je název doplněný o přiřazené vlastnosti variant, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie.
                      Pro názvy i parametry je možné použít další dostupné hodnoty, např. <code>{MANUFACTURER}</code>, konkrétní vlastnosti, např. <code>{pa_barva}</code>, položky taxonomií i včetně jejich metadat, např. <code>{product_cat:meta}</code> nebo uživatelská pole. Pro označení hodnoty se používají složené závorky a pokud je vynecháte, tak to bude považováno za jednoduchý text.
-                     Pro <strong>parametry</strong> musí být na každém řádku nejdříve uvedeno znaménko (<code>+</code> pro přidání, <code>-</code> pro odebrání), následované názvem a hodnotou parametru, vše oddělené pomocí znaků <code>|</code>.
+                     Pro <strong>změnu parametrů</strong> musí být na každém řádku nejdříve uvedeno znaménko (<code>+</code> pro přidání, <code>-</code> pro odebrání), následované názvem a hodnotou parametru, vše oddělené pomocí znaků <code>|</code>.
                      Příklad: <code>+|Barva|{pa_barva}</code>.
                      Do XML feedu bude automaticky doplněn parametr <code>PARAM</code> s názvem Barva, který bude u jednotlivých produktů nabývat hodnoty na základě přiřazené vlastnosti v podobě taxonomie <code>pa_barva</code>.
-                     Pokud jste ale nějaký parametr Barva už ve feedu měli a chcete se ho zbavit, tak stačí použít na samostatném řádku zápis <code>-|Barva</code>.',
+                     Pokud jste ale nějaký parametr Barva už ve feedu měli a chcete se ho zbavit, tak stačí použít na samostatném řádku zápis <code>-|Barva</code>.
+                     Parametry je možné i přejmenovat, a to vynecháním úvodního znaménka, např. <code>color|Barva</code>.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nastaveni_title'
         ),
         array(

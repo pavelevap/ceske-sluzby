@@ -681,6 +681,12 @@ function ceske_sluzby_xml_ziskat_pouze_viditelne_vlastnosti( $product_id, $vlast
           unset( $viditelne_vlastnosti_produkt[$hledat] );
         }
       }
+      if ( mb_strlen( $parametr[0] ) > 1 && ! empty( $viditelne_vlastnosti_produkt ) ) {
+        $hledat = array_search( $parametr[0], array_column( $viditelne_vlastnosti_produkt, 'nazev' ) );
+        if ( $hledat !== false && array_key_exists( $hledat, $viditelne_vlastnosti_produkt ) ) {
+          $viditelne_vlastnosti_produkt[$hledat]['nazev'] = $parametr[1];
+        }
+      }
       if ( $parametr[0] == "+" ) {
         if ( substr( $parametr[2], 0, 1 ) == "{" && substr( $parametr[2], -1 ) == "}" ) {
           $parametr[2] = str_replace( array( "{", "}" ), "", $parametr[2] );
