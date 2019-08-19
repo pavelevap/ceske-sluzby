@@ -297,15 +297,16 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
 
     if ( $aktivace_dodaci_doby == "yes" ) {
-      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+      $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
       $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
-      if ( ! empty( $dodaci_doba ) || $predobjednavka == "yes" ) {
+      if ( ! empty( $dodaci_doba_dropdown ) || $predobjednavka == "yes" ) {
         echo '</div>';
         echo '<div class="options_group">';
         echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>České služby</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastavení dodací doby</a>)</div>';
       }
 
-      if ( ! empty( $dodaci_doba ) ) {
+      if ( ! empty( $dodaci_doba_dropdown ) ) {
         $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
         if ( ! empty( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
           if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
@@ -319,7 +320,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
             'id' => 'ceske_sluzby_dodaci_doba', 
             'label' => 'Dodací doba',
             'description' => 'Zvolte dodací dobu pro konkrétní produkt.' . $global_dodaci_doba_text,
-            'options' => $dodaci_doba
+            'options' => $dodaci_doba_dropdown
           )
         );
       }

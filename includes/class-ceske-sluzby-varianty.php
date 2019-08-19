@@ -27,8 +27,8 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
 
   $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
   if ( $aktivace_dodaci_doby == "yes" ) {
-    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
-    if ( ! empty( $dodaci_doba ) ) {
+    $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+    if ( ! empty( $dodaci_doba_dropdown ) ) {
       if ( empty( $class ) ) {
         $class = "first";
       } else {
@@ -41,7 +41,7 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
         'wrapper_class' => 'form-row form-row-' . $class,
         'style' => 'width: 91%',
         'value' => get_post_meta( $variation->ID, 'ceske_sluzby_dodaci_doba', true ),
-        'options' => $dodaci_doba
+        'options' => $dodaci_doba_dropdown
       );
       if ( version_compare( WOOCOMMERCE_VERSION, '2.5', '>=' ) ) {
         $params = array( 'desc_tip' => 'true' ) + $params;

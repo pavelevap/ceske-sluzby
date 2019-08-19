@@ -15,7 +15,7 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
       if ( is_numeric( $rozdeleno[0] ) ) {
         if ( $dropdown && in_array( $rozdeleno[0], array( 0, 98, 99 ) ) ) {
           $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-          if ( $global_dodaci_doba == $rozdeleno[0] ) {
+          if ( $global_dodaci_doba == 0 || in_array( $rozdeleno[0], array( 98, 99 ) ) ) {
             continue;
           }
         }
