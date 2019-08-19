@@ -12,7 +12,7 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
   if ( empty( $podpora_ean ) ) {
     $class = "first";
     $params = array( 
-      'id' => "ceske_sluzby_hodnota_ean[{$loop}]",
+      'id' => "ceske_sluzby_hodnota_ean_variation[{$loop}]",
       'label' => 'EAN kód', 
       'description' => 'Zadejte hodnotu EAN.',
       'wrapper_class' => 'form-row form-row-' . $class,
@@ -35,7 +35,7 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
         $class = "last";
       }
       $params = array( 
-        'id' => "ceske_sluzby_dodaci_doba[{$loop}]",
+        'id' => "ceske_sluzby_dodaci_doba_variation[{$loop}]",
         'label' => 'Dodací doba', 
         'description' => 'Dostupnost pro jednotlivé varianty.',
         'wrapper_class' => 'form-row form-row-' . $class,
@@ -53,8 +53,8 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
 
 add_action( 'woocommerce_save_product_variation', 'ceske_sluzby_save_variation_settings_fields', 10, 2 );
 function ceske_sluzby_save_variation_settings_fields( $variation_id, $i ) {
-  if ( isset( $_POST['ceske_sluzby_dodaci_doba'] ) ) {
-    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'][$i];
+  if ( isset( $_POST['ceske_sluzby_dodaci_doba_variation'] ) ) {
+    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba_variation'][$i];
     $dodaci_doba_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', true );
     if ( ! empty( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
       update_post_meta( $variation_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
@@ -63,8 +63,8 @@ function ceske_sluzby_save_variation_settings_fields( $variation_id, $i ) {
     }
   }
 
-  if ( isset( $_POST['ceske_sluzby_hodnota_ean'] ) ) {
-    $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean'][$i];
+  if ( isset( $_POST['ceske_sluzby_hodnota_ean_variation'] ) ) {
+    $hodnota_ean = $_POST['ceske_sluzby_hodnota_ean_variation'][$i];
     $hodnota_ean_ulozeno = get_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', true );
     if ( ! empty( $hodnota_ean ) ) {
       update_post_meta( $variation_id, 'ceske_sluzby_hodnota_ean', $hodnota_ean );
