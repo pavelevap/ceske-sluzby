@@ -1421,22 +1421,26 @@ function ceske_sluzby_automaticky_ziskat_uctenku( $order_id ) {
 function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
   $zaokrouhlovani = zkontrolovat_nastavenou_hodnotu( '', array( 'wc_ceske_sluzby_nastaveni_pokladna' ), 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni', 'zaokrouhlovani', 'ceske_sluzby_zaokrouhleni' );
   if ( $zaokrouhlovani == 'nahoru' ) {
-    $dalsi_poplatky = $cart->fees;
-    $cart->calculate_fees();
-    if ( ! empty( $dalsi_poplatky ) ) {
-      foreach ( $dalsi_poplatky as $poplatek ) {
-        if ( $poplatek->taxable ) {
-          $id_sazby = key( $poplatek->tax_data );
-          if ( array_key_exists( $id_sazby, $cart->taxes ) )  {
-            $cart->taxes[$id_sazby] = $cart->taxes[$id_sazby] - $poplatek->tax;
+    if ( version_compare( WC_VERSION, '3.2', '<' ) ) {
+      $dalsi_poplatky = is_callable( array( $cart, 'get_fees' ) ) ? $cart->get_fees() : $cart->fees;
+      $cart->calculate_fees();
+      if ( ! empty( $dalsi_poplatky ) ) {
+        foreach ( $dalsi_poplatky as $poplatek ) {
+          if ( $poplatek->taxable ) {
+            $id_sazby = key( $poplatek->tax_data );
+            if ( array_key_exists( $id_sazby, $cart->taxes ) )  {
+              $cart->taxes[$id_sazby] = $cart->taxes[$id_sazby] - $poplatek->tax;
+            }
           }
         }
       }
-    }
-    if ( $cart->round_at_subtotal && wc_tax_enabled() ) {
-      $cart->tax_total = WC_Tax::get_tax_total( $cart->taxes );
+      if ( $cart->round_at_subtotal && wc_tax_enabled() ) {
+        $cart->tax_total = WC_Tax::get_tax_total( $cart->taxes );
+      } else {
+        $cart->tax_total = array_sum( $cart->taxes );
+      }
     } else {
-      $cart->tax_total = array_sum( $cart->taxes );
+      new WC_Cart_Totals( $cart );
     }
   }
 }
@@ -1456,9 +1460,11 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
     }
     if ( wc_tax_enabled() ) {
       $dane = true;
-      foreach ( $cart->taxes as $rate_id => $tax_rate ) {
-        if ( array_key_exists( $rate_id, $cart->shipping_taxes ) ) {
-          $tax_rate = $tax_rate + $cart->shipping_taxes[$rate_id];
+      $cart_taxes = is_callable( array( $cart, 'get_cart_contents_taxes' ) ) ? $cart->get_cart_contents_taxes() : $cart->taxes;
+      foreach ( $cart_taxes as $rate_id => $tax_rate ) {
+        $shipping_taxes = is_callable( array( $cart, 'get_shipping_taxes' ) ) ? $cart->get_shipping_taxes() : $cart->shipping_taxes;
+        if ( array_key_exists( $rate_id, $shipping_taxes ) ) {
+          $tax_rate = $tax_rate + $shipping_taxes[$rate_id];
         }
         $kompletni_dane[$rate_id] = $tax_rate;
       }
@@ -1482,7 +1488,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
         $dan_poplatek = WC_Tax::calc_tax( $poplatek, $tax_rates, true );
         $poplatek_celkem = $poplatek - reset( $dan_poplatek );
       }
-    }  
+    }
     $cart->add_fee( $nazev_poplatku, $poplatek_celkem, $dane, $tax_class );
   }
   if ( $cart->total > 0 && $decimals > 0 ) {
@@ -1493,9 +1499,11 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
       $zao = $zao_total;
       if ( wc_tax_enabled() ) {
         $dane = true;
-        foreach ( $cart->taxes as $rate_id => $tax_rate ) {
-          if ( array_key_exists( $rate_id, $cart->shipping_taxes ) ) {
-            $tax_rate = $tax_rate + $cart->shipping_taxes[$rate_id];
+        $cart_taxes = is_callable( array( $cart, 'get_cart_contents_taxes' ) ) ? $cart->get_cart_contents_taxes() : $cart->taxes;
+        foreach ( $cart_taxes as $rate_id => $tax_rate ) {
+          $shipping_taxes = is_callable( array( $cart, 'get_shipping_taxes' ) ) ? $cart->get_shipping_taxes() : $cart->shipping_taxes;
+          if ( array_key_exists( $rate_id, $shipping_taxes ) ) {
+            $tax_rate = $tax_rate + $shipping_taxes[$rate_id];
           }
           $kompletni_dane[$rate_id] = $tax_rate;
         }
@@ -1518,8 +1526,10 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
         $zao_taxes = WC_Tax::calc_tax( $zao_total, $tax_rates, true );
         $zao = $zao_total - reset( $zao_taxes );
       }
-      $cart->add_fee( 'Zaokrouhlení', $zao, $dane, $tax_class );
-      $cart->total += $zao_total;
+      if ( $zao > 0 ) {
+        $cart->add_fee( 'Zaokrouhlení', $zao, $dane, $tax_class );
+        $cart->total += $zao_total;
+      }
     }
   }
 }
