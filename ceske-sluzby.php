@@ -1445,6 +1445,41 @@ function ceske_sluzby_spustit_zaokrouhlovani( $cart ) {
   }
 }
 
+function ceske_sluzby_zaokrouhlovani_poplatek_dane( $cart ) {
+  $taxes['tax_class'] = '';
+  $taxes['tax_rates'] = array();
+  $shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+  if ( ( version_compare( WC_VERSION, '3.0', '<' ) && $shipping_tax_class == '' ) || ( version_compare( WC_VERSION, '3.0', '=>' ) && $shipping_tax_class == 'inherit' ) ) {
+    $cart_taxes = is_callable( array( $cart, 'get_cart_contents_taxes' ) ) ? $cart->get_cart_contents_taxes() : $cart->taxes;
+    foreach ( $cart_taxes as $rate_id => $tax_rate ) {
+      $shipping_taxes = is_callable( array( $cart, 'get_shipping_taxes' ) ) ? $cart->get_shipping_taxes() : $cart->shipping_taxes;
+      if ( array_key_exists( $rate_id, $shipping_taxes ) ) {
+        $tax_rate = $tax_rate + $shipping_taxes[$rate_id];
+      }
+      $kompletni_dane[$rate_id] = $tax_rate;
+    }
+    if ( ! empty( $kompletni_dane ) && is_array( $kompletni_dane ) ) {
+      $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
+      if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
+        foreach ( $max_dan as $rate_id ) {
+          $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
+          $tax_rates_tmp = WC_Tax::get_rates( $tax_class_tmp );
+          $sazba_tmp = $tax_rates_tmp[$rate_id]['rate'];
+          if ( $sazba_tmp >= 0 ) {
+            $taxes['tax_rates'] = $tax_rates_tmp;
+            $taxes['tax_class'] = $tax_class_tmp;
+          }
+        }
+      }
+    }
+  }
+  else {
+    $taxes['tax_rates'] = WC_Tax::get_rates( $shipping_tax_class );
+    $taxes['tax_class'] = $shipping_tax_class;  
+  }
+  return $taxes;
+}
+
 function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
   $dane = false;
   $tax_class = '';
@@ -1460,32 +1495,11 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
     }
     if ( wc_tax_enabled() ) {
       $dane = true;
-      $cart_taxes = is_callable( array( $cart, 'get_cart_contents_taxes' ) ) ? $cart->get_cart_contents_taxes() : $cart->taxes;
-      foreach ( $cart_taxes as $rate_id => $tax_rate ) {
-        $shipping_taxes = is_callable( array( $cart, 'get_shipping_taxes' ) ) ? $cart->get_shipping_taxes() : $cart->shipping_taxes;
-        if ( array_key_exists( $rate_id, $shipping_taxes ) ) {
-          $tax_rate = $tax_rate + $shipping_taxes[$rate_id];
-        }
-        $kompletni_dane[$rate_id] = $tax_rate;
-      }
-      $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
-      $sazba = 0;
-      $tax_rates = array();
-      if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
-        foreach ( $max_dan as $rate_id ) {
-          $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
-          $tax_rates_tmp = WC_Tax::get_rates( $tax_class_tmp );
-          $sazba_tmp = $tax_rates_tmp[$rate_id]['rate'];
-          if ( $sazba_tmp >= $sazba ) {
-            $sazba = $sazba_tmp;
-            $tax_rates = $tax_rates_tmp;
-            $tax_class = $tax_class_tmp;
-          }
-        }
-      }
+      $taxes = ceske_sluzby_zaokrouhlovani_poplatek_dane( $cart );
+      $tax_class = $taxes['tax_class'];
       $cena_dan = get_option( 'woocommerce_prices_include_tax' );
       if ( $cena_dan == 'yes' ) {
-        $dan_poplatek = WC_Tax::calc_tax( $poplatek, $tax_rates, true );
+        $dan_poplatek = WC_Tax::calc_tax( $poplatek, $taxes['tax_rates'], true );
         $poplatek_celkem = $poplatek - reset( $dan_poplatek );
       }
     }
@@ -1499,31 +1513,9 @@ function ceske_sluzby_zaokrouhlovani_poplatek( $cart ) {
       $zao = $zao_total;
       if ( wc_tax_enabled() ) {
         $dane = true;
-        $cart_taxes = is_callable( array( $cart, 'get_cart_contents_taxes' ) ) ? $cart->get_cart_contents_taxes() : $cart->taxes;
-        foreach ( $cart_taxes as $rate_id => $tax_rate ) {
-          $shipping_taxes = is_callable( array( $cart, 'get_shipping_taxes' ) ) ? $cart->get_shipping_taxes() : $cart->shipping_taxes;
-          if ( array_key_exists( $rate_id, $shipping_taxes ) ) {
-            $tax_rate = $tax_rate + $shipping_taxes[$rate_id];
-          }
-          $kompletni_dane[$rate_id] = $tax_rate;
-        }
-        $max_dan = array_keys( $kompletni_dane, max( $kompletni_dane ) );
-        $sazba = 0;
-        $tax_rates = array();
-        $tax_class = '';
-        if ( ! empty( $max_dan ) && is_array( $max_dan ) ) {
-          foreach ( $max_dan as $rate_id ) {
-            $tax_class_tmp = wc_get_tax_class_by_tax_id( $rate_id );
-            $tax_rates_tmp = WC_Tax::get_rates( $tax_class_tmp );
-            $sazba_tmp = $tax_rates_tmp[$rate_id]['rate'];
-            if ( $sazba_tmp >= $sazba ) {
-              $sazba = $sazba_tmp;
-              $tax_rates = $tax_rates_tmp;
-              $tax_class = $tax_class_tmp;
-            }
-          }
-        }
-        $zao_taxes = WC_Tax::calc_tax( $zao_total, $tax_rates, true );
+        $taxes = ceske_sluzby_zaokrouhlovani_poplatek_dane( $cart );
+        $tax_class = $taxes['tax_class'];
+        $zao_taxes = WC_Tax::calc_tax( $zao_total, $taxes['tax_rates'], true );
         $zao = $zao_total - reset( $zao_taxes );
       }
       if ( $zao > 0 ) {

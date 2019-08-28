@@ -625,7 +625,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
         ),
         array(
-          'title' => 'Poplatek za platbu',
+          'title' => 'Poplatek za platbu (Kč)',
           'type' => 'text',
           'desc' => 'Doplňkový poplatek k objednávce je možné upřesnit podle konkrétní platební metody či v kombinaci se způsobem dopravy.',
           'id' => 'wc_ceske_sluzby_doprava_poplatek_platba'
