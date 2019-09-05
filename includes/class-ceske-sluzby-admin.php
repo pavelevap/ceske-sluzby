@@ -717,6 +717,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 250px',
         ),
         array(
+          'title' => 'Podpora dárků',
+          'type' => 'text',
+          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text pro element <code>GIFT</code>. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_darku',
+          'css' => 'width: 250px',
+        ),
+        array(
           'title' => 'Stav produktů',
           'type' => 'select',
           'desc_tip' => 'Zvolte stav produktů, který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu).',

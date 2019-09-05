@@ -736,6 +736,7 @@ function ceske_sluzby_xml_ziskat_globalni_hodnoty() {
     'vlastni_dodaci_doba' => get_option( 'wc_ceske_sluzby_dodaci_doba_vlastni_reseni' ),
     'podpora_ean' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' ),
     'podpora_vyrobcu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_vyrobcu' ),
+    'podpora_darku' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_darku' ),
     'stav_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_stav_produktu' ),
     'nazev_produktu' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu' ),
     'nazev_variant' => get_option( 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant' ),

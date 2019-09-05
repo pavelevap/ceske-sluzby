@@ -469,6 +469,17 @@ function ceske_sluzby_xml_priradit_dodaci_dobu_produktu( $value ) {
   $dodaci_doba = array_search( $value, $schema );
   return $dodaci_doba;
 }
+
+function ceske_sluzby_xml_zpracovat_hodnotu_darku( $value, $global_data ) {
+  if ( $global_data['podpora_darku'] == 'ang_gift_gifts' ) {
+    // Plugin: ang-fgbproduct
+    if ( is_numeric( $value ) ) {
+      $post = get_post( $value );
+      $darek = $post->post_title;
+    }
+  }
+  return $darek;
+}
       
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
   $dodaci_doba_item = "";
@@ -765,6 +776,7 @@ function xml_feed_nastaveni( $feed ) {
   $settings['heureka']['nazev_variant'] = '{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}';
   $settings['heureka']['kategorie']['produkt'] = 'ceske_sluzby_xml_heureka_kategorie';
   $settings['heureka']['kategorie']['kategorie'] = 'ceske-sluzby-xml-heureka-kategorie';
+  $settings['heureka']['gift']['element'] = 'GIFT';
   $settings['glami']['dodaci_doba']['predbezna_objednavka'] = false;
   $settings['glami']['dodaci_doba']['neni_skladem'] = false;
   $settings['glami']['sku']['element'] = 'PRODUCTNO';
@@ -774,6 +786,7 @@ function xml_feed_nastaveni( $feed ) {
   $settings['glami']['nazev_variant'] = '{PRODUCTNAME} | {KATEGORIE} | {NAZEV}';
   $settings['glami']['kategorie']['produkt'] = 'ceske_sluzby_xml_glami_kategorie';
   $settings['glami']['kategorie']['kategorie'] = 'ceske-sluzby-xml-glami-kategorie';
+  $settings['glami']['gift']['element'] = false;
   return $settings[$feed];
 }
 
@@ -817,6 +830,7 @@ function xml_feed_zobrazeni() {
     $cpc = get_post_meta( $product_id, 'ceske_sluzby_xml_glami_cpc', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, false, $global_data['zkracene_zapisy'] );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
+    $darek_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_darku'], true );
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
@@ -840,6 +854,10 @@ function xml_feed_zobrazeni() {
             $vlastnosti_varianta = $vlastnosti_varianta_only;
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
+          $darek_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $variation['variation_id'], $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_darku'], true );
+          if ( empty( $darek_varianta ) && ( ! empty( $darek_produkt ) ) ) {
+            $darek_varianta = $darek_produkt;
+          }
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
           $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post_data->post_title, $feed_data );
 
@@ -863,6 +881,11 @@ function xml_feed_zobrazeni() {
           }
           if ( ! empty( $vyrobce_varianta ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_varianta );
+          }
+          if ( ! empty( $settings['gift']['element'] ) && ! empty( $darek_varianta ) ) {
+            foreach ( (array)$darek_varianta as $darek ) {
+              $xmlWriter->writeElement( 'GIFT', ceske_sluzby_xml_zpracovat_hodnotu_darku( $darek, $global_data ) );
+            }
           }
           if ( ! empty( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -924,6 +947,11 @@ function xml_feed_zobrazeni() {
           }
           if ( ! empty( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_produkt );
+          }
+          if ( ! empty( $settings['gift']['element'] ) && ! empty( $darek_produkt ) ) {
+            foreach ( (array)$darek_produkt as $darek ) {
+              $xmlWriter->writeElement( 'GIFT', ceske_sluzby_xml_zpracovat_hodnotu_darku( $darek, $global_data ) );
+            }
           }
           if ( ! empty( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -1048,6 +1076,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
     $cpc = get_post_meta( $product_id, 'ceske_sluzby_xml_glami_cpc', true );
     $popis_produkt = ceske_sluzby_xml_ziskat_popis_produktu( $post_data->post_excerpt, $post_data->post_content, false, $global_data['zkracene_zapisy'] );
     $vyrobce_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
+    $darek_produkt = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, $dostupna_postmeta, $global_data['podpora_darku'], true );
     $feed_data['MANUFACTURER'] = $vyrobce_produkt;
     $stav_produkt = ceske_sluzby_xml_ziskat_stav_produktu( $product_id, $global_data['stav_produktu'], $kategorie_stav_produkt, false, 'bazar' );
     $galerie = ceske_sluzby_xml_ziskat_obrazky_galerie( $produkt );
@@ -1071,6 +1100,10 @@ function xml_feed_aktualizace( $settings, $feed ) {
             $vlastnosti_varianta = $vlastnosti_varianta_only;
           }
           $vyrobce_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_vyrobcu'], true );
+          $darek_varianta = ceske_sluzby_xml_ziskat_hodnotu_dat( $variation['variation_id'], $vlastnosti_varianta, $dostupna_postmeta, $global_data['podpora_darku'], true );
+          if ( empty( $darek_varianta ) && ( ! empty( $darek_produkt ) ) ) {
+            $darek_varianta = $darek_produkt;
+          }
           $feed_data['MANUFACTURER'] = $vyrobce_varianta;
           $nazev_varianta = ceske_sluzby_xml_ziskat_nazev_produktu( 'varianta', $product_id, $global_data, $kategorie_nazev_produkt, $doplneny_nazev_produkt, $vlastnosti_varianta_only, $vlastnosti_varianta, $dostupna_postmeta, $post_data->post_title, $feed_data );
 
@@ -1094,6 +1127,11 @@ function xml_feed_aktualizace( $settings, $feed ) {
             }
             if ( ! empty( $vyrobce_varianta ) ) {
               $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_varianta );
+            }
+            if ( ! empty( $settings['gift']['element'] ) && ! empty( $darek_varianta ) ) {
+              foreach ( (array)$darek_varianta as $darek ) {
+                $xmlWriter->writeElement( 'GIFT', ceske_sluzby_xml_zpracovat_hodnotu_darku( $darek, $global_data ) );
+              }
             }
             if ( ! empty( $strom_kategorie ) ) {
               $xmlWriter->startElement( 'CATEGORYTEXT' );
@@ -1157,6 +1195,11 @@ function xml_feed_aktualizace( $settings, $feed ) {
           }
           if ( ! empty( $vyrobce_produkt ) ) {
             $xmlWriter->writeElement( 'MANUFACTURER', $vyrobce_produkt );
+          }
+          if ( ! empty( $settings['gift']['element'] ) && ! empty( $darek_produkt ) ) {
+            foreach ( (array)$darek_produkt as $darek ) {
+              $xmlWriter->writeElement( 'GIFT', ceske_sluzby_xml_zpracovat_hodnotu_darku( $darek, $global_data ) );
+            }
           }
           if ( ! empty( $strom_kategorie ) ) {
             $xmlWriter->startElement( 'CATEGORYTEXT' );
