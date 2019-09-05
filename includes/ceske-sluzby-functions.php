@@ -4,18 +4,37 @@ function ceske_sluzby_procistit_hodnoty( &$hodnota ) {
   $hodnota = trim( $hodnota ); 
 }
 
-function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
+function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $product_id ) {
   $dodaci_doba_array = array();
   $dodaci_doba_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_hodnoty' );
-  if ( ! empty ( $dodaci_doba_hodnoty ) ) {
+  if ( ! empty( $dodaci_doba_hodnoty ) ) {
     $dodaci_doba_tmp = array_values( array_filter( explode( PHP_EOL, $dodaci_doba_hodnoty ) ) );
     array_walk( $dodaci_doba_tmp, 'ceske_sluzby_procistit_hodnoty' );
     foreach ( $dodaci_doba_tmp as $dodaci_doba_hodnota ) {
       $rozdeleno = explode( "|", $dodaci_doba_hodnota );
       if ( is_numeric( $rozdeleno[0] ) ) {
-        if ( $dropdown && in_array( $rozdeleno[0], array( 0, 98, 99 ) ) ) {
+        if ( $product_id && in_array( $rozdeleno[0], array( 0, 98, 99 ) ) ) {
+          if ( in_array( $rozdeleno[0], array( 98, 99 ) ) ) {
+            continue;
+          }
           $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-          if ( $global_dodaci_doba == 0 || in_array( $rozdeleno[0], array( 98, 99 ) ) ) {
+          $product = wc_get_product( $product_id );
+          $custom_dodaci_doba = ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek );       
+          if ( isset( $custom_dodaci_doba['source'] ) && strpos( $custom_dodaci_doba['source'], 'external' ) !== false ) {
+            $external = true;
+          } else {
+            $external = false;
+          }
+          if ( (string)$global_dodaci_doba === '0' && ! $external && $custom_dodaci_doba['value'] !== '0' ) {
+            continue;
+          }
+          if ( ( isset( $custom_dodaci_doba['source'] ) && $custom_dodaci_doba['value'] === '0' && ! $product->is_type( 'variable' ) ) ) {
+            continue;
+          }
+          if ( isset( $custom_dodaci_doba['source'] ) && strpos( $custom_dodaci_doba['source'], 'external product' ) !== false && $custom_dodaci_doba['value'] === '0' && $product->is_type( 'variable' ) ) {
+            continue;
+          }
+          if ( ! isset( $custom_dodaci_doba['source'] ) && $custom_dodaci_doba['value'] === '0' && ! $product->is_type( 'variation' ) ) {
             continue;
           }
         }
@@ -32,9 +51,9 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
         }
       }
     }
-    if ( ! empty ( $dodaci_doba_array ) ) {
+    if ( ! empty( $dodaci_doba_array ) ) {
       ksort( $dodaci_doba_array );
-      if ( $dropdown ) {
+      if ( $product_id ) {
         $dodaci_doba_array = array ( '' => '- Vyberte -' ) + $dodaci_doba_array;
       }
     }
@@ -44,13 +63,13 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $dropdown ) {
 
 function ceske_sluzby_xml_zpracovat_parametry( $parametry_hodnoty ) {
   $parametry_array = array();
-  if ( ! empty ( $parametry_hodnoty ) ) {
+  if ( ! empty( $parametry_hodnoty ) ) {
     $parametry_tmp = array_values( array_filter( explode( PHP_EOL, $parametry_hodnoty ) ) );
     array_walk( $parametry_tmp, 'ceske_sluzby_procistit_hodnoty' );
     $i = 0;
     foreach ( $parametry_tmp as $parametr_hodnota ) {
       $rozdeleno = explode( "|", $parametr_hodnota );
-      if ( ! empty ( $rozdeleno ) ) {
+      if ( ! empty( $rozdeleno ) ) {
         if ( ( mb_strlen( $rozdeleno[0] ) > 1 && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "-" && count( $rozdeleno ) == 2 ) || ( $rozdeleno[0] == "+" && count( $rozdeleno ) == 3 ) ) {
           $parametry_array[$i] = $rozdeleno;
           $i = $i + 1;
@@ -64,7 +83,7 @@ function ceske_sluzby_xml_zpracovat_parametry( $parametry_hodnoty ) {
 function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
   $pocet_skladem_array = array();
   $pocet_skladem_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_intervaly' );
-  if ( ! empty ( $pocet_skladem_hodnoty ) ) {
+  if ( ! empty( $pocet_skladem_hodnoty ) ) {
     $pocet_skladem_tmp = array_values( array_filter( explode( PHP_EOL, $pocet_skladem_hodnoty ) ) );
     array_walk( $pocet_skladem_tmp, 'ceske_sluzby_procistit_hodnoty' );
     foreach ( $pocet_skladem_tmp as $pocet_skladem_hodnota ) {
@@ -73,7 +92,7 @@ function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
         $pocet_skladem_array[ $rozdeleno[0] ] = str_replace( '{VALUE}', $pocet, $rozdeleno[1] );
       }
     }
-    if ( ! empty ( $pocet_skladem_array ) ) {
+    if ( ! empty( $pocet_skladem_array ) ) {
       ksort( $pocet_skladem_array );
     }
   }
@@ -82,13 +101,13 @@ function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
 
 function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
   $availability = array();
-  if ( empty ( $dodaci_doba ) ) {
+  if ( empty( $dodaci_doba ) ) {
     $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
   }
-  if ( empty ( $dodaci_doba ) ) {
+  if ( empty( $dodaci_doba ) ) {
     return $availability;
   }
-  if ( ! empty ( $actual_dodaci_doba ) || (string)$actual_dodaci_doba === '0' ) {
+  if ( ! empty( $actual_dodaci_doba ) || (string)$actual_dodaci_doba === '0' ) {
     if ( array_key_exists( $actual_dodaci_doba, $dodaci_doba ) ) {
       $availability['value'] = $actual_dodaci_doba;
       $availability['text'] = $dodaci_doba[ $actual_dodaci_doba ];
@@ -101,8 +120,8 @@ function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi ) 
   $dostupnost = array();
   $actual_pocet_skladem = $mnozstvi;
   $pocet_skladem = ceske_sluzby_zpracovat_pocet_skladem( $mnozstvi );
-  if ( ! empty ( $pocet_skladem ) ) {
-    if ( ! empty ( $actual_pocet_skladem ) ) {
+  if ( ! empty( $pocet_skladem ) ) {
+    if ( ! empty( $actual_pocet_skladem ) ) {
       foreach( $pocet_skladem as $pocet => $text ) {
         if ( $actual_pocet_skladem > $pocet ) {
           $dostupnost['value'] = $pocet;
@@ -111,12 +130,12 @@ function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi ) 
       }
     }
   }
-  if ( ! empty ( $dostupnost ) ) {
+  if ( ! empty( $dostupnost ) ) {
     $availability['class'] .= ' skladem-' . $dostupnost['value'];
     $availability['availability'] = $dostupnost['text'];
   } else {
     $skladem = ceske_sluzby_ziskat_zadanou_dodaci_dobu( "", 0 );
-    if ( ! empty ( $skladem ) ) {
+    if ( ! empty( $skladem ) ) {
       $availability['class'] .= ' skladem-' . $skladem['value'];
       $availability['availability'] = $skladem['text'];
     }
@@ -127,7 +146,7 @@ function ceske_sluzby_ziskat_interval_pocet_skladem( $availability, $mnozstvi ) 
 function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
   $format = get_option( 'wc_ceske_sluzby_dodaci_doba_format_zobrazeni' );
   if ( is_array( $availability ) ) {
-    if ( ! empty ( $format ) && (string)$availability['value'] != '0' )  {
+    if ( ! empty( $format ) && (string)$availability['value'] != '0' )  {
       $variables = array( 'VALUE' => $availability['value'], 'TEXT' => $availability['text'] );
       foreach( $variables as $key => $value ) {
         $format = str_replace( '{' . $key . '}', $value, $format );
@@ -144,20 +163,45 @@ function ceske_sluzby_ziskat_format_dodaci_doby( $availability ) {
 function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek ) {
   $dodaci_doba_produkt = "";
   $dostupnost = "";
+  $source = "";
   $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, false );
-  if ( empty ( $dodaci_doba ) ) {
+  if ( empty( $dodaci_doba ) ) {
     return $dostupnost;
   }
+  $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   if ( get_class( $product ) == "WC_Product_Variation" ) {
     $varianta_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
     $dodaci_doba_varianta = get_post_meta( $varianta_id, 'ceske_sluzby_dodaci_doba', true );
-    if ( empty ( $dodaci_doba_varianta ) ) {
+    if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_varianta ) && $dodaci_doba_varianta !== '0' ) {
+      if ( $global_data['vlastni_dodaci_doba'] == 'ang_stock_status' ) {
+        // Plugin: ang-custom-stock-options
+        $dodaci_doba_varianta = get_post_meta( $varianta_id, $varianta_id, true );
+      } else {
+        $dodaci_doba_varianta = get_post_meta( $varianta_id, $global_data['vlastni_dodaci_doba'], true );
+      }
+      if ( ! empty( $dodaci_doba_varianta ) || $dodaci_doba_varianta === '0' ) {
+        $source = 'external';
+      }
+    }
+    if ( ( empty( $dodaci_doba_varianta ) && $dodaci_doba_varianta !== '0' ) || $source == 'external' ) {
       if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
         $varianta_parent_id = $product->parent->id;
       } else {
         $varianta_parent_id = $product->get_parent_id();
       }
       $dodaci_doba_produkt = get_post_meta( $varianta_parent_id, 'ceske_sluzby_dodaci_doba', true );
+      if ( ! empty( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
+        $source = 'product';
+      }
+      if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_produkt ) && $dodaci_doba_produkt !== '0' ) {
+        $dodaci_doba_produkt = get_post_meta( $varianta_parent_id, $global_data['vlastni_dodaci_doba'], true );
+        if ( ! empty( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
+          $source = 'external product';
+        }
+      }
+      if ( ( empty( $dodaci_doba_produkt ) && $dodaci_doba_produkt !== '0' ) && $source == 'external' ) {
+        $dodaci_doba_produkt = $dodaci_doba_varianta;
+      }
     } else {
       $dodaci_doba_produkt = $dodaci_doba_varianta;
     }
@@ -165,17 +209,56 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
   elseif ( get_class( $product ) == "WC_Product_Simple" ) {
     $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
     $dodaci_doba_produkt = get_post_meta( $product_id, 'ceske_sluzby_dodaci_doba', true );
+    if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_produkt ) && $dodaci_doba_produkt !== '0' ) {
+      $dodaci_doba_produkt = get_post_meta( $product_id, $global_data['vlastni_dodaci_doba'], true );
+      if ( ! empty( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
+        $source = 'external';
+      }
+    }
   }
-  if ( ! empty ( $dodaci_doba_produkt ) ) {
+  elseif ( get_class( $product ) == "WC_Product_Variable" ) {
+    $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
+    $dodaci_doba_produkt = get_post_meta( $product_id, 'ceske_sluzby_dodaci_doba', true );
+    if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_produkt ) && $dodaci_doba_produkt !== '0' ) {
+      $dodaci_doba_produkt = get_post_meta( $product_id, $global_data['vlastni_dodaci_doba'], true );
+      if ( ! empty( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
+        $source = 'external product';
+      }
+    }
+    if ( empty( $dodaci_doba_produkt ) && $dodaci_doba_produkt !== '0' ) {
+      $dostupne_varianty = $product->get_available_variations();
+      if ( ! empty( $dostupne_varianty ) ) {
+        foreach( $dostupne_varianty as $variation ) {
+          $dodaci_doba_varianta = get_post_meta( $variation['variation_id'], 'ceske_sluzby_dodaci_doba', true );
+          if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_varianta ) && $dodaci_doba_varianta !== '0' ) {
+            if ( $global_data['vlastni_dodaci_doba'] == 'ang_stock_status' ) {
+              // Plugin: ang-custom-stock-options
+              $dodaci_doba_varianta = get_post_meta( $variation['variation_id'], $variation['variation_id'], true );
+            } else {
+              $dodaci_doba_varianta = get_post_meta( $variation['variation_id'], $global_data['vlastni_dodaci_doba'], true );
+            }
+            if ( ! empty( $dodaci_doba_varianta ) || $dodaci_doba_varianta === '0' ) {
+              $source = 'external';
+            }
+          }
+        }
+      }
+    }
+  }
+  if ( ! empty( $dodaci_doba_produkt ) && ! is_numeric( $dodaci_doba_produkt ) ) {
+    $dodaci_doba_produkt = ceske_sluzby_xml_priradit_dodaci_dobu_produktu( $dodaci_doba_produkt );
+  }
+  if ( ! empty( $dodaci_doba_produkt ) || $dodaci_doba_produkt === '0' ) {
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $dodaci_doba_produkt );
+    // Pokud je produkt nastaven 0 - Skladem z jiného pluginu, tak nepoužívat, pokud je opravdu skladem(?)
   }
   // Pokud stále nemáme žádné údaje, tak zjistíme globální nastavení...
-  if ( empty ( $dostupnost ) ) {
+  if ( empty( $dostupnost ) ) {
     $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
     $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $global_dodaci_doba );
   }
   // A pokud stále nemáme žádné údaje, tak alespoň doplníme případně nastavené texty...
-  if ( empty ( $dostupnost ) ) {
+  if ( empty( $dostupnost ) ) {
     if ( $product->managing_stock() && $product->is_on_backorder(1) ) {
       if ( $product->backorders_allowed() ) {
         if ( $product->backorders_require_notification() ) {
@@ -187,6 +270,10 @@ function ceske_sluzby_ziskat_nastavenou_dostupnost_produktu( $product, $dodatek 
         $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 99 );
       }
     }
+  } else {
+    if ( $source ) {
+      $dostupnost['source'] = $source;
+    }
   }
   return $dostupnost;
 }
@@ -195,12 +282,12 @@ function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
   $dostupnost = "";
   $product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : $product->id;
   $predobjednavka = get_post_meta( $product_id, 'ceske_sluzby_xml_preorder_datum', true );
-  if ( ! empty ( $predobjednavka ) && $product->is_in_stock() ) {
+  if ( ! empty( $predobjednavka ) && $product->is_in_stock() ) {
     if ( (int)$predobjednavka >= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
       $predobjednavka = date_i18n( 'j.n.Y', $predobjednavka );
       if ( $text ) {
         $format = get_option( 'wc_ceske_sluzby_preorder_format_zobrazeni' );
-        if ( ! empty ( $format ) ) {
+        if ( ! empty( $format ) ) {
           $variables = array( 'DATUM' => $predobjednavka );
           foreach( $variables as $key => $value ) {
             $dostupnost = str_replace( '{' . $key . '}', $value, $format );
@@ -219,11 +306,11 @@ function ceske_sluzby_ziskat_predobjednavku( $product, $text ) {
 function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
   $html = "";
   $format = get_option( 'wc_ceske_sluzby_dodatecne_produkty_format_zobrazeni' );
-  if ( ! empty ( $format ) ) {
+  if ( ! empty( $format ) ) {
     // Pokud je produkt obecně skladem...
     if ( (string)$dostupnost['value'] === '0' ) {
       $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( true, false );
-      if ( ! empty ( $dodaci_doba ) ) {
+      if ( ! empty( $dodaci_doba ) ) {
         if ( $product->backorders_require_notification() ) {
           $dostupnost = ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, 98 );
         } else {
@@ -231,7 +318,7 @@ function ceske_sluzby_ziskat_format_dodatecneho_poctu( $dostupnost, $product ) {
         }
       }
     }
-    if ( ! empty ( $dostupnost ) && is_array( $dostupnost ) ) {
+    if ( ! empty( $dostupnost ) && is_array( $dostupnost ) ) {
       $variables = array( 'VALUE' => $dostupnost['value'], 'TEXT' => $dostupnost['text'] );
       foreach( $variables as $key => $value ) {
         $html = str_replace( '{' . $key . '}', $value, $format );
@@ -271,7 +358,7 @@ function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
     foreach ( $taxonomies as $name => $taxonomy ) {
       if ( $druh == "vlastnosti" ) {
         if ( taxonomy_is_product_attribute( $name ) ) {
-          if ( empty ( $dostupne_taxonomie ) ) {
+          if ( empty( $dostupne_taxonomie ) ) {
             $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
           }
           else {
@@ -280,7 +367,7 @@ function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
         }
       } elseif ( $druh == "obecne" ) {
         if ( ! taxonomy_is_product_attribute( $name ) ) {
-          if ( empty ( $dostupne_taxonomie ) ) {
+          if ( empty( $dostupne_taxonomie ) ) {
             $dostupne_taxonomie = '<strong>' . $name . '</strong> (' . $taxonomy->label .  ')';
           }
           else {
@@ -296,14 +383,14 @@ function ceske_sluzby_zobrazit_dostupne_taxonomie( $druh, $vlastnosti ) {
     if ( is_array( $vlastnosti ) && ! empty( $vlastnosti ) ) {
       foreach ( $vlastnosti as $name => $vlastnost ) {
         if ( ! $vlastnost['is_taxonomy'] ) {
-          if ( empty ( $dostupne_taxonomie ) ) {
+          if ( empty( $dostupne_taxonomie ) ) {
             $dostupne_taxonomie = '<code>{' . $vlastnost['name'] . '}</code>';
           }
           else {
             $dostupne_taxonomie .= ', <code>{' . $vlastnost['name'] . '}</code>';
           }
         } else { 
-          if ( empty ( $dostupne_taxonomie ) ) {
+          if ( empty( $dostupne_taxonomie ) ) {
             $dostupne_taxonomie = '<code>{' . $name . '}</code> (' . wc_attribute_label( $vlastnost['name'] ) .  ')';
           }
           else {
@@ -326,7 +413,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
   if ( ! empty( $product_categories ) ) {
     foreach ( $product_categories as $kategorie_produktu ) {
       $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, $termmeta_id, true );
-      if ( ! empty ( $kategorie ) ) {
+      if ( ! empty( $kategorie ) ) {
         if ( $kategorie == $aktualni_kategorie_nazev_produkt ) {
           $kategorie_url = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
         }
@@ -407,7 +494,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
 
 function ceske_sluzby_xml_zpracovat_hodnoty_kategorie( $hodnoty ) {
   $aktualni_hodnota = "";
-  if ( ! empty ( $hodnoty ) ) {
+  if ( ! empty( $hodnoty ) ) {
     if ( count( $hodnoty ) == 1 ) {
       $aktualni_hodnota = $hodnoty[0];
     } else {
@@ -421,7 +508,7 @@ function ceske_sluzby_xml_zpracovat_hodnoty_kategorie( $hodnoty ) {
           if ( $pocet > $pocet_tmp ) {
             $hodnota_tmp = $hodnota;
           }
-          if ( $pocet == $pocet_tmp && empty ( $hodnota_tmp ) ) {
+          if ( $pocet == $pocet_tmp && empty( $hodnota_tmp ) ) {
             $hodnota_tmp = $hodnota;
           }
         }

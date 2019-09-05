@@ -27,7 +27,7 @@ function ceske_sluzby_variation_settings_fields( $loop, $variation_data, $variat
 
   $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
   if ( $aktivace_dodaci_doby == "yes" ) {
-    $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+    $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, $variation->ID );
     if ( ! empty( $dodaci_doba_dropdown ) ) {
       if ( empty( $class ) ) {
         $class = "first";

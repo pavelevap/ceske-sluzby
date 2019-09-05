@@ -297,7 +297,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
 
     if ( $aktivace_dodaci_doby == "yes" ) {
-      $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
+      $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, $thepostid );
       $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
       $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
       if ( ! empty( $dodaci_doba_dropdown ) || $predobjednavka == "yes" ) {

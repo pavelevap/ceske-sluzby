@@ -453,6 +453,22 @@ function ceske_sluzby_xml_ziskat_post_data( $produkt ) {
   }
   return $post_data; 
 }
+
+function ceske_sluzby_xml_priradit_dodaci_dobu_produktu( $value ) {
+  $dodaci_doba = false; 
+  // Plugin: ang-custom-stock-options
+  $schema = array(
+    0 => 'instock',
+    99 => 'outofstock',
+    3 => 'threedays',
+    5 => 'week',
+    31 => 'ordered',
+    10 => 'inbay',
+    20 => 'external'
+  );
+  $dodaci_doba = array_search( $value, $schema );
+  return $dodaci_doba;
+}
       
 function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $item_id, $item, $global_predbezna_objednavka, $global_neni_skladem ) {
   $dodaci_doba_item = "";
@@ -462,38 +478,48 @@ function ceske_sluzby_xml_ziskat_dodaci_dobu_produktu( $global_data, $item_id, $
   }
   $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
   if ( $aktivace_dodaci_doby == "yes" ) {
-    if ( ! empty( $global_data['vlastni_dodaci_doba'] ) ) {
-      $dodaci_doba_item = get_post_meta( $item_id, $global_data['vlastni_dodaci_doba'], true );
-      if ( ( ! empty( $dodaci_doba_item ) || (string)$dodaci_doba_item === '0' ) && is_numeric( $dodaci_doba_item ) ) {
-        $dodaci_doba = $dodaci_doba_item;
-      }
-    } else {
-      $dodaci_doba_nastaveni = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
-      if ( ! empty( $dodaci_doba_nastaveni ) ) {
-        if ( ( (int)$item->get_stock_quantity() <= 0 && $item->managing_stock() ) || ! $item->managing_stock() ) {
-          if ( get_class( $item ) == "WC_Product_Variation" ) {
-            $varianta_id = is_callable( array( $item, 'get_id' ) ) ? $item->get_id() : $item->variation_id;
-            $dodaci_doba_varianta = get_post_meta( $varianta_id, 'ceske_sluzby_dodaci_doba', true );
-            if ( empty( $dodaci_doba_varianta ) ) {
-              if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-                $varianta_parent_id = $item->parent->id;
-              } else {
-                $varianta_parent_id = $item->get_parent_id();
-              }
-              $dodaci_doba_item = get_post_meta( $varianta_parent_id, 'ceske_sluzby_dodaci_doba', true );
+    $dodaci_doba_nastaveni = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
+    if ( ! empty( $dodaci_doba_nastaveni ) ) {
+      if ( ( (int)$item->get_stock_quantity() <= 0 && $item->managing_stock() ) || ! $item->managing_stock() ) {
+        if ( get_class( $item ) == "WC_Product_Variation" ) {
+          $varianta_id = is_callable( array( $item, 'get_id' ) ) ? $item->get_id() : $item->variation_id;
+          $dodaci_doba_varianta = get_post_meta( $varianta_id, 'ceske_sluzby_dodaci_doba', true );
+          if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_varianta ) && $dodaci_doba_varianta !== '0' ) {
+            if ( $global_data['vlastni_dodaci_doba'] == 'ang_stock_status' ) {
+              // Plugin: ang-custom-stock-options
+              $dodaci_doba_varianta = get_post_meta( $varianta_id, $varianta_id, true );
             } else {
-              $dodaci_doba_item = $dodaci_doba_varianta;
+              $dodaci_doba_varianta = get_post_meta( $varianta_id, $global_data['vlastni_dodaci_doba'], true );
             }
           }
-          elseif ( get_class( $item ) == "WC_Product_Simple" ) {
-            $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
+          if ( empty( $dodaci_doba_varianta ) && $dodaci_doba_varianta !== '0' ) {
+            if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+              $varianta_parent_id = $item->parent->id;
+            } else {
+              $varianta_parent_id = $item->get_parent_id();
+            }
+            $dodaci_doba_item = get_post_meta( $varianta_parent_id, 'ceske_sluzby_dodaci_doba', true );
+            if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_item ) && $dodaci_doba_item !== '0' ) {
+              $dodaci_doba_item = get_post_meta( $varianta_parent_id, $global_data['vlastni_dodaci_doba'], true );
+            }
+          } else {
+            $dodaci_doba_item = $dodaci_doba_varianta;
           }
-        } else {
-          $dodaci_doba_item = 0;
         }
-        if ( ! empty( $dodaci_doba_item ) || (string)$dodaci_doba_item === '0' ) {
-          $dodaci_doba = $dodaci_doba_item;
+        elseif ( get_class( $item ) == "WC_Product_Simple" ) {
+          $dodaci_doba_item = get_post_meta( $item_id, 'ceske_sluzby_dodaci_doba', true );
+          if ( ! empty( $global_data['vlastni_dodaci_doba'] ) && empty( $dodaci_doba_item ) && $dodaci_doba_item !== '0' ) {
+            $dodaci_doba_item = get_post_meta( $item_id, $global_data['vlastni_dodaci_doba'], true );
+          }
         }
+        if ( ! empty( $dodaci_doba_item ) && ! is_numeric( $dodaci_doba_item ) ) {
+          $dodaci_doba_item = ceske_sluzby_xml_priradit_dodaci_dobu_produktu( $dodaci_doba_item );
+        }
+      } else {
+        $dodaci_doba_item = 0;
+      }
+      if ( ! empty( $dodaci_doba_item ) || (string)$dodaci_doba_item === '0' ) {
+        $dodaci_doba = $dodaci_doba_item;
       }
     }
     $aktivace_predobjednavek = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
