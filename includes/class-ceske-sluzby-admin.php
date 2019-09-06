@@ -343,8 +343,9 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   }
 
   public static function ceske_sluzby_nastaveni_pokladna( $settings ) {
+    global $current_section;
     $options = self::dostupne_nastaveni( 'pokladna' );
-    if ( ! empty( $options ) ) {
+    if ( '' == $current_section && ! empty( $options ) ) {
       $settings[] = array(
         'title' => 'České služby',
         'type' => 'title',
