@@ -4,6 +4,16 @@ function ceske_sluzby_procistit_hodnoty( &$hodnota ) {
   $hodnota = trim( $hodnota ); 
 }
 
+function ceske_sluzby_prehled_xml_feedu() {
+  $feeds = array(
+    'heureka' => 'Heureka',
+    'zbozi' => 'Zboží',
+    'google' => 'Google',
+    'glami' => 'Glami'
+  );
+  return $feeds;
+} 
+
 function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $product_id ) {
   $dodaci_doba_array = array();
   $dodaci_doba_hodnoty = get_option( 'wc_ceske_sluzby_dodaci_doba_hodnoty' );

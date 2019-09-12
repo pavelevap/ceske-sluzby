@@ -1,6 +1,6 @@
 <?php
-function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
-  $kategorie = ceske_sluzby_xml_ziskat_vynechane_kategorie();
+function ceske_sluzby_xml_ziskat_parametry_dotazu( $feed, $limit, $offset ) {
+  $kategorie = ceske_sluzby_xml_ziskat_vynechane_kategorie( $feed );
   $args = array(
     'post_type' => 'product',
     'post_status' => 'publish',
@@ -40,7 +40,15 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
       $limit = $_GET['limit'];
     }
     if ( array_key_exists( 'pid', $_GET ) && $_GET['pid'] > 0 ) {
-      $args['p'] = $_GET['pid'];
+      $product = get_post( $_GET['pid'] );
+      $product_categories = get_the_terms( $product, 'product_cat' );
+      $terms_ids = wp_list_pluck( $product_categories, 'term_id' );
+      if ( empty( $kategorie ) || ( ! empty( $kategorie ) && empty( array_intersect( $terms_ids, $kategorie ) ) ) ) {
+        $args['p'] = $_GET['pid'];
+      } else {
+        // https://wordpress.stackexchange.com/questions/140692/can-i-force-wp-query-to-return-no-results/140727
+        $args['post__in'] = array(0); 
+      }
     }
   }
   if ( $limit ) {
@@ -54,14 +62,19 @@ function ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset ) {
   return $args;
 }
 
-function ceske_sluzby_xml_ziskat_vynechane_kategorie() {
+function ceske_sluzby_xml_ziskat_vynechane_kategorie( $feed ) {
   $vynechane_kategorie = array();
   $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
   if ( ! empty( $product_categories ) && ! is_wp_error( $product_categories ) ) {
     foreach ( $product_categories as $kategorie_produktu ) {
-      $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
-      if ( ! empty( $vynechano ) ) {
+      $vynechano_vse = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
+      if ( ! empty( $vynechano_vse ) ) {
         $vynechane_kategorie[] = $kategorie_produktu->term_id;
+      } else {
+        $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano' );
+        if ( ! empty( $vynechano ) && isset( $vynechano[$feed] ) ) {
+          $vynechane_kategorie[] = $kategorie_produktu->term_id;
+        }
       }
     }
   }
@@ -799,7 +812,7 @@ function xml_feed_zobrazeni() {
   $feed = get_query_var( 'feed' );
   $settings = xml_feed_nastaveni( $feed );
   // http://codeinthehole.com/writing/creating-large-xml-files-with-php/
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $feed, false, false );
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   if ( empty( $global_data['nazev_produktu'] ) ) {
@@ -1019,7 +1032,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
 
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $feed, $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );
@@ -1254,7 +1267,7 @@ function xml_feed_aktualizace( $settings, $feed ) {
 }
 
 function zbozi_xml_feed_zobrazeni() {
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( 'zbozi', false, false );
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
@@ -1480,7 +1493,7 @@ function zbozi_xml_feed_aktualizace() {
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
 
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( 'zbozi', $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );
@@ -1726,7 +1739,7 @@ function zbozi_xml_feed_aktualizace() {
 }
 
 function google_xml_feed_zobrazeni() {
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( false, false );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( 'google', false, false );
   $products = get_posts( $args );
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
   $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
@@ -1962,7 +1975,7 @@ function pricemania_xml_feed_aktualizace() {
   $xmlWriter->openMemory();
   $xmlWriter->setIndent( true );
 
-  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( $limit, $offset );
+  $args = ceske_sluzby_xml_ziskat_parametry_dotazu( 'pricemania', $limit, $offset );
   $products = get_posts( $args );
 
   $xmlWriter->startDocument( '1.0', 'utf-8' );

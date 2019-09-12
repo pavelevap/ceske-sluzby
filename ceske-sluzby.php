@@ -894,9 +894,15 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
   <div class="form-field">
     <label for="ceske-sluzby-xml-vynechano">Odebrat z XML</label>
     <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" />
-    <span>
+    <strong><span style="padding-right: 10px;">Vše</span></strong>
+      <?php $feeds = ceske_sluzby_prehled_xml_feedu();
+      foreach ( $feeds as $feed_id => $feed_name ) { ?>
+        <input name="ceske-sluzby-xml-feed-vynechano[<?php echo $feed_id; ?>]" id="ceske-sluzby-xml-feed-vynechano[<?php echo $feed_id; ?>]" type="checkbox" value="yes" <?php checked( isset( $xml_feed_vynechano_ulozeno[$feed_id] ) ? $xml_feed_vynechano_ulozeno[$feed_id] : '', "yes" ); ?>/>
+        <span style="padding-right: 10px;"><?php echo $feed_name; ?></span>
+      <?php } ?>
+    <p>
       Zaškrtněte pokud chcete odebrat produkty této kategorie z XML feedů.
-    </span>
+    </p>
   </div>
   <?php
   if ( ! empty( $global_data['stav_produktu'] ) ) {
@@ -940,6 +946,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $glami_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
   $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
   $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
+  $xml_feed_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
   $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
   $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
   $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
@@ -1056,7 +1063,13 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     <th scope="row" valign="top"><label>Odebrat z XML</label></th>
     <td> 
       <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" <?php checked( $xml_vynechano_ulozeno, "yes" ); ?>/>
-      <span class="description">
+      <strong><span class="description" style="padding-right: 10px;">Vše</span></strong>
+      <?php $feeds = ceske_sluzby_prehled_xml_feedu();
+      foreach ( $feeds as $feed_id => $feed_name ) { ?>
+        <input name="ceske-sluzby-xml-feed-vynechano[<?php echo $feed_id; ?>]" id="ceske-sluzby-xml-feed-vynechano[<?php echo $feed_id; ?>]" type="checkbox" value="yes" <?php checked( isset( $xml_feed_vynechano_ulozeno[$feed_id] ) ? $xml_feed_vynechano_ulozeno[$feed_id] : '', "yes" ); ?>/>
+        <span class="description" style="padding-right: 10px;"><?php echo $feed_name; ?></span>
+      <?php } ?>
+      <p class="description">
         Zaškrtněte pokud chcete odebrat produkty této kategorie z XML feedů.
       </span>
     </td>
@@ -1129,6 +1142,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
 
     $ukladana_data_checkbox = array(
       'ceske-sluzby-xml-vynechano',
+      'ceske-sluzby-xml-feed-vynechano',
       'ceske-sluzby-xml-erotika',
       'ceske-sluzby-xml-zbozi-extra-message'
     );
@@ -1213,8 +1227,23 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       $columns .= 'Glami: <a href="#" title="' . $glami_kategorie . '">KA</a>';
     }
     $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
+    $kategorie_feed_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-feed-vynechano', true );
     if ( $kategorie_vynechano ) {
-      $columns .= '<span style="margin-left: 10px; color: red;">x</span>';
+      $columns .= '<span style="margin-left: 10px; color: red; font-weight: bold;">X</span>';
+    } elseif ( $kategorie_feed_vynechano ) {
+      $feeds = ceske_sluzby_prehled_xml_feedu();
+      $title = ' title="';
+      $i = 0;
+      foreach ( $kategorie_feed_vynechano as $feed => $value ) {
+        if ( $i == 0 ) {
+          $title .= $feeds[$feed];
+        } else {
+          $title .= ', ' . $feeds[$feed];
+        };
+        $i = $i + 1;
+      }
+      $title .= '"';
+      $columns .= '<span style="margin-left: 10px; color: red;"' . $title . '>x</span>';
     }
     $stav_produktu = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-stav-produktu', true );
     if ( ! empty( $stav_produktu ) ) {

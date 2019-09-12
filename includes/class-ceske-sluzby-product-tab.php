@@ -43,12 +43,14 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
 
     $vynechane_kategorie = "";
+    $vynechane_kategorie_feed = "";
     $stav_produktu_kategorie = "";
     $extra_message_kategorie_odkaz = "";
     $extra_message_kategorie_array = array();
     $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
     foreach ( $product_categories as $kategorie_produktu ) {
       $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
+      $xml_feed_vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
       $stav_produktu = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
       $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
       if ( ! empty( $vynechano ) ) {
@@ -56,6 +58,15 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
           $vynechane_kategorie .= ", ";
         }
         $vynechane_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+      }
+      if ( ! empty( $xml_feed_vynechano ) ) {
+        $feeds = ceske_sluzby_prehled_xml_feedu();
+        foreach ( $xml_feed_vynechano as $feed => $value ) {
+          if ( ! empty( $vynechane_kategorie_feed ) ) {
+            $vynechane_kategorie_feed .= ", ";
+          }
+          $vynechane_kategorie_feed .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a> (' . $feeds[$feed] . ')';
+        }
       }
       if ( ! empty( $stav_produktu ) ) {
         if ( $stav_produktu == 'used' ) {
@@ -81,12 +92,15 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     if ( ! empty( $vynechane_kategorie ) ) {
       echo '<p class="form-field"><label for="ceske_sluzby_xml_vynechano">Odebrat z XML</label>Není potřeba nic zadávat, protože jsou zcela ignorovány některé kategorie: ' . $vynechane_kategorie . '</p>';
     } else {
+      if ( ! empty( $vynechane_kategorie_feed ) ) {
+        $vynechane_kategorie_feed = ' Na úrovni kategorií zatím máte nastaveno následující: ' . $vynechane_kategorie_feed;
+      }
       woocommerce_wp_checkbox( 
         array( 
           'id' => 'ceske_sluzby_xml_vynechano', 
           'wrapper_class' => '', // show_if_simple - pouze u jednoduchých produktů
           'label' => 'Odebrat z XML', 
-          'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů'
+          'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů.' . $vynechane_kategorie_feed
         ) 
       );
     }
