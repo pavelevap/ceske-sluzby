@@ -501,9 +501,22 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'API klíč: Ověřeno zákazníky',
           'type' => 'text',
-          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="https://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
+          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="https://sluzby.' . HEUREKA_URL . '/n/sluzby/certifikat-spokojenosti/">zde</a>.',
           'id' => 'wc_ceske_sluzby_heureka_overeno-api',
           'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Souhlas s odesíláním dat',
+          'type' => 'select',
+          'desc_tip' => 'Možnosti souhlasu zákazníků pro službu Ověřeno zákazníky.',
+          'id' => 'wc_ceske_sluzby_heureka_overeno-souhlas',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            '' => 'Neaktivní',
+            'souhlas_optout' => 'Neodmítnout souhlas',
+            'nesouhlas_optout' => 'Nepotvrdit nesouhlas'
+          ),
+          'css' => 'width: 300px',
         ),
         array(
           'title' => 'API klíč: Měření konverzí',

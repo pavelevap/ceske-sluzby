@@ -28,7 +28,23 @@ else {
 
 function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
-  if ( ! empty( $api ) ) {
+  $souhlas = get_option( 'wc_ceske_sluzby_heureka_overeno-souhlas' );
+  $souhlas_check = array();
+  $souhlas_text = "";
+  if ( ! empty( $souhlas ) ) {
+    if ( $souhlas == 'souhlas_optout' && isset( $_POST['heureka_overeno_zakazniky_souhlas_optout'] ) && (int)$_POST['heureka_overeno_zakazniky_souhlas_optout'] == 1 ) {
+      $souhlas_check = array( $souhlas => current_time( 'mysql' ) );
+      $souhlas_text = 'Objednávka byla úspěšně odeslána do služby Ověřeno zákazníky (Heureka) a zákazník neodmítl navržený souhlas se zpracováním dat.';
+    }
+    if ( $souhlas == 'nesouhlas_optout' && ! isset( $_POST['heureka_overeno_zakazniky_nesouhlas_optout'] ) ) {
+      $souhlas_check = array( $souhlas => current_time( 'mysql' ) );
+      $souhlas_text = 'Objednávka byla úspěšně odeslána do služby Ověřeno zákazníky (Heureka) a zákazník nepotvrdil nesouhlas se zpracováním dat.';
+    }
+  } else {
+    $souhlas_check = array( 'neaktivni' => current_time( 'mysql' ) );
+    $souhlas_text = 'Objednávka byla úspěšně odeslána do služby Ověřeno zákazníky (Heureka).';
+  }
+  if ( ! empty( $api ) && ! empty( $souhlas_check ) ) {
     $order = wc_get_order( $order_id );
     
     // https://github.com/heureka/heureka-overeno-php-api
@@ -51,6 +67,8 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
 
       $overeno->addOrderId( $order_id );
       $overeno->send();
+      update_post_meta( $order_id, 'ceske_sluzby_heureka_overeno_zakazniky_souhlas', $souhlas_check );
+      $order->add_order_note( $souhlas_text );
     }
     catch ( OverflowException $o ) {
       $order->add_order_note( 'API klíč pro službu Ověřeno zákazníky nebyl správně nastaven: ' . $o->getMessage() );
@@ -239,6 +257,7 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_dpd_parcelshop' );
 
     add_action( 'woocommerce_checkout_order_processed', 'ceske_sluzby_heureka_overeno_zakazniky', 10, 2 );
+    add_action( 'woocommerce_review_order_before_submit', 'ceske_sluzby_heureka_overeno_zakazniky_souhlas' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_heureka_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_zbozi_mereni_konverzi' );
     add_action( 'woocommerce_thankyou', 'ceske_sluzby_sklik_mereni_konverzi' );
@@ -804,6 +823,29 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
   }
   $output .= '</div>';
   return $output;
+}
+
+function ceske_sluzby_heureka_overeno_zakazniky_souhlas() {
+  $api = get_option( 'wc_ceske_sluzby_heureka_overeno-api' );
+  $souhlas = get_option( 'wc_ceske_sluzby_heureka_overeno-souhlas' );
+  if ( ! empty( $api ) ) {
+    if ( $souhlas == 'nesouhlas_optout' ) {
+      woocommerce_form_field( 'heureka_overeno_zakazniky_nesouhlas_optout',
+        array(
+          'type' => 'checkbox',
+          'label' => 'Nesouhlasím se zasláním dotazníku spokojenosti v rámci programu Ověřeno zákazníky (Heureka), který pomáhá zlepšovat naše služby.',
+        )
+      );
+    }
+    if ( $souhlas == 'souhlas_optout' ) {
+      woocommerce_form_field( 'heureka_overeno_zakazniky_souhlas_optout',
+        array(
+          'type' => 'checkbox',
+          'label' => 'Souhlasím se zasláním dotazníku spokojenosti v rámci programu Ověřeno zákazníky (Heureka), který pomáhá zlepšovat naše služby.',
+        ), 1 
+      );
+    }
+  }
 }
 
 function ceske_sluzby_xml_kategorie_pridat_pole() {
