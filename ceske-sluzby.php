@@ -280,6 +280,21 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
     add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_dpd_parcelshop_objednavka_zobrazit_pobocku' );
 
+    $aktivace_zasilkovna = get_option( 'wc_ceske_sluzby_doprava_zasilkovna' );
+    if ( $aktivace_zasilkovna == "yes" ) {
+      add_action( 'woocommerce_shipping_init', 'ceske_sluzby_doprava_zasilkovna_init' );
+      add_filter( 'woocommerce_shipping_methods', 'ceske_sluzby_doprava_zasilkovna' );
+      $zasilkovna_settings = get_option( 'woocommerce_ceske_sluzby_zasilkovna_settings' );
+      if ( isset( $zasilkovna_settings['zasilkovna_api-klic'] ) && ! empty( $zasilkovna_settings['zasilkovna_api-klic'] ) ) {
+        add_action( 'wp_footer', 'ceske_sluzby_zasilkovna_scripts_checkout', 100 );
+        add_action( 'woocommerce_review_order_after_shipping', 'ceske_sluzby_zasilkovna_zobrazit_pobocky' );
+        add_action( 'woocommerce_new_order_item', 'ceske_sluzby_zasilkovna_ulozeni_pobocky', 10, 2 );
+        add_action( 'woocommerce_checkout_process', 'ceske_sluzby_zasilkovna_overit_pobocku' );
+        add_action( 'woocommerce_admin_order_data_after_billing_address', 'ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku' );
+        add_action( 'woocommerce_email_after_order_table', 'ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku' );
+        add_action( 'woocommerce_order_details_after_order_table', 'ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku' );
+      }
+    }
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_ulozenka_dobirka_pay4pay' );
     add_filter( 'woocommerce_pay4pay_cod_amount', 'ceske_sluzby_dpd_parcelshop_dobirka_pay4pay' );
 
@@ -593,6 +608,84 @@ function ceske_sluzby_dpd_parcelshop_dobirka_pay4pay( $amount ) {
     }
   }
   return $amount;
+}
+
+function ceske_sluzby_doprava_zasilkovna_init() {
+  if ( ! class_exists( 'WC_Shipping_Ceske_Sluzby_Zasilkovna' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-zasilkovna.php';
+  }
+}
+ 
+function ceske_sluzby_doprava_zasilkovna( $methods ) {
+  $methods['ceske_sluzby_zasilkovna'] = 'WC_Shipping_Ceske_Sluzby_Zasilkovna';
+  return $methods;
+}
+
+function ceske_sluzby_zasilkovna_zobrazit_pobocky() {
+  if ( is_ajax() ) {
+    $zasilkovna_branches = '';
+    if ( isset( $_POST['post_data'] ) ) {
+      parse_str( $_POST['post_data'], $post_data );
+      if ( isset( $post_data['packeta-point-id'] ) ) {
+        $zasilkovna_branches = $post_data['packeta-point-id'];
+      }
+    }
+    $chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+    if ( strpos( $chosen_shipping_method[0], "ceske_sluzby_zasilkovna" ) !== false ) { ?>
+      <tr class="zasilkovna">
+        <td>
+          <img src="https://files.packeta.com/web/images/page/Zasilkovna_logo_WEB_tb_nove.png" width="200" border="0">
+        </td>
+        <td>
+          <input type="button" onclick="Packeta.Widget.pick(packetaApiKey, showSelectedPickupPoint)" value="Zvolit pobočku">
+          <div>Pobočka:
+            <input type="hidden" id="packeta-point-id" name="packeta-point-id" value="<?php echo $zasilkovna_branches; ?>">
+            <span id="packeta-point-info" style="font-weight:bold;"><?php if ( $zasilkovna_branches ) { echo $zasilkovna_branches; } else { echo "Zatím nevybráno"; } ?></span>
+          </div>
+        </td>
+      </tr>
+    <?php } else { ?>
+      <input type="hidden" id="packeta-point-id" name="packeta-point-id" value="<?php echo $zasilkovna_branches; ?>">
+    <?php }
+  }
+}
+
+function ceske_sluzby_zasilkovna_ulozeni_pobocky( $item_id, $item ) {
+  if ( isset( $_POST["packeta-point-id"] ) ) {
+    if ( ! empty( $_POST["packeta-point-id"] ) && strpos( $_POST["shipping_method"][0], "ceske_sluzby_zasilkovna" ) !== false ) {
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $item_type = $item['order_item_type'];
+      } else {
+        $item_type = $item->get_type();
+      }
+      if ( $item_type == 'shipping' ) {
+        wc_add_order_item_meta( $item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', esc_attr( $_POST['packeta-point-id'] ), true );
+      }
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_overit_pobocku() {
+  if ( isset( $_POST["packeta-point-id"] ) ) {
+    if ( empty( $_POST["packeta-point-id"] ) && strpos( $_POST["shipping_method"][0], "ceske_sluzby_zasilkovna" ) !== false ) {
+      wc_add_notice( 'Pokud chcete doručit zboží prostřednictvím Zásilkovny, zvolte prosím pobočku.', 'error' );
+    }
+  }
+}
+
+function ceske_sluzby_zasilkovna_objednavka_zobrazit_pobocku( $order ) {
+  if ( $order->has_shipping_method( 'ceske_sluzby_zasilkovna' ) ) {
+    foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        $pobocka = $order->get_item_meta( $shipping_item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', true );
+      } else {
+        $pobocka = wc_get_order_item_meta( $shipping_item_id, 'ceske_sluzby_zasilkovna_pobocka_nazev', true );
+      }
+      if ( ! empty( $pobocka ) ) {
+        echo "<p><strong>Zásilkovna:</strong> " . $pobocka . "</p>";
+      }
+    }
+  }
 }
 
 function ceske_sluzby_moznost_menit_dobirku( $zmena, $objednavka ) {
@@ -1777,5 +1870,68 @@ function ceske_sluzby_zobrazeni_dodaci_doby_varianty( $variation ) {
       }
     }
     echo '<span' . $source . '>' . $dodaci_doba['text'] . $dodatek . '</span>';
+  }
+}
+
+// http://docs.packetery.com/01-pickup-point-selection/01-widget.html#toc-quick-start-examples
+function ceske_sluzby_zasilkovna_scripts_checkout() {
+  if ( is_checkout() ) {
+    $zasilkovna_settings = get_option( 'woocommerce_ceske_sluzby_zasilkovna_settings' ); 
+    if ( isset( $zasilkovna_settings['zasilkovna_api-klic'] ) && ! empty( $zasilkovna_settings['zasilkovna_api-klic'] ) ) {
+      $api_klic = $zasilkovna_settings['zasilkovna_api-klic']; ?>
+      <script src="https://widget.packeta.com/www/js/library.js"></script>
+      <script type="text/javascript">
+        var packetaApiKey = '<?php echo $api_klic; ?>';
+        var $storage_support = true;
+        try {
+          $storage_support = ( 'sessionStorage' in window && window.sessionStorage !== null );
+          window.localStorage.setItem( 'ceske_sluzby', 'test' );
+          window.localStorage.removeItem( 'ceske_sluzby' );
+        } catch( err ) {
+          $storage_support = false;
+        }
+        if ( $storage_support ) {
+          jQuery( document ).ready(function( $ ) {
+            $( document.body ).on( 'updated_checkout', function() {
+              var ceske_sluzby_zasilkovna = localStorage.getItem( 'ceske_sluzby_zasilkovna' );
+              if ( document.getElementById( 'packeta-point-info' ) !== null ) {
+                var paragraph = document.getElementById( 'packeta-point-info' ).firstChild;
+                if ( ceske_sluzby_zasilkovna !== null ) {
+                  paragraph.nodeValue = ceske_sluzby_zasilkovna;
+                  document.getElementById( 'packeta-point-id' ).value = ceske_sluzby_zasilkovna;
+                } else if ( paragraph !== "Zatím nevybráno" ) {
+                  paragraph.nodeValue = "Zatím nevybráno";
+                }
+              }
+            })
+          });
+        }
+        function showSelectedPickupPoint(point) {
+          var spanElement = document.getElementById( 'packeta-point-info' );
+          var idElement = document.getElementById( 'packeta-point-id' );
+          if ( point ) {
+            spanElement.innerText = point.name;
+            idElement.value = point.name;
+            if ( $storage_support ) {
+              localStorage.setItem( 'ceske_sluzby_zasilkovna', point.name );
+            }
+          }
+          else {
+            if ( $storage_support ) {
+              var ceske_sluzby_zasilkovna = localStorage.getItem( 'ceske_sluzby_zasilkovna' );
+            } else {
+              var ceske_sluzby_zasilkovna = null;
+            }
+            if ( ceske_sluzby_zasilkovna !== null ) {
+              spanElement.innerText = ceske_sluzby_zasilkovna;
+              idElement.value = ceske_sluzby_zasilkovna;
+            } else {
+              spanElement.innerText = "Zatím nevybráno";
+              idElement.value = "";
+            }
+          }
+        };
+      </script>
+    <?php }
   }
 }

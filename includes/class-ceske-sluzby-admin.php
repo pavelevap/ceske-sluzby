@@ -150,6 +150,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $sections = array(
       '' => 'Základní nastavení'
     );
+    $sections['doprava'] = 'Doprava';
     if ( $aktivace_xml == "yes" ) {
       $sections['xml-feed'] = 'XML feed';
     }
@@ -635,24 +636,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
         ),
         array(
-          'title' => 'Pouze doprava zdarma',
-          'type' => 'checkbox',
-          'desc' => 'Pokud je dostupná doprava zdarma, tak zobrazit pouze tuto možnost (+ nabídku vyzvednutí na pobočce).',
-          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
-        ),
-        array(
-          'title' => 'Poplatek za platbu (Kč)',
-          'type' => 'text',
-          'desc' => 'Doplňkový poplatek k objednávce je možné upřesnit podle konkrétní platební metody či v kombinaci se způsobem dopravy.',
-          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba'
-        ),
-        array(
-          'title' => 'Název poplatku za platbu',
-          'type' => 'text',
-          'desc' => 'Název poplatku za způsob platby.',
-          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba_nazev'
-        ),
-        array(
           'title' => 'Zakrouhlování',
           'type' => 'select',
           'desc_tip' => 'Možnosti zaokrouhlení celkové částky objednávky.',
@@ -670,6 +653,47 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
+        )
+      );
+    }
+
+    if ( 'doprava' == $current_section ) {
+      $settings = array(
+        array(
+          'title' => 'Doprava a pokladna',
+          'type' => 'title',
+          'desc' => 'Nastavení doplňkových možností pro dopravu a pokladnu.',
+          'id' => 'wc_ceske_sluzby_doprava_title'
+        ),
+        array(
+          'title' => 'Zásilkovna',
+          'type' => 'checkbox',
+          'desc' => 'Po aktivaci bude dostupné nastavení v menu Doprava - Zásilkovna a možnost přidávání této dopravní možnosti.',
+          'id' => 'wc_ceske_sluzby_doprava_zasilkovna'
+        ),
+        array(
+          'title' => 'Poplatek za platbu (Kč)',
+          'type' => 'text',
+          'desc' => 'Doplňkový poplatek k objednávce je možné upřesnit podle konkrétní platební metody či v kombinaci se způsobem dopravy.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Název poplatku za platbu',
+          'type' => 'text',
+          'desc' => 'Název poplatku za způsob platby.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba_nazev',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Pouze doprava zdarma',
+          'type' => 'checkbox',
+          'desc' => 'Pokud je dostupná doprava zdarma, tak zobrazit pouze tuto možnost (+ nabídku vyzvednutí na pobočce).',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_doprava_title'
         )
       );
     }
