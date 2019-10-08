@@ -60,9 +60,21 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
       }
       $overeno->setEmail( $posted['billing_email'] );
 
-      $products = $order->get_items();
-      foreach ( $products as $product ) {
-        $overeno->addProduct( $product['name'] );
+      $items = $order->get_items();
+      if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+        foreach ( $items as $item_data ) {
+          $overeno->addProduct( $item_data['name'] );
+        }
+      } else {
+        foreach ( $items as $item_id => $item_data ) {
+          $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+          if ( $aktivace_xml == "yes" ) {
+            $overeno->addProductItemId( $item_id );
+          } else {
+            $product = $item_data->get_product();
+            $overeno->addProduct( $product->get_name() );
+          }
+        }
       }
 
       $overeno->addOrderId( $order_id );
@@ -83,15 +95,23 @@ function ceske_sluzby_heureka_mereni_konverzi( $order_id ) {
   $api = get_option( 'wc_ceske_sluzby_heureka_konverze-api' );
   if ( ! empty( $api ) ) {
     $order = wc_get_order( $order_id );
-    $products = $order->get_items(); ?>
+    $items = $order->get_items(); ?>
 
 <script type="text/javascript">
 var _hrq = _hrq || [];
     _hrq.push(['setKey', '<?php echo $api; ?>']);
     _hrq.push(['setOrderId', '<?php echo $order_id; ?>']);
-    <?php foreach ( $products as $product ) {
-      $cena = wc_format_decimal( $order->get_item_subtotal( $product ) );
-      echo "_hrq.push(['addProduct', '" . $product['name'] . "', '" . $cena . "', '" . $product['qty'] . "']);";
+    <?php if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+      foreach ( $items as $item ) {
+        $cena = wc_format_decimal( $order->get_item_subtotal( $item ) );
+        echo "_hrq.push(['addProduct', '" . $item['name'] . "', '" . $cena . "', '" . $item['qty'] . "']);";
+      } 
+    } else {
+      foreach ( $items as $item_id => $item_data ) {
+        $product = $item_data->get_product();
+        $cena = wc_format_decimal( $item_data->get_total() / $item_data->get_quantity() );
+        echo "_hrq.push(['addProduct', '" . $product->get_name() . "', '" . $cena . "', '" . $item_data->get_quantity() . "']);";
+      }  
     } ?>
     _hrq.push(['trackOrder']);
 
@@ -168,17 +188,24 @@ var seznam_retargeting_id = <?php echo $konverze; ?>;
 function ceske_sluzby_srovname_mereni_konverzi( $order_id ) {
   $klic = get_option( 'wc_ceske_sluzby_srovname_konverze-objednavky' );
   if ( ! empty( $klic ) ) {
-  
     $order = wc_get_order( $order_id );
-    $products = $order->get_items(); ?>
+    $items = $order->get_items(); ?>
 
 <script type="text/javascript">
 var _srt = _srt || [];
     _srt.push(['_setShop', '<?php echo $klic; ?>']);
     _srt.push(['_setTransId', '<?php echo $order_id; ?>']);
-    <?php foreach ( $products as $product ) {
-      $cena = wc_format_decimal( $order->get_item_subtotal( $product ) );
-      echo "_srt.push(['_addProduct', '" . $product['name'] . "', '" . $cena . "', '" . $product['qty'] . "']);";
+    <?php if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+      foreach ( $items as $item ) {
+        $cena = wc_format_decimal( $order->get_item_subtotal( $item ) );
+        echo "_srt.push(['_addProduct', '" . $item['name'] . "', '" . $cena . "', '" . $item['qty'] . "']);";
+      }
+    } else {
+      foreach ( $items as $item_id => $item_data ) {
+        $product = $item_data->get_product();
+        $cena = wc_format_decimal( $item_data->get_total() / $item_data->get_quantity() );
+        echo "_srt.push(['_addProduct', '" . $product->get_name() . "', '" . $cena . "', '" . $item_data->get_quantity() . "']);";
+      }
     } ?>
     _srt.push(['_trackTrans']);
 
