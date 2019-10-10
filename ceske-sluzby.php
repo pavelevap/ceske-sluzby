@@ -68,10 +68,10 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
       } else {
         foreach ( $items as $item_id => $item_data ) {
           $aktivace_xml = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+          $product = $item_data->get_product();
           if ( $aktivace_xml == "yes" ) {
-            $overeno->addProductItemId( $item_id );
+            $overeno->addProductItemId( $product->get_id() );
           } else {
-            $product = $item_data->get_product();
             $overeno->addProduct( $product->get_name() );
           }
         }
