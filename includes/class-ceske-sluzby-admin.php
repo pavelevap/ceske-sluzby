@@ -83,6 +83,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'class' => 'wc-enhanced-select',
           'default' => ''
         );
+        $form_fields['ceske_sluzby_cena_dopravy'] = array(
+          'title' => 'Cena dopravy',
+          'type' => 'textarea',
+          'desc_tip' => 'Upřesněte nastavení cen pomocí intervalů',
+          'css' => 'width: 40%; height: 85px;',
+          'default' => ''
+        );
         if ( empty( $settings ) ) {
           $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Žádné platební metody nejsou dostupné.';
         } else {
@@ -307,6 +314,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     }
     if ( $type == 'doprava' ) {
       $options['platebni_metody'] = 'Dostupné platební metody';
+      $options['cena_dopravy'] = 'Cenové intervaly pro dopravu';
     }
     if ( $type == 'pokladna' ) {
       $reverse_type = 'pokladna_doprava';
@@ -684,6 +692,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'desc' => 'Název poplatku za způsob platby.',
           'id' => 'wc_ceske_sluzby_doprava_poplatek_platba_nazev',
           'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Ceny dopravy podle daně',
+          'type' => 'checkbox',
+          'desc' => 'Pokud v eshopu zadáváte ceny s daní, tak je bude možné používat i při základním nastavení dopravy.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-zpusob-dane'
         ),
         array(
           'title' => 'Pouze doprava zdarma',

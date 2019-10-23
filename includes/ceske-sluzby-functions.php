@@ -109,6 +109,23 @@ function ceske_sluzby_zpracovat_pocet_skladem( $pocet ) {
   return $pocet_skladem_array;
 }
 
+function ceske_sluzby_zpracovat_ceny_dopravy( $cena_dopravy_hodnoty, $cena_limit ) {
+  $cena_dopravy = array();
+  if ( ! empty( $cena_dopravy_hodnoty ) ) {
+    $cena_dopravy_tmp = array_values( array_filter( explode( PHP_EOL, $cena_dopravy_hodnoty ) ) );
+    array_walk( $cena_dopravy_tmp, 'ceske_sluzby_procistit_hodnoty' );
+    foreach ( $cena_dopravy_tmp as $cena_dopravy_hodnota ) {
+      $rozdeleno = explode( "|", $cena_dopravy_hodnota );
+      if ( count( $rozdeleno ) == 2 && is_numeric( $rozdeleno[0] ) && is_numeric( $rozdeleno[1] ) ) {
+        if ( $cena_limit > $rozdeleno[0] ) {
+          $cena_dopravy['cena'] = $rozdeleno[1];
+        }
+      }
+    }
+  }
+  return $cena_dopravy;
+}
+
 function ceske_sluzby_ziskat_zadanou_dodaci_dobu( $dodaci_doba, $actual_dodaci_doba ) {
   $availability = array();
   if ( empty( $dodaci_doba ) ) {

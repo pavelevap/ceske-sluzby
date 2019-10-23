@@ -1962,3 +1962,56 @@ function ceske_sluzby_zasilkovna_scripts_checkout() {
     <?php }
   }
 }
+
+add_filter( 'woocommerce_package_rates', 'ceske_sluzby_doprava_cenove_intervaly' );
+function ceske_sluzby_doprava_cenove_intervaly( $rates ) {
+  if ( ! is_admin() ) {
+    $nastaveni_doprava = get_option( 'wc_ceske_sluzby_nastaveni_doprava' );
+    if ( is_array( $nastaveni_doprava ) && in_array( 'cena_dopravy', $nastaveni_doprava ) ) {
+      $available_shipping = WC()->shipping->load_shipping_methods();
+      $cena_kosik = WC()->cart->subtotal;
+      $ceny_doprava = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_doprava-zpusob-dane' );
+      foreach( $rates as $key => $rate ) {
+        $cena_dopravy_array = array();
+        if ( strpos( $key, ':' ) === false ) {
+          if ( isset( $available_shipping[ $key ] ) ) {
+            $shipping_method = $available_shipping[$key];
+            $settings = $shipping_method->settings;
+          }
+        } else {
+          $pieces = explode( ":", $key );
+          if ( is_array( $pieces ) && ! empty( $pieces ) && count( $pieces ) == 2 ) {
+            $order_method = $pieces[0];
+            $order_instance = $pieces[1];
+            if ( is_numeric( $order_instance ) ) {
+              $shipping_method = WC_Shipping_Zones::get_shipping_method( $order_instance );
+              $settings = $shipping_method->instance_settings;
+            }
+          }
+        }
+        if ( isset( $settings['ceske_sluzby_cena_dopravy'] ) && ! empty( $settings['ceske_sluzby_cena_dopravy'] ) ) {
+          $cena_dopravy_array = ceske_sluzby_zpracovat_ceny_dopravy( $settings['ceske_sluzby_cena_dopravy'], $cena_kosik );
+        }
+        if ( empty( $cena_dopravy_array ) && wc_prices_include_tax() && $ceny_doprava == 'yes' ) {
+          $cena_dopravy_array['cena'] = $rates[$key]->cost;
+        }
+        if ( ! empty( $cena_dopravy_array ) ) {
+          $new_cost = wc_format_decimal( $cena_dopravy_array['cena'], wc_get_price_decimals() );
+          $rates[$key]->cost = $new_cost;
+          if ( wc_tax_enabled() && false !== $rates[$key]->taxes && $rates[$key]->cost > 0 && $shipping_method->is_taxable()) {
+            if ( wc_prices_include_tax() ) {
+              $taxes = WC_Tax::calc_inclusive_tax( $new_cost, WC_Tax::get_shipping_tax_rates() );
+            } else {
+              $taxes = WC_Tax::calc_exclusive_tax( $new_cost, WC_Tax::get_shipping_tax_rates() );
+            }
+            $rates[$key]->taxes = $taxes;
+          }
+          if ( wc_prices_include_tax() && $rates[$key]->cost > 0 ) {
+            $rates[$key]->cost = $new_cost - current( $taxes );
+          }
+        }
+      }
+    }
+  }
+  return $rates;
+}
