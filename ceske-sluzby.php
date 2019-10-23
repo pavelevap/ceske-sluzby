@@ -1996,6 +1996,9 @@ function ceske_sluzby_doprava_cenove_intervaly( $rates ) {
           $cena_dopravy_array['cena'] = $rates[$key]->cost;
         }
         if ( ! empty( $cena_dopravy_array ) ) {
+          if ( $cena_dopravy_array['cena'] == 0 ) {
+            $rates[$key]->taxes = 0;
+          }
           $new_cost = wc_format_decimal( $cena_dopravy_array['cena'], wc_get_price_decimals() );
           $rates[$key]->cost = $new_cost;
           if ( wc_tax_enabled() && false !== $rates[$key]->taxes && $rates[$key]->cost > 0 && $shipping_method->is_taxable()) {

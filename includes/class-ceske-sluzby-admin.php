@@ -83,6 +83,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'class' => 'wc-enhanced-select',
           'default' => ''
         );
+        if ( empty( $settings ) ) {
+          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Žádné platební metody nejsou dostupné.';
+        } else {
+          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Zvolte platební metody, které nebudou nadále dostupné.';
+        }
+      }
+      if ( in_array( 'cena_dopravy', $moznosti_nastaveni ) && array_key_exists( 'cena_dopravy', $options ) ) {
         $form_fields['ceske_sluzby_cena_dopravy'] = array(
           'title' => 'Cena dopravy',
           'type' => 'textarea',
@@ -90,11 +97,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 40%; height: 85px;',
           'default' => ''
         );
-        if ( empty( $settings ) ) {
-          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Žádné platební metody nejsou dostupné.';
-        } else {
-          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Zvolte platební metody, které nebudou nadále dostupné.';
-        }
       }
     }
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
