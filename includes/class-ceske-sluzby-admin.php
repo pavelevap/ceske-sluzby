@@ -702,6 +702,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-zpusob-dane'
         ),
         array(
+          'title' => 'Text pro dopravu zdarma',
+          'type' => 'text',
+          'desc' => 'V případě dopravy zdarma se nezobrazí žádná cena ani informace. Můžete zadat <code>{VALUE}</code> pro zobrazení nulové ceny nebo libovolný text (např. <code>ZDARMA</code>).',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-text-dopravy-zdarma',
+          'css' => 'width: 300px'
+        ),
+        array(
           'title' => 'Pouze doprava zdarma',
           'type' => 'checkbox',
           'desc' => 'Pokud je dostupná doprava zdarma, tak zobrazit pouze tuto možnost (+ nabídku vyzvednutí na pobočce).',

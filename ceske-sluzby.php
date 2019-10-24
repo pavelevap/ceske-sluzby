@@ -2018,3 +2018,18 @@ function ceske_sluzby_doprava_cenove_intervaly( $rates ) {
   }
   return $rates;
 }
+
+add_filter( 'woocommerce_cart_shipping_method_full_label', 'ceske_sluzby_doprava_text_pro_dopravu_zdarma', 10, 2 );
+function ceske_sluzby_doprava_text_pro_dopravu_zdarma( $label, $method ) {
+  if ( $method->cost == 0 ) {
+    $text_doprava_zdarma = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_doprava-text-dopravy-zdarma' );
+    if ( ! empty( $text_doprava_zdarma ) ) {
+      if ( $text_doprava_zdarma == '{VALUE}' ) {
+        $label .= ': ' . wc_price( $method->cost );
+      } else {
+        $label .= ': ' . $text_doprava_zdarma;
+      }
+    }
+  }
+  return $label;
+}
