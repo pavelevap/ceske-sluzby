@@ -1861,6 +1861,10 @@ function ceske_sluzby_zobrazeni_dodaci_doby_administrace( $stock_html, $produkt 
               $dodatek = ' title="Nastaveno na úrovni produktu"';
             }
           }
+          if ( empty( $dodaci_doba ) ) {
+            $availability = $varianta->get_availability();
+            $dodaci_doba['text'] = $availability['availability'];
+          }
           $stock_html .= '<br><span' . $source . $dodatek . '>' . $value_html . ': ' . $dodaci_doba['text'] . '</span>';
         }
       }

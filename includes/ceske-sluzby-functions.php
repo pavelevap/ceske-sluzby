@@ -44,7 +44,7 @@ function ceske_sluzby_zpracovat_dodaci_dobu_produktu( $dodatek, $product_id ) {
           if ( isset( $custom_dodaci_doba['source'] ) && strpos( $custom_dodaci_doba['source'], 'external product' ) !== false && $custom_dodaci_doba['value'] === '0' && $product->is_type( 'variable' ) ) {
             continue;
           }
-          if ( ! isset( $custom_dodaci_doba['source'] ) && $custom_dodaci_doba['value'] === '0' && ! $product->is_type( 'variation' ) ) {
+          if ( ! isset( $custom_dodaci_doba['source'] ) && $custom_dodaci_doba['value'] === '0' ) {
             continue;
           }
         }

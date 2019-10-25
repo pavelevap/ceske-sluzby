@@ -1022,8 +1022,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Hodnoty pro dodací dobu',
           'type' => 'textarea',
-          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.',
-          'default' => sprintf( '1|Skladem zítra%1$s3|Dostupné do 3 dnů%1$s7|Na objednávku do týdne', PHP_EOL ),
+          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu. Příklad:<br>
+                     <code>1|Skladem zítra</code><br>
+                     <code>3|Dostupné do 3 dnů</code><br>
+                     <code>7|Na objednávku do týdne</code><br>
+                     Můžete změnit také základní texty uváděné u produktů skladem (<code>0</code>), na objednávku (<code>98</code>) nebo není skladem (<code>99</code>).',
+          'default' => '',
           'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_hodnoty'
         ),
@@ -1060,9 +1064,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Intervaly počtu produktů',
           'type' => 'textarea',
           'desc' => 'Na každém řádku musí být uvedena číselná hodnota (dolní hranice počtu produktů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.
-                     Použít můžete také hodnotu <code>{VALUE}</code>, která zobrazí přesný počet produktů skladem.
+                     Použít můžete také hodnotu <code>{VALUE}</code>, která zobrazí přesný počet produktů skladem. Příklad:<br>
+                     <code>0|Skladem: {VALUE}</code><br>
+                     <code>5|Skladem 5+</code><br>
+                     <code>10|Skladem 10+</code><br>
                      Automaticky je také generována CSS třída ve formátu <code>skladem-{VALUE}</code>.',
-          'default' => sprintf( '0|Skladem: {VALUE}%1$s5|Skladem 5+%1$s10|Skladem 10+', PHP_EOL ),
+          'default' => '',
           'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
         ),
