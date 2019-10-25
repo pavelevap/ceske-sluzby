@@ -2027,7 +2027,7 @@ function ceske_sluzby_doprava_text_pro_dopravu_zdarma( $label, $method ) {
       if ( $text_doprava_zdarma == '{VALUE}' ) {
         $label .= ': ' . wc_price( $method->cost );
       } else {
-        $label .= ': ' . $text_doprava_zdarma;
+        $label .= ': <span class="woocommerce-Price-amount amount">' . $text_doprava_zdarma . '</span>';
       }
     }
   }
