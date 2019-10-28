@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action( 'woocommerce_email_header', $email_heading ); ?>
+do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php
 $odkaz_html = "";
@@ -25,4 +25,4 @@ if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {
   Objednávka byla odeslána a můžete ji sledovat zde: <?php echo $odkaz_html; ?>.
 </p>
 
-<?php do_action( 'woocommerce_email_footer' ); ?>
+<?php do_action( 'woocommerce_email_footer', $email ); ?>
