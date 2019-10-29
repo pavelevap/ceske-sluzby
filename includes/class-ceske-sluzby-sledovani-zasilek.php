@@ -135,7 +135,7 @@ class Ceske_Sluzby_Sledovani_Zasilek {
 
     $order = wc_get_order( $post_id );
     $shipping = $order->get_shipping_methods();
-    if ( ! empty ( $shipping ) && is_array ( $shipping ) ) {
+    if ( ! empty( $shipping ) && is_array ( $shipping ) ) {
       $shipping_item_id = key( $shipping );
       $item_id = $shipping_item_id;
     }
@@ -145,19 +145,25 @@ class Ceske_Sluzby_Sledovani_Zasilek {
       $dopravce = sanitize_text_field( $_POST['ceske_sluzby_sledovani_zasilek_dopravce'] );
       $id_zasilky_ulozeno = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
       $dopravce_ulozeno = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-      if ( ! empty ( $id_zasilky ) ) {
+      if ( ! empty( $id_zasilky ) ) {
         if ( $id_zasilky != $id_zasilky_ulozeno ) {
           wc_update_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', $id_zasilky );
         }
       } else {
         wc_delete_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky' );
       }
-      if ( ! empty ( $dopravce ) ) {
+      if ( ! empty( $dopravce ) ) {
         if ( $dopravce != $dopravce_ulozeno ) {
           wc_update_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', $dopravce );
         }
       } else {
         wc_delete_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce' );
+      }
+      if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) && ( $order->has_status( 'on-hold' ) || $order->has_status( 'processing' ) ) ) {
+        $aktivace_odeslano = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano' );
+        if ( $aktivace_odeslano == "yes" ) {
+          $_POST['order_status'] = "wc-odeslano";
+        }
       }
     }
   }
@@ -168,7 +174,7 @@ class Ceske_Sluzby_Sledovani_Zasilek {
 
     $order = wc_get_order( $post->ID );
     $shipping = $order->get_shipping_methods();
-    if ( ! empty ( $shipping ) && is_array ( $shipping ) ) {
+    if ( ! empty( $shipping ) && is_array ( $shipping ) ) {
       $shipping_item_id = key( $shipping );
       $item_id = $shipping_item_id;
     }

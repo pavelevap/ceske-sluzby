@@ -2075,6 +2075,7 @@ function ceske_sluzby_odebrat_bankovni_ucet_po_dokonceni_objednavky() {
 add_filter( 'woocommerce_admin_order_actions', 'ceske_sluzby_zmena_stavu_platba_predem_administrace_ikony', 100, 2 );
 function ceske_sluzby_zmena_stavu_platba_predem_administrace_ikony( $actions, $order ) {
   $zmena_platby_predem = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem' );
+  $aktivace_odeslano = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano' );
   if ( $zmena_platby_predem == "yes" ) {
     if ( $order->has_status( 'processing' ) ) {
       $on_hold = array( 'on-hold' => array(
@@ -2094,6 +2095,15 @@ function ceske_sluzby_zmena_stavu_platba_predem_administrace_ikony( $actions, $o
     }
     unset( $actions['processing'] );
   }
+  elseif ( $aktivace_odeslano == "yes" ) {
+    if ( $order->has_status( 'odeslano' ) ) {
+      $actions['complete'] = array(
+        'url' => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+        'name' => __( 'Complete', 'woocommerce' ),
+        'action' => 'complete',
+      );
+    }
+  }
   return $actions;
 }
 
@@ -2107,4 +2117,31 @@ function ceske_sluzby_stylovani_tlacitek_objednavky_administrace_css() {
       }
     </style>
   <?php }
+}
+
+add_action( 'init', 'ceske_sluzby_registrace_stavu_objednavky_odeslano' );
+function ceske_sluzby_registrace_stavu_objednavky_odeslano() {
+  $aktivace_odeslano = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano' );
+  if ( $aktivace_odeslano == "yes" ) {
+    register_post_status( 'wc-odeslano', array(
+      'label' => 'Odesláno',
+      'public' => true,
+      'show_in_admin_status_list' => true,
+      'show_in_admin_all_list' => true,
+      'exclude_from_search' => false,
+      'label_count' => _n_noop( 'Odesláno <span class="count">(%s)</span>', 'Odesláno <span class="count">(%s)</span>' )
+    ) );
+    add_filter( 'wc_order_statuses', 'ceske_sluzby_zobrazovat_status_objednano' );
+  }
+}
+
+function ceske_sluzby_zobrazovat_status_objednano( $order_statuses ) {
+  $new_order_statuses = array();
+  foreach ( $order_statuses as $key => $status ) {
+    $new_order_statuses[ $key ] = $status;
+    if ( 'wc-processing' === $key || 'wc-on-hold' === $key ) {
+      $new_order_statuses['wc-odeslano'] = 'Odesláno';
+    }
+  }
+  return $new_order_statuses;
 }

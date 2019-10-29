@@ -628,6 +628,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
         ),
         array(
+          'title' => 'Status "Odesláno"',
+          'type' => 'checkbox',
+          'desc' => 'Aktivace nového stavu objednávky s názvem "Odesláno", který bude automaticky použit při vyplnění údajů určených ke sledování zásilky.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano'
+        ),
+        array(
           'title' => 'Potvrzovat platbu předem',
           'type' => 'checkbox',
           'desc' => 'Změna základního stavu objednávky umožní nejdříve zkontrolovat objednávku než budou odeslány údaje o bankovním účtu pro platbu předem.',
