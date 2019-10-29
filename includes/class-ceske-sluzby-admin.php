@@ -628,6 +628,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
         ),
         array(
+          'title' => 'Potvrzovat platbu předem',
+          'type' => 'checkbox',
+          'desc' => 'Změna základního stavu objednávky umožní nejdříve zkontrolovat objednávku než budou odeslány údaje o bankovním účtu pro platbu předem.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem'
+        ),
+        array(
           'title' => 'Dodací doba',
           'type' => 'checkbox',
           'desc' => 'Aktivovat možnost podrobného nastavení dodací doby, které bude dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">zde</a>.',

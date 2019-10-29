@@ -396,6 +396,14 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
       add_filter( 'woocommerce_calc_tax', 'ceske_sluzby_zmena_kalkulace_dani' );
       add_filter( 'woocommerce_tax_round', 'ceske_sluzby_zmena_zaokrouhlovani_dani' );
     }
+    $zmena_platby_predem = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem' );
+    if ( $zmena_platby_predem == "yes" ) {
+      add_filter( 'woocommerce_bacs_process_payment_order_status','ceske_sluzby_zmena_stavu_objednavky_platba_predem', 10, 2 );
+      add_filter( 'woocommerce_email_actions', 'ceske_sluzby_moznost_odesilat_emaily_zmena_stavu_platba_predem' );
+      add_action( 'woocommerce_email', 'ceske_sluzby_zmena_emailovych_notifikaci_platba_predem' );
+      add_action( 'init', 'ceske_sluzby_odebrat_bankovni_ucet_po_dokonceni_objednavky', 100 );
+      add_action( 'admin_head', 'ceske_sluzby_stylovani_tlacitek_objednavky_administrace_css' );
+    }
   }
 }
 add_action( 'plugins_loaded', 'ceske_sluzby_kontrola_aktivniho_pluginu' );
@@ -2036,4 +2044,67 @@ function ceske_sluzby_doprava_text_pro_dopravu_zdarma( $label, $method ) {
     }
   }
   return $label;
+}
+
+function ceske_sluzby_zmena_stavu_objednavky_platba_predem( $status, $order ) {
+  return 'processing';
+}
+
+function ceske_sluzby_moznost_odesilat_emaily_zmena_stavu_platba_predem( $email_actions ) {
+  $email_actions[] = 'woocommerce_order_status_processing_to_on-hold';
+  return $email_actions;
+}
+
+function ceske_sluzby_zmena_emailovych_notifikaci_platba_predem( $email_class ) {
+  remove_action( 'woocommerce_order_status_on-hold_to_processing_notification', array( $email_class->emails['WC_Email_Customer_Processing_Order'], 'trigger' ) );
+  add_action( 'woocommerce_order_status_processing_to_on-hold_notification', array( $email_class->emails['WC_Email_Customer_On_Hold_Order'], 'trigger' ) );
+}
+
+function ceske_sluzby_odebrat_bankovni_ucet_po_dokonceni_objednavky() {
+  if ( ! function_exists( 'WC' ) ) {
+    return;
+  }
+  $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+  $gateway = isset( $available_gateways['bacs'] ) ? $available_gateways['bacs'] : false;
+  if ( false == $gateway ) {
+    return;
+  }
+  remove_action( 'woocommerce_thankyou_bacs', array( $gateway, 'thankyou_page' ) );
+}
+
+add_filter( 'woocommerce_admin_order_actions', 'ceske_sluzby_zmena_stavu_platba_predem_administrace_ikony', 100, 2 );
+function ceske_sluzby_zmena_stavu_platba_predem_administrace_ikony( $actions, $order ) {
+  $zmena_platby_predem = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem' );
+  if ( $zmena_platby_predem == "yes" ) {
+    if ( $order->has_status( 'processing' ) ) {
+      $on_hold = array( 'on-hold' => array(
+        'url' => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+        'name' => __( 'On-hold', 'woocommerce' ),
+        'action' => 'on-hold',
+      ) );
+      $actions = array_merge( $on_hold, $actions );
+      unset( $actions['complete'] );
+    }
+    if ( $order->has_status( 'odeslano' ) ) {
+      $actions['complete'] = array(
+        'url' => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+        'name' => __( 'Complete', 'woocommerce' ),
+        'action' => 'complete',
+      );
+    }
+    unset( $actions['processing'] );
+  }
+  return $actions;
+}
+
+function ceske_sluzby_stylovani_tlacitek_objednavky_administrace_css() {
+  global $pagenow;
+  if ( $pagenow == 'edit.php' || $pagenow == 'post.php' ) { ?>
+    <style type="text/css">
+      .widefat .column-wc_actions a.on-hold::after {
+        font-family: "WooCommerce";
+        content: "\e00f";
+      }
+    </style>
+  <?php }
 }
