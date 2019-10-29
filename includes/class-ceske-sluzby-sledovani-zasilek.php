@@ -25,12 +25,19 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
       'url' => 'http://tandt.posta.sk/zasielky/%ID%',
       'lang' => 'SK'
     ),
+    'Zasilkovna' => array(
+      'nazev' => 'Zásilkovna',
+      'lang' => array(
+        'CZ' => 'https://www.zasilkovna.cz/vyhledavani/?det=%ID%',
+        'SK' => 'https://www.zasielkovna.sk/vyhladavanie/?det=%ID%'
+      )
+    ),
     'DPD' => array(
       'nazev' => 'DPD',
       'lang' => array(
-                  'CZ' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ',
-                  'SK' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=sk_SK'
-                )
+        'CZ' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ',
+        'SK' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=sk_SK'
+      )
     ),
     'INTIME' => array(
       'nazev' => 'Intime',
@@ -45,23 +52,23 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
     'DHL' => array(
       'nazev' => 'DHL',
       'lang' => array(
-                  'CZ' => 'http://www.dhl.cz/content/cz/cs/express/sledovani_zasilek.shtml?brand=DHL&AWB=%ID%',
-                  'SK' => 'http://www.dhl.sk/content/sk/sk/express/sledovanie_zasielky.shtml?brand=DHL&AWB=%ID%'
-                )
+        'CZ' => 'http://www.dhl.cz/content/cz/cs/express/sledovani_zasilek.shtml?brand=DHL&AWB=%ID%',
+        'SK' => 'http://www.dhl.sk/content/sk/sk/express/sledovanie_zasielky.shtml?brand=DHL&AWB=%ID%'
+      )
     ),
     'GEIS' => array(
       'nazev' => 'Geis',
       'lang' => array(
-                  'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
-                  'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
-                )
+        'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
+        'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
+      )
     ),
     'GLS' => array(
       'nazev' => 'GLS',
       'lang' => array(
-                  'CZ' => 'https://gls-group.eu/CZ/cs/sledovani-zasilek?match=%ID%',
-                  'SK' => 'https://gls-group.eu/SK/sk/sledovanie-zasielok?match=%ID%'
-                )
+        'CZ' => 'https://gls-group.eu/CZ/cs/sledovani-zasilek?match=%ID%',
+        'SK' => 'https://gls-group.eu/SK/sk/sledovanie-zasielok?match=%ID%'
+      )
     )
   );
   foreach ( $dopravci as $key => $dopravce ) {
