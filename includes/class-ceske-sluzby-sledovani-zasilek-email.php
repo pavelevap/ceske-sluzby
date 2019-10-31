@@ -43,9 +43,13 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
     if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
       return;
     }
-    $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-    if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
-      $this->object->add_order_note( 'Sledování zásilek: Emailová notifikace byla odeslána.' );
+    if ( ! empty( $_POST['ceske_sluzby_sledovani_zasilek_id_zasilky'] ) && ! empty( $_POST['ceske_sluzby_sledovani_zasilek_dopravce'] ) ) {
+      $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+      if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+        $this->object->add_order_note( 'Sledování zásilek: Emailová notifikace byla odeslána.' );
+      }
+    } else {
+      $this->object->add_order_note( 'CHYBA: Emailová notifikace nebyla odeslána (chybí potřebné informace o zásilce).' );
     }
   }
 
