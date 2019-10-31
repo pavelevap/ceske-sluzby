@@ -229,7 +229,10 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     $aktivace_email = get_option( 'woocommerce_wc_email_ceske_sluzby_sledovani_zasilek_settings' );
     if ( isset ( $aktivace_email['enabled'] ) && $aktivace_email['enabled'] == "yes" ) {
       if ( $order->has_status( 'on-hold' ) ) {
-        echo '<p>Asi není moc dobrý nápad odesílat nezaplacenou objednávku?';
+        $zmena_platby_predem = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem' );
+        if ( $zmena_platby_predem != "yes" ) {
+          echo '<p>Asi není moc dobrý nápad odesílat nezaplacenou objednávku?';
+        }
       } else {
     ?>
     <br />
