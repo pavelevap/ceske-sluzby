@@ -333,7 +333,9 @@ function ceske_sluzby_kontrola_aktivniho_pluginu() {
     $sledovani_zasilek = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek' );
     if ( $sledovani_zasilek == "yes" ) {
       add_filter( 'woocommerce_email_classes', 'ceske_sluzby_sledovani_zasilek_email' );
-      add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
+      if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+        add_filter( 'woocommerce_email_actions', 'ceske_sluzby_sledovani_zasilek_email_akce' );
+      }
     }
 
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
@@ -1586,7 +1588,7 @@ function ceske_sluzby_load_admin_scripts() {
   $screen_id = $screen ? $screen->id : '';
   $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
   $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
-  if ( in_array( $screen_id, array( 'product', 'edit-product', 'shop_order' ) ) && $predobjednavka == "yes" ) {
+  if ( ( in_array( $screen_id, array( 'product', 'edit-product' ) ) && $predobjednavka == "yes" ) || $screen_id == 'shop_order' ) {
     wp_register_script( 'wc-admin-ceske-sluzby', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-admin.js', array( 'jquery-ui-datepicker' ), CS_VERSION );
     wp_enqueue_script( 'wc-admin-ceske-sluzby' );
   }

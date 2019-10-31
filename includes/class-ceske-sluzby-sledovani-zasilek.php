@@ -95,9 +95,18 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     add_action( 'woocommerce_process_shop_order_meta', array( $this, 'save' ) );
     $aktivace_email = get_option( 'woocommerce_wc_email_ceske_sluzby_sledovani_zasilek_settings' );
     if ( isset ( $aktivace_email['enabled'] ) && $aktivace_email['enabled'] == "yes" ) {
-      add_filter( 'woocommerce_resend_order_emails_available', array( $this, 'moznost_odesilat_email_sledovani_zasilek' ) );
+      if ( version_compare( WC_VERSION, '3.2', '<' ) ) {
+        add_filter( 'woocommerce_resend_order_emails_available', array( $this, 'moznost_odesilat_email_sledovani_zasilek_deprecated' ) );
+      } else {
+        add_filter( 'woocommerce_order_actions', array( $this, 'moznost_odesilat_email_sledovani_zasilek' ) );
+        add_action( 'woocommerce_order_action_wc_email_ceske_sluzby_sledovani_zasilek', array( $this, 'trigger_action' ) );
+      }
     }
     add_filter( 'woocommerce_hidden_order_itemmeta', array( $this, 'skryt_zobrazeni_hodnot' ) );
+  }
+
+  public function trigger_action( $order ) {
+    do_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce', $order );
   }
 
   public function add_meta_box( $post_type ) {
@@ -113,10 +122,15 @@ class Ceske_Sluzby_Sledovani_Zasilek {
       );
     }
   }
-  
-  public function moznost_odesilat_email_sledovani_zasilek( $available_emails ) {
+
+  public function moznost_odesilat_email_sledovani_zasilek_deprecated( $available_emails ) {
     $available_emails[] = 'wc_email_ceske_sluzby_sledovani_zasilek';
     return $available_emails;
+  }
+
+  public function moznost_odesilat_email_sledovani_zasilek( $actions ) {
+    $actions['wc_email_ceske_sluzby_sledovani_zasilek'] = 'Email o sledované zásilce';
+    return $actions;
   }
 
   public function skryt_zobrazeni_hodnot( $keys ) {

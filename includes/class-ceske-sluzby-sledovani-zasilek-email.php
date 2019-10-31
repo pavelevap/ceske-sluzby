@@ -17,7 +17,9 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
     $this->template_html  = 'sledovani-zasilek.php';
     $this->template_plain = 'sledovani-zasilek-plain.php';
 
-    add_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce_notification', array( $this, 'trigger' ) );
+    if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+      add_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce_notification', array( $this, 'trigger' ) );
+    }
     add_filter( 'woocommerce_locate_core_template', array( $this, 'ceske_sluzby_locate_template' ), 10, 3 );
     parent::__construct();
   }
@@ -42,7 +44,10 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
       return;
     }
     $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-	}
+    if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+      $this->object->add_order_note( 'Sledování zásilek: Emailová notifikace byla odeslána.' );
+    }
+  }
 
   function get_content_html() {
     ob_start();
