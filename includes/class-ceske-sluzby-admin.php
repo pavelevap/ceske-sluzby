@@ -386,13 +386,28 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $form_fields = array();
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     $options = self::dostupne_nastaveni( 'pokladna' );
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
+
+    $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+      'title' => 'České služby',
+      'type' => 'title',
+    );
+    $variabilni_symbol['ceske_sluzby_variabilni_symbol'] = array(
+      'title' => 'Variabilní symbol',
+      'type' => 'checkbox',
+      'label' => 'K bankovním údajům o platbě předem bude doplněn variabilní symbol v podobě čísla objednávky.'
+    );
+    $available_gateways['bacs']->form_fields += $form_fields;
+    $available_gateways['bacs']->form_fields += $variabilni_symbol;
+
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
-      $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
-        $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
-          'title' => 'České služby',
-          'type' => 'title',
-        );
+        if ( $gateway_id != "bacs" ) {
+          $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+            'title' => 'České služby',
+            'type' => 'title',
+          );
+        }
         if ( in_array( 'poplatek_platba', $moznosti_nastaveni ) ) {
           $form_fields['ceske_sluzby_poplatek_platba'] = array(
             'title' => 'Poplatek za platbu',
@@ -638,6 +653,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'checkbox',
           'desc' => 'Změna základního stavu objednávky umožní nejdříve zkontrolovat objednávku než budou odeslány údaje o bankovním účtu pro platbu předem.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem'
+        ),
+        array(
+          'title' => 'Formát čísla objednávky',
+          'type' => 'text',
+          'desc' => 'Možnost nastavení vlastního číslování objednávek. Zatím je podporován jediný formát, a to <code>{DATE:Ymd}{SEQUENCE:d|2}</code>',
+          'id' => 'wc_ceske_sluzby_format_cisla_objednavky',
+          'css' => 'width: 300px'
         ),
         array(
           'title' => 'Dodací doba',

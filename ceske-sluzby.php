@@ -2147,3 +2147,64 @@ function ceske_sluzby_zobrazovat_status_objednano( $order_statuses ) {
   }
   return $new_order_statuses;
 }
+
+add_filter( 'woocommerce_order_number', 'ceske_sluzby_zmenit_cislo_objednavky', 10, 2 );
+function ceske_sluzby_zmenit_cislo_objednavky( $order_id, $order ) {
+  $format_cisla = get_option( 'wc_ceske_sluzby_format_cisla_objednavky' );
+  if ( ! empty( $format_cisla ) && $format_cisla == "{DATE:Ymd}{SEQUENCE:d|2}" ) {
+    $cislo_objednavky = get_post_meta( $order_id, '_ceske_sluzby_cislo_objednavky', true );
+    if ( ! empty( $cislo_objednavky ) ) {
+      return $cislo_objednavky;
+    } else {
+      return $order_id;
+    }
+  }
+}
+
+// https://github.com/joydipnath/Custom-Order-Number-Woo
+add_action( 'woocommerce_new_order', 'ceske_sluzby_ulozit_nastavene_cislo_objednavky' );
+function ceske_sluzby_ulozit_nastavene_cislo_objednavky( $order_id ) {
+  $format_cisla = get_option( 'wc_ceske_sluzby_format_cisla_objednavky' );
+  if ( ! empty( $format_cisla ) && $format_cisla == "{DATE:Ymd}{SEQUENCE:d|2}" ) {
+    $last_order = get_option( 'ceske_sluzby_cislo_objednavky' );
+    $actual_date = current_time( 'Ymd' );
+    if ( ! empty( $last_order ) ) {
+      $last_order_date = substr( $last_order, 0, 8 );
+      $last_sequence = substr( $last_order, 8, 2 );
+      $last_sequence_number = ltrim( $last_sequence, "0" );
+      if ( $actual_date == $last_order_date ) {
+        $sequence = $last_sequence_number + 1;
+        $sequence = sprintf( '%02d', $sequence );
+      } else {
+        $sequence = sprintf( '%02d', 1 );
+      }
+    } else {
+      $sequence = sprintf( '%02d', 1 );
+    }
+    $order_number = $actual_date . $sequence;
+    update_post_meta( $order_id, '_ceske_sluzby_cislo_objednavky', $order_number );
+    update_option( 'ceske_sluzby_cislo_objednavky', $order_number );
+  }
+};
+
+add_filter( 'woocommerce_bacs_account_fields', 'ceske_sluzby_platba_predem_variabilni_symbol', 10, 2 );
+function ceske_sluzby_platba_predem_variabilni_symbol( $account_fields, $order_id ) {
+  $bacs_settings = get_option( 'woocommerce_bacs_settings' ); 
+  if ( isset( $bacs_settings['ceske_sluzby_variabilni_symbol'] ) && $bacs_settings['ceske_sluzby_variabilni_symbol'] == "yes" ) {
+    if ( isset( $account_fields['account_number']['value'] ) && ! empty( $account_fields['account_number']['value'] ) ) {
+      $order = wc_get_order( $order_id );;
+      $account_fields_new = array();
+      foreach( $account_fields as $key => $value ) {
+        $account_fields_new[$key] = $value;
+        if ( $key === 'account_number' ) {
+          $account_fields_new['variabilni-symbol'] = array(
+            'label' => 'Variabilní symbol',
+            'value' => $order->get_order_number()
+          );
+        }
+      }
+      return $account_fields_new;
+    }
+  }
+  return $account_fields;
+}
