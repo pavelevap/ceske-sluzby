@@ -386,19 +386,21 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $form_fields = array();
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     $options = self::dostupne_nastaveni( 'pokladna' );
-    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
+    $available_gateways = WC()->payment_gateways->payment_gateways();
 
-    $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
-      'title' => 'České služby',
-      'type' => 'title',
-    );
-    $variabilni_symbol['ceske_sluzby_variabilni_symbol'] = array(
-      'title' => 'Variabilní symbol',
-      'type' => 'checkbox',
-      'label' => 'K bankovním údajům o platbě předem bude doplněn variabilní symbol v podobě čísla objednávky.'
-    );
-    $available_gateways['bacs']->form_fields += $form_fields;
-    $available_gateways['bacs']->form_fields += $variabilni_symbol;
+    if ( isset( $available_gateways['bacs'] ) ) {
+      $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+        'title' => 'České služby',
+        'type' => 'title',
+      );
+      $variabilni_symbol['ceske_sluzby_variabilni_symbol'] = array(
+        'title' => 'Variabilní symbol',
+        'type' => 'checkbox',
+        'label' => 'K bankovním údajům o platbě předem bude doplněn variabilní symbol v podobě čísla objednávky.'
+      );
+      $available_gateways['bacs']->form_fields += $form_fields;
+      $available_gateways['bacs']->form_fields += $variabilni_symbol;
+    }
 
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
       foreach ( $available_gateways as $gateway_id => $gateway ) {
