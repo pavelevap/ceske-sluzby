@@ -2155,10 +2155,9 @@ function ceske_sluzby_zmenit_cislo_objednavky( $order_id, $order ) {
     $cislo_objednavky = get_post_meta( $order_id, '_ceske_sluzby_cislo_objednavky', true );
     if ( ! empty( $cislo_objednavky ) ) {
       return $cislo_objednavky;
-    } else {
-      return $order_id;
     }
   }
+  return $order_id;
 }
 
 // https://github.com/joydipnath/Custom-Order-Number-Woo
