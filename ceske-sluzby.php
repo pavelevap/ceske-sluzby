@@ -1111,16 +1111,16 @@ function ceske_sluzby_xml_kategorie_pridat_pole() {
 function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   $checked = '';
   $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
-  $heureka_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-  $heureka_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-productname', true );
-  $zbozi_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
-  $zbozi_productname = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-productname', true );
-  $glami_kategorie = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
-  $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
-  $xml_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
-  $xml_feed_vynechano_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
-  $xml_erotika_ulozeno = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
-  $xml_stav_produktu = get_woocommerce_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
+  $heureka_kategorie = get_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+  $heureka_productname = get_term_meta( $term->term_id, 'ceske-sluzby-xml-heureka-productname', true );
+  $zbozi_kategorie = get_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+  $zbozi_productname = get_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-productname', true );
+  $glami_kategorie = get_term_meta( $term->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
+  $kategorie_extra_message_ulozeno = get_term_meta( $term->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
+  $xml_vynechano_ulozeno = get_term_meta( $term->term_id, 'ceske-sluzby-xml-vynechano', true );
+  $xml_feed_vynechano_ulozeno = get_term_meta( $term->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
+  $xml_erotika_ulozeno = get_term_meta( $term->term_id, 'ceske-sluzby-xml-erotika', true );
+  $xml_stav_produktu = get_term_meta( $term->term_id, 'ceske-sluzby-xml-stav-produktu', true );
   $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
   $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
   $xml_feed_glami = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
@@ -1303,7 +1303,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
           $value = str_replace( 'Glami.cz | ', '', $value );
           $value = str_replace( 'Glami.sk | ', '', $value );
         }
-        $ulozeno_text = get_woocommerce_term_meta( $term_id, $key, true );
+        $ulozeno_text = get_term_meta( $term_id, $key, true );
         if ( ! empty( $value ) ) {
           update_woocommerce_term_meta( $term_id, $key, esc_attr( $value ) );
         } elseif ( ! empty( $ulozeno_text ) ) {
@@ -1319,7 +1319,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
       'ceske-sluzby-xml-zbozi-extra-message'
     );
     foreach ( $ukladana_data_checkbox as $key ) {
-      $ulozeno_checkbox = get_woocommerce_term_meta( $term_id, $key, true );
+      $ulozeno_checkbox = get_term_meta( $term_id, $key, true );
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
         if ( ! empty( $value ) ) {
@@ -1340,13 +1340,13 @@ function ceske_sluzby_xml_kategorie_pridat_sloupec( $columns ) {
 
 function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
   if ( 'xml-heureka' == $column ) {
-    $heureka_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
+    $heureka_kategorie = get_term_meta( $id, 'ceske-sluzby-xml-heureka-kategorie', true );
     $heureka_nazev = false;
     if ( $heureka_kategorie ) {
       $columns .= 'Heureka: <a href="#" title="' . $heureka_kategorie . '">KA</a>';
       $heureka_nazev = true;
     }
-    $heureka_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-heureka-productname', true );
+    $heureka_productname = get_term_meta( $id, 'ceske-sluzby-xml-heureka-productname', true );
     if ( $heureka_productname ) {
       if ( $heureka_nazev ) {
         $columns .= ' <a href="#" title="' . $heureka_productname . '">PR</a>';
@@ -1358,13 +1358,13 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
     if ( $heureka_nazev ) {
       $columns .= '<br />';
     }
-    $zbozi_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+    $zbozi_kategorie = get_term_meta( $id, 'ceske-sluzby-xml-zbozi-kategorie', true );
     $zbozi_nazev = false;
     if ( $zbozi_kategorie ) {
       $columns .= 'Zboží: <a href="#" title="' . $zbozi_kategorie . '">KA</a>';
       $zbozi_nazev = true;
     }
-    $zbozi_productname = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-productname', true );
+    $zbozi_productname = get_term_meta( $id, 'ceske-sluzby-xml-zbozi-productname', true );
     if ( $zbozi_productname ) {
       if ( $zbozi_nazev ) {
         $columns .= ' <a href="#" title="' . $zbozi_productname . '">PR</a>';
@@ -1373,9 +1373,9 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
         $zbozi_nazev = true;
       }
     }
-    $glami_kategorie = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-glami-kategorie', true );
+    $glami_kategorie = get_term_meta( $id, 'ceske-sluzby-xml-glami-kategorie', true );
     $extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
-    $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-zbozi-extra-message', true );
+    $kategorie_extra_message_ulozeno = get_term_meta( $id, 'ceske-sluzby-xml-zbozi-extra-message', true );
     if ( ! empty( $kategorie_extra_message_ulozeno ) ) {
       $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
       foreach ( $kategorie_extra_message_ulozeno as $key => $value ) {
@@ -1398,8 +1398,8 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       }
       $columns .= 'Glami: <a href="#" title="' . $glami_kategorie . '">KA</a>';
     }
-    $kategorie_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
-    $kategorie_feed_vynechano = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-feed-vynechano', true );
+    $kategorie_vynechano = get_term_meta( $id, 'ceske-sluzby-xml-vynechano', true );
+    $kategorie_feed_vynechano = get_term_meta( $id, 'ceske-sluzby-xml-feed-vynechano', true );
     if ( $kategorie_vynechano ) {
       $columns .= '<span style="margin-left: 10px; color: red; font-weight: bold;">X</span>';
     } elseif ( $kategorie_feed_vynechano ) {
@@ -1417,7 +1417,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       $title .= '"';
       $columns .= '<span style="margin-left: 10px; color: red;"' . $title . '>x</span>';
     }
-    $stav_produktu = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-stav-produktu', true );
+    $stav_produktu = get_term_meta( $id, 'ceske-sluzby-xml-stav-produktu', true );
     if ( ! empty( $stav_produktu ) ) {
       if ( $stav_produktu == 'used' ) {
         $stav_produktu_hodnota = 'Použité (bazar)';
@@ -1426,7 +1426,7 @@ function ceske_sluzby_xml_kategorie_sloupec( $columns, $column, $id ) {
       }
       $columns .= '<br />' . $stav_produktu_hodnota;
     }
-    $erotika = get_woocommerce_term_meta( $id, 'ceske-sluzby-xml-erotika', true );
+    $erotika = get_term_meta( $id, 'ceske-sluzby-xml-erotika', true );
     if ( $erotika ) {
       if ( $erotika == 'yes' ) {
         $erotika_hodnota = 'Erotický obsah';

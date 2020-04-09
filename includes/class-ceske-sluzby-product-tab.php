@@ -49,10 +49,10 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $extra_message_kategorie_array = array();
     $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
     foreach ( $product_categories as $kategorie_produktu ) {
-      $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
-      $xml_feed_vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
-      $stav_produktu = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
-      $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
+      $vynechano = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
+      $xml_feed_vynechano = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
+      $stav_produktu = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
+      $kategorie_extra_message_ulozeno = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
       if ( ! empty( $vynechano ) ) {
         if ( ! empty( $vynechane_kategorie ) ) {
           $vynechane_kategorie .= ", ";
@@ -157,7 +157,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       );
       $kategorie_heureka = "";
       foreach ( $product_categories as $kategorie_produktu ) {
-        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
+        $kategorie = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
         if ( ! empty( $kategorie ) ) {
           if ( empty( $kategorie_heureka ) ) {
             $kategorie_heureka = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
@@ -208,7 +208,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
       $kategorie_zbozi = "";
       foreach ( $product_categories as $kategorie_produktu ) {
-        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
+        $kategorie = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
         if ( ! empty( $kategorie ) ) {
           if ( empty( $kategorie_zbozi ) ) {
             $kategorie_zbozi = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
@@ -270,7 +270,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=glami&pid=' . $post->ID . '">XML produktu</a>)</div>';
       $kategorie_glami = "";
       foreach ( $product_categories as $kategorie_produktu ) {
-        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
+        $kategorie = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
         if ( ! empty( $kategorie ) ) {
           if ( empty( $kategorie_glami ) ) {
             $kategorie_glami = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
