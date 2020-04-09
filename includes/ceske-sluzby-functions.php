@@ -439,7 +439,7 @@ function ceske_sluzby_zobrazit_xml_hodnotu( $postmeta_id, $product_id, $post, $t
   $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
   if ( ! empty( $product_categories ) ) {
     foreach ( $product_categories as $kategorie_produktu ) {
-      $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, $termmeta_id, true );
+      $kategorie = get_term_meta( $kategorie_produktu->term_id, $termmeta_id, true );
       if ( ! empty( $kategorie ) ) {
         if ( $kategorie == $aktualni_kategorie_nazev_produkt ) {
           $kategorie_url = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';

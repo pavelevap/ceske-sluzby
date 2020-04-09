@@ -67,11 +67,11 @@ function ceske_sluzby_xml_ziskat_vynechane_kategorie( $feed ) {
   $product_categories = get_terms( 'product_cat' ); // Do budoucna použít parametr meta_query?
   if ( ! empty( $product_categories ) && ! is_wp_error( $product_categories ) ) {
     foreach ( $product_categories as $kategorie_produktu ) {
-      $vynechano_vse = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
+      $vynechano_vse = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano' );
       if ( ! empty( $vynechano_vse ) ) {
         $vynechane_kategorie[] = $kategorie_produktu->term_id;
       } else {
-        $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano' );
+        $vynechano = get_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano' );
         if ( ! empty( $vynechano ) && isset( $vynechano[$feed] ) ) {
           $vynechane_kategorie[] = $kategorie_produktu->term_id;
         }
@@ -94,7 +94,7 @@ function ceske_sluzby_xml_ziskat_prirazene_hodnoty_kategorie( $product_categorie
   $prirazene_hodnoty = array();
   if ( ! empty( $product_categories ) ) {
     foreach ( $product_categories as $kategorie ) {
-      $hodnota = get_woocommerce_term_meta( $kategorie->term_id, $termmeta_key, true );
+      $hodnota = get_term_meta( $kategorie->term_id, $termmeta_key, true );
       if ( ! empty( $hodnota ) ) {
         if ( is_array( $hodnota ) ) {
           $prirazene_hodnoty = array_merge( $prirazene_hodnoty, $hodnota );
@@ -120,7 +120,7 @@ function ceske_sluzby_xml_ziskat_kategorie_produktu( $product_id, $postmeta_prod
     $dostupne_kategorie = ceske_sluzby_xml_ziskat_prirazene_kategorie( $product_id );
     if ( $dostupne_kategorie ) {
       if ( $termmeta_kategorie ) {
-        $doplnena_kategorie = get_woocommerce_term_meta( $dostupne_kategorie[0]->term_id, $termmeta_kategorie, true );
+        $doplnena_kategorie = get_term_meta( $dostupne_kategorie[0]->term_id, $termmeta_kategorie, true );
       }
       if ( $doplnena_kategorie ) {
         $strom_kategorie = $doplnena_kategorie;
@@ -662,7 +662,7 @@ function ceske_sluzby_xml_ziskat_hodnotu_dat( $product_id, $vlastnosti_produkt, 
           $terms = get_the_terms( $product_id, $taxonomy );
           if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
             foreach ( $terms as $term ) {
-              $termmeta_value = get_woocommerce_term_meta( $term->term_id, $termmeta );
+              $termmeta_value = get_term_meta( $term->term_id, $termmeta );
               if ( ! empty( $termmeta_value ) ) {
                 // Pokud bude u produktu přiřazeno více položek ze stejné taxonomie, tak bude použita pouze poslední získaná hodnota.
                 $value = $termmeta_value;
