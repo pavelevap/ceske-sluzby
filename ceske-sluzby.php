@@ -6,7 +6,7 @@
  * Version: 0.6-alpha
  * Author: Pavel Hejn
  * Author URI: https://www.separatista.net
- * GitHub Plugin URI: pavelevap/ceske-sluzby 
+ * GitHub Plugin URI: pavelevap/ceske-sluzby
  * License: GPL2
  */
 
@@ -46,10 +46,10 @@ function ceske_sluzby_heureka_overeno_zakazniky( $order_id, $posted ) {
   }
   if ( ! empty( $api ) && ! empty( $souhlas_check ) ) {
     $order = wc_get_order( $order_id );
-    
+
     // https://github.com/heureka/heureka-overeno-php-api
     require_once( dirname( __FILE__ ) . '/src/heureka/HeurekaOvereno.php' );
-    
+
     $language = get_locale();
     try {
       if ( $language == "sk_SK" ) {
@@ -105,13 +105,13 @@ var _hrq = _hrq || [];
       foreach ( $items as $item ) {
         $cena = wc_format_decimal( $order->get_item_subtotal( $item ) );
         echo "_hrq.push(['addProduct', '" . $item['name'] . "', '" . $cena . "', '" . $item['qty'] . "']);";
-      } 
+      }
     } else {
       foreach ( $items as $item_id => $item_data ) {
         $product = $item_data->get_product();
         $cena = wc_format_decimal( $item_data->get_total() / $item_data->get_quantity() );
         echo "_hrq.push(['addProduct', '" . $product->get_name() . "', '" . $cena . "', '" . $item_data->get_quantity() . "']);";
-      }  
+      }
     } ?>
     _hrq.push(['trackOrder']);
 
@@ -145,7 +145,7 @@ function ceske_sluzby_heureka_certifikat_spokojenosti() {
       $odsazeni = 60;
     }
   ?>
-    
+
 <script type="text/javascript">
 //<![CDATA[
 var _hwq = _hwq || [];
@@ -255,7 +255,7 @@ function ceske_sluzby_sledovani_zasilek_email_akce( $email_actions ) {
   $email_actions[] = 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce';
   return $email_actions;
 }
- 
+
 function ceske_sluzby_kontrola_aktivniho_pluginu() {
   if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.2', '>=' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/ceske-sluzby-functions.php';
@@ -415,7 +415,7 @@ function ceske_sluzby_doprava_ulozenka_init() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-ulozenka.php';
   }
 }
- 
+
 function ceske_sluzby_doprava_ulozenka( $methods ) {
   $methods[] = 'WC_Shipping_Ceske_Sluzby_Ulozenka';
   return $methods;
@@ -515,7 +515,7 @@ function ceske_sluzby_ulozenka_dobirka_pay4pay( $amount ) {
     if ( $zeme == "CZ" ) {
       if ( ! empty( $settings['ulozenka_dobirka'] ) ) {
         $amount = $settings['ulozenka_dobirka'];
-      } 
+      }
     }
     if ( $zeme == "SK" ) {
       if ( ! empty( $settings['ulozenka_dobirka-slovensko'] ) ) {
@@ -535,7 +535,7 @@ function ceske_sluzby_doprava_dpd_parcelshop_init() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-json-loader.php';
   }
 }
- 
+
 function ceske_sluzby_doprava_dpd_parcelshop( $methods ) {
   $methods[] = 'WC_Shipping_Ceske_Sluzby_DPD_ParcelShop';
   return $methods;
@@ -652,7 +652,7 @@ function ceske_sluzby_doprava_zasilkovna_init() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-ceske-sluzby-zasilkovna.php';
   }
 }
- 
+
 function ceske_sluzby_doprava_zasilkovna( $methods ) {
   $methods['ceske_sluzby_zasilkovna'] = 'WC_Shipping_Ceske_Sluzby_Zasilkovna';
   return $methods;
@@ -753,10 +753,10 @@ function ceske_sluzby_aktivace_xml_feed() {
     } else {
       if ( wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml' ) ) {
         $timestamp = wp_next_scheduled( 'ceske_sluzby_heureka_aktualizace_xml' );
-        wp_unschedule_event( $timestamp, 'ceske_sluzby_heureka_aktualizace_xml' ); 
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_heureka_aktualizace_xml' );
       }
     }
-    
+
     $zbozi_xml = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
     if ( $zbozi_xml == "yes" ) {
       if ( ! wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
@@ -765,7 +765,7 @@ function ceske_sluzby_aktivace_xml_feed() {
     } else {
       if ( wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' ) ) {
         $timestamp = wp_next_scheduled( 'ceske_sluzby_zbozi_aktualizace_xml' );
-        wp_unschedule_event( $timestamp, 'ceske_sluzby_zbozi_aktualizace_xml' ); 
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_zbozi_aktualizace_xml' );
       }
     }
 
@@ -789,7 +789,7 @@ function ceske_sluzby_aktivace_xml_feed() {
     } else {
       if ( wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' ) ) {
         $timestamp = wp_next_scheduled( 'ceske_sluzby_glami_aktualizace_xml' );
-        wp_unschedule_event( $timestamp, 'ceske_sluzby_glami_aktualizace_xml' ); 
+        wp_unschedule_event( $timestamp, 'ceske_sluzby_glami_aktualizace_xml' );
       }
     }
   } else {
@@ -932,7 +932,7 @@ function ceske_sluzby_heureka_recenze_obchodu( $atts ) {
               $output .= 'Datum: před ' . human_time_diff( $recenze->unix_timestamp );
               if ( ! empty( $recenze->name ) ) {
                 $output .= ' | Autor: ' . $recenze->name;
-              } 
+              }
               $output .= '</li>';
               $output .= '</ul>';
             }
@@ -972,7 +972,7 @@ function ceske_sluzby_heureka_overeno_zakazniky_souhlas() {
         array(
           'type' => 'checkbox',
           'label' => 'Souhlasím se zasláním dotazníku spokojenosti v rámci programu Ověřeno zákazníky (Heureka), který pomáhá zlepšovat naše služby.',
-        ), 1 
+        ), 1
       );
     }
   }
@@ -1130,7 +1130,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     </tr>
     <tr class="form-field">
       <th scope="row" valign="top"><label>Kategorie</label></th>
-      <td> 
+      <td>
         <input name="ceske-sluzby-xml-heureka-kategorie" id="ceske-sluzby-xml-heureka-kategorie" type="text" value="<?php echo esc_attr( $heureka_kategorie ); ?>" placeholder="CATEGORYTEXT" />
         <p class="description">
           Zatím je nutné doplnit příslušnou kategorii z Heureky ručně (aktuální přehled naleznete <a href="http://www.<?php echo HEUREKA_URL; ?>/direct/xml-export/shops/heureka-sekce.xml">zde</a>).<br />
@@ -1142,7 +1142,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
       <tr class="form-field">
         <th scope="row" valign="top"><label>Název produktů</label></th>
-        <td> 
+        <td>
           <input name="ceske-sluzby-xml-heureka-productname" id="ceske-sluzby-xml-heureka-productname" type="text" value="<?php echo esc_attr( $heureka_productname ); ?>" placeholder="PRODUCTNAME" />
             <p class="description">
               Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Heureky (aktuální přehled naleznete <a href="http://sluzby.<?php echo HEUREKA_URL; ?>/napoveda/povinne-nazvy/" target="_blank">zde</a>).<br />
@@ -1159,7 +1159,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     </tr>
     <tr class="form-field">
       <th scope="row" valign="top"><label>Kategorie</label></th>
-      <td> 
+      <td>
         <input name="ceske-sluzby-xml-zbozi-kategorie" id="ceske-sluzby-xml-zbozi-kategorie" type="text" value="<?php echo esc_attr( $zbozi_kategorie ); ?>" placeholder="CATEGORYTEXT" />
         <p class="description">
           Zatím je nutné doplnit příslušnou kategorii ze Zbozi.cz ručně (aktuální přehled naleznete <a href="http://www.zbozi.cz/static/categories.csv">zde</a>).<br />
@@ -1170,7 +1170,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     <?php if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{KATEGORIE}' ) !== false ) { ?>
       <tr class="form-field">
         <th scope="row" valign="top"><label>Název produktů</label></th>
-        <td> 
+        <td>
           <input name="ceske-sluzby-xml-zbozi-productname" id="ceske-sluzby-xml-zbozi-productname" type="text" value="<?php echo esc_attr( $zbozi_productname ); ?>" placeholder="PRODUCTNAME" />
             <p class="description">
               Pomocí placeholderů můžete doplnit obecný název pro všechny produkty z příslušné kategorie Zboží.cz (aktuální přehled naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">zde</a>).<br />
@@ -1188,7 +1188,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
           $extra_message_text = ''; ?>
           <tr class="form-field">
             <th scope="row" valign="top"><label><?php echo $extra_message_array[ $extra_message ]; ?></label></th>
-            <td> 
+            <td>
               <span class="description">
                 Není potřeba nic zadávat, protože na úrovni eshopu je tato informace <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.
               </span>
@@ -1201,7 +1201,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
           } ?>
           <tr class="form-field">
             <th scope="row" valign="top"><label><?php echo $extra_message_array[ $extra_message ]; ?></label></th>
-            <td> 
+            <td>
               <input name="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" id="ceske-sluzby-xml-zbozi-extra-message[<?php echo $extra_message; ?>]" type="checkbox" value="yes" <?php echo $checked; ?>/>
               <span class="description">
                 Po zaškrtnutí budou produkty v příslušné kategorii označeny příslušnou doplňkovou informací. Na úrovni eshopu zatím není nic <a href="<?php echo admin_url(); ?>admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastaveno</a>.
@@ -1218,7 +1218,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
     </tr>
     <tr class="form-field">
       <th scope="row" valign="top"><label>Kategorie</label></th>
-      <td> 
+      <td>
         <input name="ceske-sluzby-xml-glami-kategorie" id="ceske-sluzby-xml-glami-kategorie" type="text" value="<?php echo esc_attr( $glami_kategorie ); ?>" placeholder="CATEGORYTEXT" />
         <p class="description">
           Zatím je nutné doplnit příslušnou kategorii z Glami ručně (aktuální přehled naleznete <a href="http://www.<?php echo GLAMI_URL; ?>/category-xml/">zde</a>).<br />
@@ -1233,7 +1233,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   </tr>
   <tr class="form-field">
     <th scope="row" valign="top"><label>Odebrat z XML</label></th>
-    <td> 
+    <td>
       <input name="ceske-sluzby-xml-vynechano" id="ceske-sluzby-xml-vynechano" type="checkbox" value="yes" <?php checked( $xml_vynechano_ulozeno, "yes" ); ?>/>
       <strong><span class="description" style="padding-right: 10px;">Vše</span></strong>
       <?php $feeds = ceske_sluzby_prehled_xml_feedu();
@@ -1272,7 +1272,7 @@ function ceske_sluzby_xml_kategorie_upravit_pole( $term ) {
   </tr>
   <tr class="form-field">
     <th scope="row" valign="top"><label>Erotický obsah</label></th>
-    <td> 
+    <td>
       <input name="ceske-sluzby-xml-erotika" id="ceske-sluzby-xml-erotika" type="checkbox" value="yes" <?php checked( $xml_erotika_ulozeno, "yes" ); ?>/>
       <span class="description">
         Zaškrtněte pokud chcete označit obsah webu jako erotický.
@@ -1307,7 +1307,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
         if ( ! empty( $value ) ) {
           update_woocommerce_term_meta( $term_id, $key, esc_attr( $value ) );
         } elseif ( ! empty( $ulozeno_text ) ) {
-          delete_woocommerce_term_meta( $term_id, $key ); 
+          delete_woocommerce_term_meta( $term_id, $key );
         }
       }
     }
@@ -1326,7 +1326,7 @@ function ceske_sluzby_xml_kategorie_ulozit( $term_id, $tt_id = '', $taxonomy = '
           update_woocommerce_term_meta( $term_id, $key, $value );
         }
       } elseif ( ! empty( $ulozeno_checkbox ) ) {
-        delete_woocommerce_term_meta( $term_id, $key ); 
+        delete_woocommerce_term_meta( $term_id, $key );
       }
     }
   }
@@ -1595,7 +1595,7 @@ function ceske_sluzby_load_admin_scripts() {
   if ( in_array( $screen_id, array( 'woocommerce_page_wc-settings' ) ) && $aktivace_eet == "yes" ) {
     if ( ! did_action( 'wp_enqueue_media' ) ) {
       wp_enqueue_media();
-    } 
+    }
     wp_register_script( 'wc-admin-ceske-sluzby-upload-button', untrailingslashit( plugins_url( '/', __FILE__ ) ) . '/js/ceske-sluzby-upload-button-admin.js', array( 'jquery' ), CS_VERSION );
     wp_enqueue_script( 'wc-admin-ceske-sluzby-upload-button' );
   }
@@ -1699,7 +1699,7 @@ function ceske_sluzby_zaokrouhlovani_poplatek_dane( $cart ) {
   }
   else {
     $taxes['tax_rates'] = WC_Tax::get_rates( $shipping_tax_class );
-    $taxes['tax_class'] = $shipping_tax_class;  
+    $taxes['tax_class'] = $shipping_tax_class;
   }
   return $taxes;
 }
@@ -1754,7 +1754,7 @@ function ceske_sluzby_aktualizovat_checkout_javascript() {
   if ( is_checkout() ) {
     $nastaveni_pokladna = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     $nastaveni_pokladna_doprava = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
-    if ( ( is_array( $nastaveni_pokladna ) && ( in_array( 'zaokrouhlovani', $nastaveni_pokladna ) || in_array( 'poplatek_platba', $nastaveni_pokladna ) ) ) || 
+    if ( ( is_array( $nastaveni_pokladna ) && ( in_array( 'zaokrouhlovani', $nastaveni_pokladna ) || in_array( 'poplatek_platba', $nastaveni_pokladna ) ) ) ||
     ( is_array( $nastaveni_pokladna_doprava ) && in_array( 'poplatek_platba', $nastaveni_pokladna_doprava ) ) ) { ?>
       <script type="text/javascript">
         jQuery(document).ready(function($){
@@ -1764,7 +1764,7 @@ function ceske_sluzby_aktualizovat_checkout_javascript() {
         });
       </script><?php
     }
-  } 
+  }
 }
 
 function ceske_sluzby_compare_sazba( $a, $b ) {
@@ -1917,10 +1917,10 @@ function ceske_sluzby_zobrazeni_dodaci_doby_varianty( $variation ) {
 // http://docs.packetery.com/01-pickup-point-selection/01-widget.html#toc-quick-start-examples
 function ceske_sluzby_zasilkovna_scripts_checkout() {
   if ( is_checkout() ) {
-    $zasilkovna_settings = get_option( 'woocommerce_ceske_sluzby_zasilkovna_settings' ); 
+    $zasilkovna_settings = get_option( 'woocommerce_ceske_sluzby_zasilkovna_settings' );
     if ( isset( $zasilkovna_settings['zasilkovna_api-klic'] ) && ! empty( $zasilkovna_settings['zasilkovna_api-klic'] ) ) {
       $api_klic = $zasilkovna_settings['zasilkovna_api-klic']; ?>
-      <script src="https://widget.packeta.com/www/js/library.js"></script>
+      <script src="https://widget.packeta.com/v6/www/js/library.js"></script>
       <script type="text/javascript">
         var packetaApiKey = '<?php echo $api_klic; ?>';
         var $storage_support = true;
@@ -2188,7 +2188,7 @@ function ceske_sluzby_ulozit_nastavene_cislo_objednavky( $order_id ) {
 
 add_filter( 'woocommerce_bacs_account_fields', 'ceske_sluzby_platba_predem_variabilni_symbol', 10, 2 );
 function ceske_sluzby_platba_predem_variabilni_symbol( $account_fields, $order_id ) {
-  $bacs_settings = get_option( 'woocommerce_bacs_settings' ); 
+  $bacs_settings = get_option( 'woocommerce_bacs_settings' );
   if ( isset( $bacs_settings['ceske_sluzby_variabilni_symbol'] ) && $bacs_settings['ceske_sluzby_variabilni_symbol'] == "yes" ) {
     if ( isset( $account_fields['account_number']['value'] ) && ! empty( $account_fields['account_number']['value'] ) ) {
       $order = wc_get_order( $order_id );;
