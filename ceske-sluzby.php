@@ -563,7 +563,7 @@ function ceske_sluzby_dpd_parcelshop_zobrazit_pobocky() {
         $parametry = array( 'provider' => 5, 'country' => $zeme_code ); ?>
         <tr class="dpd-parcelshop">
           <td>
-            <img src="http://www.dpdparcelshop.cz/images/DPD-logo.png" width="140" border="0">
+            <img src="https://pickup.dpd.cz/images/DPD-logo.png" width="140" border="0">
           </td>
           <td>
             <font size="2">DPD ParcelShop - výběr pobočky:</font><br>
