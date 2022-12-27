@@ -17,7 +17,7 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
   $dopravci = array(
     'CPOST' => array(
       'nazev' => 'Česká pošta',
-      'url' => 'http://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
+      'url' => 'https://www.postaonline.cz/cs/trackandtrace/-/zasilka/cislo?parcelNumbers=%ID%',
       'lang' => 'CZ'
     ),
     'SPOST' => array(
@@ -25,12 +25,19 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
       'url' => 'http://tandt.posta.sk/zasielky/%ID%',
       'lang' => 'SK'
     ),
+    'Zasilkovna' => array(
+      'nazev' => 'Zásilkovna',
+      'lang' => array(
+        'CZ' => 'https://www.zasilkovna.cz/vyhledavani/?det=%ID%',
+        'SK' => 'https://www.zasielkovna.sk/vyhladavanie/?det=%ID%'
+      )
+    ),
     'DPD' => array(
       'nazev' => 'DPD',
       'lang' => array(
-                  'CZ' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ',
-                  'SK' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=sk_SK'
-                )
+        'CZ' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=cs_CZ',
+        'SK' => 'https://tracking.dpd.de/parcelstatus?query=%ID%&locale=sk_SK'
+      )
     ),
     'INTIME' => array(
       'nazev' => 'Intime',
@@ -45,23 +52,23 @@ function ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $lang ) {
     'DHL' => array(
       'nazev' => 'DHL',
       'lang' => array(
-                  'CZ' => 'http://www.dhl.cz/content/cz/cs/express/sledovani_zasilek.shtml?brand=DHL&AWB=%ID%',
-                  'SK' => 'http://www.dhl.sk/content/sk/sk/express/sledovanie_zasielky.shtml?brand=DHL&AWB=%ID%'
-                )
+        'CZ' => 'http://www.dhl.cz/content/cz/cs/express/sledovani_zasilek.shtml?brand=DHL&AWB=%ID%',
+        'SK' => 'http://www.dhl.sk/content/sk/sk/express/sledovanie_zasielky.shtml?brand=DHL&AWB=%ID%'
+      )
     ),
     'GEIS' => array(
       'nazev' => 'Geis',
       'lang' => array(
-                  'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
-                  'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
-                )
+        'CZ' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=cs&country=cs',
+        'SK' => 'http://tt.geis.cz/TrackAndTrace/ZasilkaDetailCargo.aspx?id=%ID%&lang=sk&country=sk'
+      )
     ),
     'GLS' => array(
       'nazev' => 'GLS',
       'lang' => array(
-                  'CZ' => 'https://gls-group.eu/CZ/cs/sledovani-zasilek?match=%ID%',
-                  'SK' => 'https://gls-group.eu/SK/sk/sledovanie-zasielok?match=%ID%'
-                )
+        'CZ' => 'https://gls-group.eu/CZ/cs/sledovani-zasilek?match=%ID%',
+        'SK' => 'https://gls-group.eu/SK/sk/sledovanie-zasielok?match=%ID%'
+      )
     )
   );
   foreach ( $dopravci as $key => $dopravce ) {
@@ -88,9 +95,18 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     add_action( 'woocommerce_process_shop_order_meta', array( $this, 'save' ) );
     $aktivace_email = get_option( 'woocommerce_wc_email_ceske_sluzby_sledovani_zasilek_settings' );
     if ( isset ( $aktivace_email['enabled'] ) && $aktivace_email['enabled'] == "yes" ) {
-      add_filter( 'woocommerce_resend_order_emails_available', array( $this, 'moznost_odesilat_email_sledovani_zasilek' ) );
+      if ( version_compare( WC_VERSION, '3.2', '<' ) ) {
+        add_filter( 'woocommerce_resend_order_emails_available', array( $this, 'moznost_odesilat_email_sledovani_zasilek_deprecated' ) );
+      } else {
+        add_filter( 'woocommerce_order_actions', array( $this, 'moznost_odesilat_email_sledovani_zasilek' ) );
+        add_action( 'woocommerce_order_action_wc_email_ceske_sluzby_sledovani_zasilek', array( $this, 'trigger_action' ) );
+      }
     }
     add_filter( 'woocommerce_hidden_order_itemmeta', array( $this, 'skryt_zobrazeni_hodnot' ) );
+  }
+
+  public function trigger_action( $order ) {
+    do_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce', $order );
   }
 
   public function add_meta_box( $post_type ) {
@@ -106,10 +122,15 @@ class Ceske_Sluzby_Sledovani_Zasilek {
       );
     }
   }
-  
-  public function moznost_odesilat_email_sledovani_zasilek( $available_emails ) {
+
+  public function moznost_odesilat_email_sledovani_zasilek_deprecated( $available_emails ) {
     $available_emails[] = 'wc_email_ceske_sluzby_sledovani_zasilek';
     return $available_emails;
+  }
+
+  public function moznost_odesilat_email_sledovani_zasilek( $actions ) {
+    $actions['wc_email_ceske_sluzby_sledovani_zasilek'] = 'Email o sledované zásilce';
+    return $actions;
   }
 
   public function skryt_zobrazeni_hodnot( $keys ) {
@@ -135,7 +156,7 @@ class Ceske_Sluzby_Sledovani_Zasilek {
 
     $order = wc_get_order( $post_id );
     $shipping = $order->get_shipping_methods();
-    if ( ! empty ( $shipping ) && is_array ( $shipping ) ) {
+    if ( ! empty( $shipping ) && is_array ( $shipping ) ) {
       $shipping_item_id = key( $shipping );
       $item_id = $shipping_item_id;
     }
@@ -145,19 +166,25 @@ class Ceske_Sluzby_Sledovani_Zasilek {
       $dopravce = sanitize_text_field( $_POST['ceske_sluzby_sledovani_zasilek_dopravce'] );
       $id_zasilky_ulozeno = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
       $dopravce_ulozeno = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-      if ( ! empty ( $id_zasilky ) ) {
+      if ( ! empty( $id_zasilky ) ) {
         if ( $id_zasilky != $id_zasilky_ulozeno ) {
           wc_update_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', $id_zasilky );
         }
       } else {
         wc_delete_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky' );
       }
-      if ( ! empty ( $dopravce ) ) {
+      if ( ! empty( $dopravce ) ) {
         if ( $dopravce != $dopravce_ulozeno ) {
           wc_update_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', $dopravce );
         }
       } else {
         wc_delete_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce' );
+      }
+      if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) && ( $order->has_status( 'on-hold' ) || $order->has_status( 'processing' ) ) ) {
+        $aktivace_odeslano = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano' );
+        if ( $aktivace_odeslano == "yes" ) {
+          $_POST['order_status'] = "wc-odeslano";
+        }
       }
     }
   }
@@ -168,13 +195,13 @@ class Ceske_Sluzby_Sledovani_Zasilek {
 
     $order = wc_get_order( $post->ID );
     $shipping = $order->get_shipping_methods();
-    if ( ! empty ( $shipping ) && is_array ( $shipping ) ) {
+    if ( ! empty( $shipping ) && is_array ( $shipping ) ) {
       $shipping_item_id = key( $shipping );
       $item_id = $shipping_item_id;
     }
     $id_zasilky = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_id_zasilky', true );
     $dopravce = wc_get_order_item_meta( $item_id, 'ceske_sluzby_sledovani_zasilek_dopravce', true );
-    $zeme_doruceni = $order->shipping_country;
+    $zeme_doruceni = is_callable( array( $order, 'get_shipping_country' ) ) ? $order->get_shipping_country() : $order->shipping_country;
     $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci( $zeme_doruceni );
 
     if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {
@@ -202,7 +229,10 @@ class Ceske_Sluzby_Sledovani_Zasilek {
     $aktivace_email = get_option( 'woocommerce_wc_email_ceske_sluzby_sledovani_zasilek_settings' );
     if ( isset ( $aktivace_email['enabled'] ) && $aktivace_email['enabled'] == "yes" ) {
       if ( $order->has_status( 'on-hold' ) ) {
-        echo '<p>Asi není moc dobrý nápad odesílat nezaplacenou objednávku?';
+        $zmena_platby_predem = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem' );
+        if ( $zmena_platby_predem != "yes" ) {
+          echo '<p>Asi není moc dobrý nápad odesílat nezaplacenou objednávku?';
+        }
       } else {
     ?>
     <br />

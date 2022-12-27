@@ -17,7 +17,9 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
     $this->template_html  = 'sledovani-zasilek.php';
     $this->template_plain = 'sledovani-zasilek-plain.php';
 
-    add_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce_notification', array( $this, 'trigger' ) );
+    if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+      add_action( 'woocommerce_ceske_sluzby_sledovani_zasilek_email_akce_notification', array( $this, 'trigger' ) );
+    }
     add_filter( 'woocommerce_locate_core_template', array( $this, 'ceske_sluzby_locate_template' ), 10, 3 );
     parent::__construct();
   }
@@ -35,14 +37,21 @@ class WC_Email_Ceske_Sluzby_Sledovani_Zasilek extends WC_Email {
       return;
     }
     $this->object = wc_get_order( $order_id );
-    $this->recipient = $this->object->billing_email;
+    $this->recipient = is_callable( array( $this->object, 'get_billing_email' ) ) ? $this->object->get_billing_email() : $this->object->billing_email;
     $this->find[] = '{order_number}';
     $this->replace[] = $this->object->get_order_number();
     if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
       return;
     }
-    $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-	}
+    if ( ! empty( $_POST['ceske_sluzby_sledovani_zasilek_id_zasilky'] ) && ! empty( $_POST['ceske_sluzby_sledovani_zasilek_dopravce'] ) ) {
+      $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+      if ( version_compare( WC_VERSION, '3.2', '>=' ) ) {
+        $this->object->add_order_note( 'Sledování zásilek: Emailová notifikace byla odeslána.' );
+      }
+    } else {
+      $this->object->add_order_note( 'CHYBA: Emailová notifikace nebyla odeslána (chybí potřebné informace o zásilce).' );
+    }
+  }
 
   function get_content_html() {
     ob_start();

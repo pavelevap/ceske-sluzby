@@ -24,7 +24,7 @@ class Ceske_Sluzby_Json_Loader {
 
     $body = wp_remote_retrieve_body( $result );
     if ( $body == '' ) {
-      throw new Exception( 'Ceske_Sluzby_Json_Loader Failed: Obsah Json je prázdný.' );
+      throw new Exception( 'Ceske_Sluzby_Json_Loader Failed: Json je prázdný.' );
     }
 
     return $body;
@@ -33,9 +33,22 @@ class Ceske_Sluzby_Json_Loader {
   function parse( $body ) {
     $json = json_decode( $body );
     if ( json_last_error() !== JSON_ERROR_NONE ) {
-      throw new Exception( 'Ceske_Sluzby_Json_Loader Failed: Neplatný Json obsah získaný ze serveru - ' . json_last_error() );
+      throw new Exception( 'Ceske_Sluzby_Json_Loader Failed: Neplatný Json získaný ze serveru - ' . json_last_error() );
     }
     return $json;
+  }
+
+  function sortName( $array ) {
+    $arraySorted = array();
+    if ( is_array( $array ) ) {
+      foreach ( $array as $item ) {
+        $arraySorted[] = $item->name;
+      }
+      // https://www.itnetwork.cz/php/ostatni/metoda-pro-razeni-pole-podle-nejen-ceske-abecedy
+      require_once dirname( dirname( __FILE__ ) ) . '/src/SortUTF.php';
+      $arraySorted = SortUTF::sort( $arraySorted, true );
+    }
+    return $arraySorted;
   }
 
   function build( $params ) {

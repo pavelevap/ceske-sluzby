@@ -3,8 +3,11 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
   public function __construct() {
     if ( is_admin() ) {
-      add_filter( 'woocommerce_product_data_tabs', array( $this, 'ceske_sluzby_product_tab' ) );
-      add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
+      $xml_feed = get_option( 'wc_ceske_sluzby_heureka_xml_feed-aktivace' );
+      if ( $xml_feed == "yes" ) {
+        add_filter( 'woocommerce_product_data_tabs', array( $this, 'ceske_sluzby_product_tab' ) );
+        add_action( 'woocommerce_product_data_panels', array( $this, 'ceske_sluzby_product_tab_obsah' ) );
+      }
       add_action( 'woocommerce_process_product_meta', array( $this, 'ceske_sluzby_product_tab_ulozeni' ) );
       add_action( 'woocommerce_product_options_stock_status', array( $this, 'ceske_sluzby_zobrazit_nastaveni_dodaci_doby' ) );
       add_action( 'woocommerce_product_options_sku', array( $this, 'ceske_sluzby_zobrazit_nastaveni_ean' ) );
@@ -27,7 +30,8 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     $global_data = ceske_sluzby_xml_ziskat_globalni_hodnoty();
     $xml_feed_heureka = get_option( 'wc_ceske_sluzby_xml_feed_heureka-aktivace' );
     $xml_feed_zbozi = get_option( 'wc_ceske_sluzby_xml_feed_zbozi-aktivace' );
-    if ( ! empty ( $global_data['stav_produktu'] ) ) {
+    $xml_feed_glami = get_option( 'wc_ceske_sluzby_xml_feed_glami-aktivace' );
+    if ( ! empty( $global_data['stav_produktu'] ) ) {
       if ( $global_data['stav_produktu'] == 'used' ) {
         $global_stav_produktu_hodnota = 'Použité (bazar)';
       } else {
@@ -39,33 +43,44 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>XML feedy</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hromadné nastavení</a>)</div>';
 
     $vynechane_kategorie = "";
+    $vynechane_kategorie_feed = "";
     $stav_produktu_kategorie = "";
     $extra_message_kategorie_odkaz = "";
     $extra_message_kategorie_array = array();
     $product_categories = wp_get_post_terms( $post->ID, 'product_cat' );
     foreach ( $product_categories as $kategorie_produktu ) {
       $vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-vynechano', true );
+      $xml_feed_vynechano = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-feed-vynechano', true );
       $stav_produktu = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-stav-produktu', true );
       $kategorie_extra_message_ulozeno = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-extra-message', true );
-      if ( ! empty ( $vynechano ) ) {
-        if ( ! empty ( $vynechane_kategorie ) ) {
+      if ( ! empty( $vynechano ) ) {
+        if ( ! empty( $vynechane_kategorie ) ) {
           $vynechane_kategorie .= ", ";
         }
         $vynechane_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
       }
-      if ( ! empty ( $stav_produktu ) ) {
+      if ( ! empty( $xml_feed_vynechano ) ) {
+        $feeds = ceske_sluzby_prehled_xml_feedu();
+        foreach ( $xml_feed_vynechano as $feed => $value ) {
+          if ( ! empty( $vynechane_kategorie_feed ) ) {
+            $vynechane_kategorie_feed .= ", ";
+          }
+          $vynechane_kategorie_feed .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a> (' . $feeds[$feed] . ')';
+        }
+      }
+      if ( ! empty( $stav_produktu ) ) {
         if ( $stav_produktu == 'used' ) {
           $stav_produktu_hodnota = 'Použité (bazar)';
         } else {
           $stav_produktu_hodnota = 'Repasované';
         }
-        if ( ! empty ( $stav_produktu_kategorie ) ) {
+        if ( ! empty( $stav_produktu_kategorie ) ) {
           $stav_produktu_kategorie .= ", ";
         }
         $stav_produktu_kategorie .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>: <strong>' . $stav_produktu_hodnota . '</strong>';
       }
-      if ( ! empty ( $kategorie_extra_message_ulozeno ) ) {
-        if ( ! empty ( $extra_message_kategorie_odkaz ) ) {
+      if ( ! empty( $kategorie_extra_message_ulozeno ) ) {
+        if ( ! empty( $extra_message_kategorie_odkaz ) ) {
           $extra_message_kategorie_odkaz .= ", ";
         }
         $extra_message_kategorie_odkaz .= '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
@@ -74,27 +89,30 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
         }
       }
     }
-    if ( ! empty ( $vynechane_kategorie ) ) {
+    if ( ! empty( $vynechane_kategorie ) ) {
       echo '<p class="form-field"><label for="ceske_sluzby_xml_vynechano">Odebrat z XML</label>Není potřeba nic zadávat, protože jsou zcela ignorovány některé kategorie: ' . $vynechane_kategorie . '</p>';
     } else {
+      if ( ! empty( $vynechane_kategorie_feed ) ) {
+        $vynechane_kategorie_feed = ' Na úrovni kategorií zatím máte nastaveno následující: ' . $vynechane_kategorie_feed;
+      }
       woocommerce_wp_checkbox( 
         array( 
           'id' => 'ceske_sluzby_xml_vynechano', 
           'wrapper_class' => '', // show_if_simple - pouze u jednoduchých produktů
           'label' => 'Odebrat z XML', 
-          'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů'
+          'description' => 'Po zaškrtnutí nebude produkt zahrnut do žádného z generovaných XML feedů.' . $vynechane_kategorie_feed
         ) 
       );
     }
 
-    if ( ! empty ( $global_data['stav_produktu'] ) ) {
+    if ( ! empty( $global_data['stav_produktu'] ) ) {
       $stav_produktu_text = 'Není potřeba nic zadávat, protože je na úrovni celého webu <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> hodnota <strong>' . $global_stav_produktu_hodnota . '</strong>.';
-      if ( ! empty ( $stav_produktu_kategorie ) ) {
+      if ( ! empty( $stav_produktu_kategorie ) ) {
         $stav_produktu_text .= ' Dále je nastaveno na úrovni kategorie ' . $stav_produktu_kategorie . '.';
       }
       $stav_produktu_text .= ' Případná změna na úrovni produktu však bude mít přednost.';
     }
-    elseif ( ! empty ( $stav_produktu_kategorie ) ) {
+    elseif ( ! empty( $stav_produktu_kategorie ) ) {
       $stav_produktu_text = 'Není potřeba nic zadávat, protože je nastaveno na úrovni kategorie ' . $stav_produktu_kategorie . '. Případná změna na úrovni produktu však bude mít přednost.';
     } else {
       $stav_produktu_text = 'Zvolte stav produktu (pokud není nový).';
@@ -115,23 +133,23 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_heureka == "yes" ) {
       echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>)</div>';
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Heureka</strong> (<a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=heureka&pid=' . $post->ID . '">XML produktu</a>)</div>';
       if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{PRODUCTNAME}' ) !== false ) {
         woocommerce_wp_text_input(
           array( 
             'id' => 'ceske_sluzby_xml_heureka_productname', 
-            'label' => 'Přesný název (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/povinne-nazvy/" target="_blank">manuál</a>)', 
+            'label' => 'Přesný název (<a href="https://sluzby.' . HEUREKA_URL . '/napoveda/povinne-nazvy/" target="_blank">manuál</a>)', 
             'placeholder' => 'PRODUCTNAME',
             'desc_tip' => 'true',
             'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
           )
         );
-        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_heureka_productname', $post->ID, $post, 'ceske-sluzby-xml-heureka-productname', $global_data, false );
+        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_heureka_productname', $post->ID, $post, 'ceske-sluzby-xml-heureka-productname', $global_data );
       }
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_heureka_product', 
-          'label' => 'Doplněný název (<a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/#PRODUCT" target="_blank">manuál</a>)', 
+          'label' => 'Doplněný název (<a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/#PRODUCT" target="_blank">manuál</a>)', 
           'placeholder' => 'PRODUCT',
           'desc_tip' => 'true',
           'description' => 'Zadejte doplněk názvu produktu, mezera je zobrazena automaticky (použito i pro feed Zboží.cz).' 
@@ -140,8 +158,8 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       $kategorie_heureka = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-heureka-kategorie', true );
-        if ( ! empty ( $kategorie ) ) {
-          if ( empty ( $kategorie_heureka ) ) {
+        if ( ! empty( $kategorie ) ) {
+          if ( empty( $kategorie_heureka ) ) {
             $kategorie_heureka = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
             $nazev_kategorie_heureka = $kategorie;
           }
@@ -150,13 +168,13 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_heureka_kategorie', 
-          'label' => 'Kategorie (<a href="http://www.' . HEUREKA_URL . '/direct/xml-export/shops/heureka-sekce.xml" target="_blank">přehled</a>)', 
+          'label' => 'Kategorie (<a href="https://www.' . HEUREKA_URL . '/direct/xml-export/shops/heureka-sekce.xml" target="_blank">přehled</a>)', 
           'placeholder' => 'CATEGORYTEXT',
           'desc_tip' => 'true',
           'description' => 'Příklad: Elektronika | Počítače a kancelář | Software | Multimediální software' 
         )
       );
-      if ( ! empty ( $kategorie_heureka ) ) {
+      if ( ! empty( $kategorie_heureka ) ) {
         echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_heureka . ': <code>' . $nazev_kategorie_heureka . '</code></p>';
       }
       echo '</div>';
@@ -164,19 +182,18 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
 
     if ( $xml_feed_zbozi == "yes" ) {
       echo '<div class="options_group">';
-      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>)</div>';
-      $custom_labels_array = ceske_sluzby_xml_ziskat_dodatecna_oznaceni_nabidky();
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Zbozi.cz</strong> (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=zbozi&pid=' . $post->ID . '">XML produktu</a>)</div>';
       if ( empty( $global_data['nazev_produktu'] ) || strpos( $global_data['nazev_produktu'], '{PRODUCTNAME}' ) !== false ) {
         woocommerce_wp_text_input(
           array( 
             'id' => 'ceske_sluzby_xml_zbozi_productname', 
-            'label' => 'Přesný název (<a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">manuál</a>)', 
+            'label' => 'Přesný název (<a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/pravidla-pojmenovani-nabidek/" target="_blank">manuál</a>)', 
             'placeholder' => 'PRODUCTNAME',
             'desc_tip' => 'true',
             'description' => 'Zadejte přesný název produktu, pokud chcete aby byl odlišný od aktuálního názvu.' 
           )
         );
-        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_zbozi_productname', $post->ID, $post, 'ceske-sluzby-xml-zbozi-productname', $global_data, $custom_labels_array );
+        ceske_sluzby_zobrazit_xml_hodnotu( 'ceske_sluzby_xml_zbozi_productname', $post->ID, $post, 'ceske-sluzby-xml-zbozi-productname', $global_data );
       }
       if ( $xml_feed_heureka != "yes" ) {
         woocommerce_wp_text_input(
@@ -192,8 +209,8 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       $kategorie_zbozi = "";
       foreach ( $product_categories as $kategorie_produktu ) {
         $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-zbozi-kategorie', true );
-        if ( ! empty ( $kategorie ) ) {
-          if ( empty ( $kategorie_zbozi ) ) {
+        if ( ! empty( $kategorie ) ) {
+          if ( empty( $kategorie_zbozi ) ) {
             $kategorie_zbozi = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
             $nazev_kategorie_zbozi = $kategorie;
           }
@@ -202,20 +219,20 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       woocommerce_wp_text_input(
         array( 
           'id' => 'ceske_sluzby_xml_zbozi_kategorie', 
-          'label' => 'Kategorie (<a href="http://www.zbozi.cz/static/categories.csv" target="_blank">přehled</a>)', 
+          'label' => 'Kategorie (<a href="https://www.zbozi.cz/static/categories.csv" target="_blank">přehled</a>)', 
           'placeholder' => 'CATEGORYTEXT',
           'desc_tip' => 'true',
           'description' => 'Příklad: Počítače | Software | Grafický a video software' 
         )
       );
-      if ( ! empty ( $kategorie_zbozi ) ) {
+      if ( ! empty( $kategorie_zbozi ) ) {
         echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_zbozi . ': <code>' . $nazev_kategorie_zbozi . '</code></p>';
       }
       $extra_message_aktivace = get_option( 'wc_ceske_sluzby_xml_feed_zbozi_extra_message-aktivace' );
-      if ( ! empty ( $extra_message_aktivace ) ) {
+      if ( ! empty( $extra_message_aktivace ) ) {
         $extra_message_array = ceske_sluzby_ziskat_nastaveni_zbozi_extra_message();
         foreach ( $extra_message_aktivace as $extra_message ) {
-          if ( ! empty ( $extra_message_kategorie_odkaz ) && ! empty ( $extra_message_kategorie_array ) && in_array( $extra_message, $extra_message_kategorie_array ) ) {
+          if ( ! empty( $extra_message_kategorie_odkaz ) && ! empty( $extra_message_kategorie_array ) && in_array( $extra_message, $extra_message_kategorie_array ) ) {
             if ( array_key_exists( $extra_message, $global_data['extra_message'] ) ) {
               echo '<p class="form-field"><label for="ceske_sluzby_xml_zbozi_extra_message[' . $extra_message . ']">' . $extra_message_array[ $extra_message ] . '</label>Není potřeba nic zadávat, protože na úrovni kategorie ' . $extra_message_kategorie_odkaz . ' i eshopu je tato informace <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">nastavena</a> globálně pro všechny produkty.';
             } else {
@@ -247,6 +264,44 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       }
       echo '</div>';
     }
+
+    if ( $xml_feed_glami == "yes" ) {
+      echo '<div class="options_group">'; // hide_if_grouped - skrýt u seskupených produktů
+      echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>Glami</strong> (<a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">obecný manuál</a>, <a target="_blank" href="' . site_url() . '/?feed=glami&pid=' . $post->ID . '">XML produktu</a>)</div>';
+      $kategorie_glami = "";
+      foreach ( $product_categories as $kategorie_produktu ) {
+        $kategorie = get_woocommerce_term_meta( $kategorie_produktu->term_id, 'ceske-sluzby-xml-glami-kategorie', true );
+        if ( ! empty( $kategorie ) ) {
+          if ( empty( $kategorie_glami ) ) {
+            $kategorie_glami = '<a href="' . admin_url(). 'edit-tags.php?action=edit&taxonomy=product_cat&tag_ID=' . $kategorie_produktu->term_id . '">' . $kategorie_produktu->name . '</a>';
+            $nazev_kategorie_glami = $kategorie;
+          }
+        }
+      }
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_glami_kategorie', 
+          'label' => 'Kategorie (<a href="https://www.' . GLAMI_URL . '/category-xml/" target="_blank">přehled</a>)', 
+          'placeholder' => 'CATEGORYTEXT',
+          'desc_tip' => 'true',
+          'description' => 'Příklad: Dámské oblečení a obuv | Dámské boty | Dámské outdoorové boty' 
+        )
+      );
+      woocommerce_wp_text_input(
+        array( 
+          'id' => 'ceske_sluzby_xml_glami_cpc',
+          'data_type' => 'price',
+          'label' => 'CPC', 
+          'placeholder' => '0,00',
+          'desc_tip' => 'true',
+          'description' => 'Nastavení maximální ceny za proklik (Kč).' 
+        )
+      );
+      if ( ! empty( $kategorie_glami ) ) {
+        echo '<p class="form-field"><strong>Upozornění: </strong>Pokud nic nevyplníte, tak bude automaticky použita hodnota na úrovni kategorie ' . $kategorie_glami . ': <code>' . $nazev_kategorie_glami . '</code></p>';
+      }
+      echo '</div>';
+    }
     echo '</div>';
   }
 
@@ -254,19 +309,20 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
     global $thepostid;
     $global_dodaci_doba_text = '';
     $aktivace_dodaci_doby = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_dodaci_doba-aktivace' );
-    $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, true );
-    $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
 
     if ( $aktivace_dodaci_doby == "yes" ) {
-      if ( ! empty ( $dodaci_doba ) || $predobjednavka == "yes" ) {
+      $dodaci_doba_dropdown = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, $thepostid );
+      $dodaci_doba = ceske_sluzby_zpracovat_dodaci_dobu_produktu( false, false );
+      $predobjednavka = get_option( 'wc_ceske_sluzby_preorder-aktivace' );
+      if ( ! empty( $dodaci_doba_dropdown ) || $predobjednavka == "yes" ) {
         echo '</div>';
         echo '<div class="options_group">';
         echo '<div class="nadpis" style="margin-left: 12px; margin-top: 10px;"><strong>České služby</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastavení dodací doby</a>)</div>';
       }
 
-      if ( ! empty ( $dodaci_doba ) ) {
+      if ( ! empty( $dodaci_doba_dropdown ) ) {
         $global_dodaci_doba = get_option( 'wc_ceske_sluzby_xml_feed_heureka_dodaci_doba' );
-        if ( ! empty ( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
+        if ( ! empty( $global_dodaci_doba ) || $global_dodaci_doba === '0' ) {
           if ( array_key_exists( $global_dodaci_doba, $dodaci_doba ) ) {
             $global_dodaci_doba_text = ' Globálně máte <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=dodaci-doba">nastaveno</a>: <strong>' . $dodaci_doba[ $global_dodaci_doba ] . '</strong> (<a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=xml-feed">hodnota</a>: '.$global_dodaci_doba.').';
           } else {
@@ -278,7 +334,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
             'id' => 'ceske_sluzby_dodaci_doba', 
             'label' => 'Dodací doba',
             'description' => 'Zvolte dodací dobu pro konkrétní produkt.' . $global_dodaci_doba_text,
-            'options' => $dodaci_doba
+            'options' => $dodaci_doba_dropdown
           )
         );
       }
@@ -286,7 +342,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       if ( $predobjednavka == "yes" ) {
         $datum_predobjednavky = "";
         $datum = get_post_meta( $thepostid, 'ceske_sluzby_xml_preorder_datum', true );
-        if ( ! empty ( $datum ) ) {
+        if ( ! empty( $datum ) ) {
           $datum_predobjednavky = date_i18n( 'Y-m-d', $datum );
         }
         echo '<p class="form-field ceske_sluzby_xml_preorder_datum_field">
@@ -301,7 +357,7 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
   public function ceske_sluzby_zobrazit_nastaveni_ean() {
     global $thepostid;
     $podpora_ean = get_option( 'wc_ceske_sluzby_xml_feed_heureka_podpora_ean' );
-    if ( empty ( $podpora_ean ) ) {
+    if ( empty( $podpora_ean ) ) {
       $value = get_post_meta( $thepostid, 'ceske_sluzby_hodnota_ean', true );
       woocommerce_wp_text_input(
         array( 
@@ -335,19 +391,21 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_heureka_kategorie',
       'ceske_sluzby_xml_zbozi_productname',
       'ceske_sluzby_xml_zbozi_kategorie',
+      'ceske_sluzby_xml_glami_kategorie',
+      'ceske_sluzby_xml_glami_cpc',
       'ceske_sluzby_xml_stav_produktu',
       'ceske_sluzby_xml_preorder_datum'
     );
     foreach ( $ukladana_data_text as $key ) {
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
-        $ulozeno = get_post_meta( $post_id, $key, true );
+        $ulozeno_text = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
           if ( $key == 'ceske_sluzby_xml_preorder_datum' ) {
             $value = strtotime( $value );
           }
           update_post_meta( $post_id, $key, esc_attr( $value ) );
-        } elseif ( ! empty( $ulozeno ) ) {
+        } elseif ( ! empty( $ulozeno_text ) ) {
           delete_post_meta( $post_id, $key );
         }
       }
@@ -358,28 +416,30 @@ class WC_Product_Tab_Ceske_Sluzby_Admin {
       'ceske_sluzby_xml_zbozi_extra_message'
     );
     foreach ( $ukladana_data_checkbox as $key ) {
+      $ulozeno_checkbox = get_post_meta( $post_id, $key, true );
       if ( isset( $_POST[ $key ] ) ) {
         $value = $_POST[ $key ];
-        $ulozeno = get_post_meta( $post_id, $key, true );
         if ( ! empty( $value ) ) {
           update_post_meta( $post_id, $key, $value );
         }
-      } elseif ( ! empty( $ulozeno ) ) {
+      } elseif ( ! empty( $ulozeno_checkbox ) ) {
         delete_post_meta( $post_id, $key );
       }
     }
 
-    $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
-    $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
-    if ( is_array( $dodaci_doba_ulozeno ) ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
-    }
-    if ( ! empty ( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
-      if ( ! is_array( $dodaci_doba ) ) {
-        update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+    if ( isset( $_POST['ceske_sluzby_dodaci_doba'] ) ) {
+      $dodaci_doba = $_POST['ceske_sluzby_dodaci_doba'];
+      $dodaci_doba_ulozeno = get_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', true );
+      if ( is_array( $dodaci_doba_ulozeno ) ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
       }
-    } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
-      delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
+      if ( ! empty( $dodaci_doba ) || (string)$dodaci_doba === '0' ) {
+        if ( ! is_array( $dodaci_doba ) ) {
+          update_post_meta( $post_id, 'ceske_sluzby_dodaci_doba', $dodaci_doba );
+        }
+      } elseif ( ! empty( $dodaci_doba_ulozeno ) || (string)$dodaci_doba_ulozeno === '0' ) {
+        delete_post_meta( $post_id, 'ceske_sluzby_dodaci_doba' );
+      }
     }
   }
 }

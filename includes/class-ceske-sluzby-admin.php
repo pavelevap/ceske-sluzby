@@ -1,5 +1,5 @@
 <?php
-// http://docs.woothemes.com/document/adding-a-section-to-a-settings-tab/
+// https://docs.woothemes.com/document/adding-a-section-to-a-settings-tab/
 class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function init() {
@@ -10,44 +10,139 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     add_filter( 'woocommerce_admin_settings_sanitize_option', __CLASS__ . '::admin_settings_sanitize_option', 10, 3 );
     add_action( 'woocommerce_admin_field_upload', __CLASS__ . '::ceske_sluzby_upload_button_settings_field' );
     add_action( 'woocommerce_update_options_checkout', __CLASS__ . '::ceske_sluzby_nastaveni_plateb' );
-    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_plateb', 100 );
+    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_plateb' );
     add_action( 'woocommerce_sections_shipping', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna_doprava' );
-    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna_doprava', 100 );
+    add_action( 'wp_loaded', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna_doprava' );
     add_filter( 'woocommerce_get_settings_checkout', __CLASS__ . '::ceske_sluzby_nastaveni_pokladna' );
     add_action( 'woocommerce_settings_tabs_shipping', __CLASS__ . '::settings_tab_shipping' );
     add_action( 'woocommerce_update_options_shipping', __CLASS__ . '::update_settings_shipping' );
   }
 
+  public static function ceske_sluzby_ziskat_aktivovane_platebni_metody() {
+    $available_gateways = array();
+    if ( ! is_null( WC()->payment_gateways ) ) {
+      $gateways = WC()->payment_gateways->payment_gateways();
+      if ( ! empty( $gateways ) ) {
+        foreach ( $gateways as $gateway ) {
+          if ( $gateway->is_available() || ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) ) {
+            $available_gateways[ $gateway->id ] = $gateway;
+          }
+        }
+      }
+    }
+    return $available_gateways;
+  }
+
+  public static function ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr ) {
+    $shipping_method = '';
+    if ( ! empty( $aktualni_filtr ) ) {
+      if ( strpos( $aktualni_filtr, 'woocommerce_shipping_instance_form_fields_' ) !== false ) {
+        $shipping_method = str_replace( 'woocommerce_shipping_instance_form_fields_', '', $aktualni_filtr );
+      } elseif ( strpos( $aktualni_filtr, 'woocommerce_settings_api_form_fields_' ) !== false ) {
+        $shipping_method = str_replace( 'woocommerce_settings_api_form_fields_', '', $aktualni_filtr );
+      }
+    }
+    return $shipping_method;
+  }
+
+  public static function ceske_sluzby_ziskat_povolenou_dopravu_cod() {
+    $cod_shipping = array();
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
+    if ( array_key_exists( 'cod', $available_gateways ) && isset( $available_gateways['cod']->enable_for_methods ) ) {
+      $cod_shipping = $available_gateways['cod']->enable_for_methods;
+    }
+    return $cod_shipping;
+  }
+
   public static function ceske_sluzby_zobrazeni_pokladna_doprava( $form_fields ) {
-    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
-    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_doprava' );
+    $options = self::dostupne_nastaveni( 'doprava' );
+    $zobrazeny_uvod = false;
+    $aktualni_filtr = current_filter();
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
       $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
         'title' => 'České služby',
         'type' => 'title',
         'default' => ''
-      );    
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+      );
+      $zobrazeny_uvod = true;
+      $settings = array();
+      $shipping_method = self::ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr );
+      $cod_shipping = self::ceske_sluzby_ziskat_povolenou_dopravu_cod();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
-        if ( in_array( 'eet_format', $moznosti_nastaveni ) && array_key_exists( 'eet_format', $options ) ) {
-          $form_fields['ceske_sluzby_eet_format_' . $gateway_id ] = array(
-            'title' => 'EET: Formát účtenky (' . $gateway->title . ')',
-            'type' => 'select',
-            'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-            'css' => 'width: 300px',
-            'default' => 'no',
-            'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
-          );
+        if ( $gateway_id != 'cod' || empty( $cod_shipping ) || ( $gateway_id == 'cod' && ! empty( $cod_shipping ) && in_array( $shipping_method, $cod_shipping ) ) ) {
+          $settings[$gateway_id] = $gateway->title;
         }
-        if ( in_array( 'eet_podminka', $moznosti_nastaveni ) && array_key_exists( 'eet_podminka', $options ) ) {
-          $form_fields['ceske_sluzby_eet_podminka_' . $gateway_id ] = array(
-            'title' => 'EET: Podmínka odeslání (' . $gateway->title . ')',
-            'type' => 'select',
-            'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-            'css' => 'width: 300px',
-            'default' => 'no',
-            'description' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
-          );
+      }
+      if ( in_array( 'platebni_metody', $moznosti_nastaveni ) && array_key_exists( 'platebni_metody', $options ) ) {
+        $form_fields['ceske_sluzby_platebni_metody'] = array(
+          'title' => 'Odstranit platební metody',
+          'type' => 'multiselect',
+          'options' => $settings,
+          'class' => 'wc-enhanced-select',
+          'default' => ''
+        );
+        if ( empty( $settings ) ) {
+          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Žádné platební metody nejsou dostupné.';
+        } else {
+          $form_fields['ceske_sluzby_platebni_metody']['description'] = 'Zvolte platební metody, které nebudou nadále dostupné.';
+        }
+      }
+      if ( in_array( 'cena_dopravy', $moznosti_nastaveni ) && array_key_exists( 'cena_dopravy', $options ) ) {
+        $form_fields['ceske_sluzby_cena_dopravy'] = array(
+          'title' => 'Cena dopravy',
+          'type' => 'textarea',
+          'desc_tip' => 'Upřesněte nastavení cen pomocí intervalů',
+          'css' => 'width: 40%; height: 85px;',
+          'default' => ''
+        );
+      }
+    }
+    $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna_doprava' );
+    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+    if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
+      if ( ! $zobrazeny_uvod ) {
+        $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+          'title' => 'České služby',
+          'type' => 'title',
+          'default' => ''
+        );
+        $shipping_method = self::ceske_sluzby_ziskat_aktualni_dopravu( $aktualni_filtr );
+        $cod_shipping = self::ceske_sluzby_ziskat_povolenou_dopravu_cod();
+      }
+      foreach ( $moznosti_nastaveni as $moznost_nastaveni ) {
+        foreach ( $available_gateways as $gateway_id => $gateway ) {
+          if ( $gateway_id != 'cod' || empty( $cod_shipping ) || ( $gateway_id == 'cod' && ! empty( $cod_shipping ) && in_array( $shipping_method, $cod_shipping ) ) ) {
+            if ( $moznost_nastaveni == 'poplatek_platba' && array_key_exists( 'poplatek_platba', $options ) ) {
+              $form_fields['ceske_sluzby_poplatek_platba_' . $gateway_id ] = array(
+                'title' => 'Poplatek za platbu (' . $gateway->title . ')',
+                'type' => 'text',
+                'description' => 'Doplňte cenu poplatku za použitou platební metodu. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_doprava_poplatek_platba' ),
+                'default' => ''
+              );
+            }
+            if ( $moznost_nastaveni == 'eet_format' && array_key_exists( 'eet_format', $options ) ) {
+              $form_fields['ceske_sluzby_eet_format_' . $gateway_id ] = array(
+                'title' => 'EET: Formát účtenky (' . $gateway->title . ')',
+                'type' => 'select',
+                'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
+                'css' => 'width: 300px',
+                'default' => '',
+                'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
+              );
+            }
+            if ( in_array( 'eet_podminka', $moznosti_nastaveni ) && array_key_exists( 'eet_podminka', $options ) ) {
+              $form_fields['ceske_sluzby_eet_podminka_' . $gateway_id ] = array(
+                'title' => 'EET: Podmínka odeslání (' . $gateway->title . ')',
+                'type' => 'select',
+                'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
+                'css' => 'width: 300px',
+                'default' => '',
+                'description' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
+              );
+            }
+          }
         }
       }
     }
@@ -64,6 +159,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $sections = array(
       '' => 'Základní nastavení'
     );
+    $sections['doprava'] = 'Doprava';
     if ( $aktivace_xml == "yes" ) {
       $sections['xml-feed'] = 'XML feed';
     }
@@ -126,33 +222,45 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
   public static function get_settings_shipping( $current_section = '' ) {
     global $current_section, $hide_save_button;
     $settings = array();
-    $options = self::dostupne_nastaveni( 'pokladna_doprava' );
-    if ( ! empty( $options ) ) {
-      if ( '' == $current_section && ! isset( $_GET['zone_id'] ) && ! isset( $_GET['instance_id'] ) ) {
-        $hide_save_button = false;
-        $settings = array(
-          array(
-            'title' => 'České služby',
-            'type' => 'title',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
-          ),
-          array(
-            'title' => 'Možnosti nastavení',
-            'type' => 'multiselect',
-            'desc' => 'Zvolte podporované funkce, které můžete následně nastavit v kombinaci jednotlivých platebních a dopravních metod.',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava',
-            'class' => 'wc-enhanced-select',
-            'options' => $options,
-            'custom_attributes' => array(
-              'data-placeholder' => 'Nastavení kombinace platebních a dopravních metod'
-            )
-          ),
-          array(
-            'type' => 'sectionend',
-            'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title'
+    if ( '' == $current_section && ! isset( $_GET['zone_id'] ) && ! isset( $_GET['instance_id'] ) ) {
+      $hide_save_button = false;
+      $settings[] = array(
+        'title' => 'České služby',
+        'type' => 'title',
+        'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title',
+      );
+      $options = self::dostupne_nastaveni( 'doprava' );
+      if ( ! empty( $options ) ) {
+        $settings[] = array(
+          'title' => 'Dopravní metody',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>na úrovni jednotlivých dopravních metod</strong>.',
+          'id' => 'wc_ceske_sluzby_nastaveni_doprava',
+          'class' => 'wc-enhanced-select',
+          'options' => $options,
+          'custom_attributes' => array(
+            'data-placeholder' => 'Nastavení na úrovni dopravních metod'
           )
         );
       }
+      $options = self::dostupne_nastaveni( 'pokladna_doprava' );
+      if ( ! empty( $options ) ) {
+        $settings[] = array(
+          'title' => 'Kombinace dopravních a platebních metod',
+          'type' => 'multiselect',
+          'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>v kombinaci jednotlivých platebních a dopravních metod</strong>.',
+          'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava',
+          'class' => 'wc-enhanced-select',
+          'options' => $options,
+          'custom_attributes' => array(
+            'data-placeholder' => 'Nastavení kombinace platebních a dopravních metod'
+          )
+        );
+      }
+      $settings[] = array(
+        'type' => 'sectionend',
+        'id' => 'wc_ceske_sluzby_nastaveni_pokladna_doprava_title'
+      );
     }
     return $settings;
   }
@@ -190,15 +298,25 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function dostupne_nastaveni( $type ) {
     $options = array();
+    $reverse_type = '';
     $aktivace_eet = get_option( 'wc_ceske_sluzby_dalsi_nastaveni_eet-aktivace' );
-    if ( $aktivace_eet == "yes" && ( $type == 'pokladna' || $type == 'pokladna_doprava' ) ) {
+    if ( $type == 'pokladna' || $type == 'pokladna_doprava' ) {
+      if ( $aktivace_eet == "yes" ) {
+        $options = array(
+          'eet_format' => 'EET: Formát účtenky',
+          'eet_podminka' => 'EET: Podmínka odeslání'
+        );
+      }
       $options = array(
-        'eet_format' => 'EET: Formát účtenky',
-        'eet_podminka' => 'EET: Podmínka odeslání'
+        'poplatek_platba' => 'Poplatek za platbu',
       );
     }
     if ( $type == 'pokladna' ) {
       $options['zaokrouhlovani'] = 'Zaokrouhlování celkové ceny objednávky';
+    }
+    if ( $type == 'doprava' ) {
+      $options['platebni_metody'] = 'Dostupné platební metody';
+      $options['cena_dopravy'] = 'Cenové intervaly pro dopravu';
     }
     if ( $type == 'pokladna' ) {
       $reverse_type = 'pokladna_doprava';
@@ -206,11 +324,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     if ( $type == 'pokladna_doprava' ) {
       $reverse_type = 'pokladna';
     }
-    $dalsi_moznosti = get_option( 'wc_ceske_sluzby_nastaveni_' . $reverse_type );
-    if ( ! empty( $dalsi_moznosti ) && is_array( $dalsi_moznosti ) ) {
-      foreach ( $dalsi_moznosti as $id ) {
-        if ( array_key_exists( $id, $options ) ) {
-          unset( $options[$id] );
+    if ( ! empty( $reverse_type ) ) {
+      $dalsi_moznosti = get_option( 'wc_ceske_sluzby_nastaveni_' . $reverse_type );
+      if ( ! empty( $dalsi_moznosti ) && is_array( $dalsi_moznosti ) ) {
+        foreach ( $dalsi_moznosti as $id ) {
+          if ( array_key_exists( $id, $options ) ) {
+            unset( $options[$id] );
+          }
         }
       }
     }
@@ -219,29 +339,34 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function zobrazit_zvolene_nastaveni( $settings ) {
     $description = 'Na úrovni eshopu zatím není nic nastaveno.';
-    $eet_format_nastaveni = get_option( $settings );
-    if ( ! empty( $eet_format_nastaveni ) ) {
-      $eet_format_array = self::moznosti_nastaveni( $settings );
-      if ( array_key_exists( $eet_format_nastaveni, $eet_format_array ) ) {
-        $eet_format = $eet_format_array[$eet_format_nastaveni];
-        $description = 'Na úrovni eshopu je nastaveno: <strong>' . $eet_format . '</strong>.';
+    $zvolene_nastaveni = get_option( $settings );
+    if ( ! empty( $zvolene_nastaveni ) ) {
+      $mozne_nastaveni_array = self::moznosti_nastaveni( $settings );
+      if ( ! empty( $mozne_nastaveni_array ) ) {
+        if ( array_key_exists( $zvolene_nastaveni, $mozne_nastaveni_array ) ) {
+          $nastaveni = $mozne_nastaveni_array[$zvolene_nastaveni];
+        }
+      } else {
+        $nastaveni = $zvolene_nastaveni;
       }
+      $description = 'Na úrovni eshopu je nastaveno: <strong>' . $nastaveni . '</strong>.';
     }
     return $description;
   }
 
   public static function ceske_sluzby_nastaveni_pokladna( $settings ) {
+    global $current_section;
     $options = self::dostupne_nastaveni( 'pokladna' );
-    if ( ! empty( $options ) ) {
+    if ( '' == $current_section && ! empty( $options ) ) {
       $settings[] = array(
         'title' => 'České služby',
         'type' => 'title',
         'id' => 'wc_ceske_sluzby_nastaveni_pokladna_title',
       );
       $settings[] = array(
-        'title' => 'Možnosti nastavení',
+        'title' => 'Platební metody',
         'type' => 'multiselect',
-        'desc' => 'Zvolte podporované funkce, které můžete následně nastavit na úrovni jednotlivých platebních metod.',
+        'desc' => 'Zvolte podporované funkce, které můžete následně nastavit <strong>na úrovni jednotlivých platebních metod</strong>.',
         'id' => 'wc_ceske_sluzby_nastaveni_pokladna',
         'class' => 'wc-enhanced-select',
         'options' => $options,
@@ -261,19 +386,44 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
     $form_fields = array();
     $moznosti_nastaveni = get_option( 'wc_ceske_sluzby_nastaveni_pokladna' );
     $options = self::dostupne_nastaveni( 'pokladna' );
+    $available_gateways = WC()->payment_gateways->payment_gateways();
+
+    if ( isset( $available_gateways['bacs'] ) ) {
+      $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+        'title' => 'České služby',
+        'type' => 'title',
+      );
+      $variabilni_symbol['ceske_sluzby_variabilni_symbol'] = array(
+        'title' => 'Variabilní symbol',
+        'type' => 'checkbox',
+        'label' => 'K bankovním údajům o platbě předem bude doplněn variabilní symbol v podobě čísla objednávky.'
+      );
+      $available_gateways['bacs']->form_fields += $form_fields;
+      $available_gateways['bacs']->form_fields += $variabilni_symbol;
+    }
+
     if ( ! empty( $moznosti_nastaveni ) && is_array( $moznosti_nastaveni ) ) {
-      $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
       foreach ( $available_gateways as $gateway_id => $gateway ) {
-        $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
-          'title' => 'České služby',
-          'type' => 'title',
-        );
+        if ( $gateway_id != "bacs" ) {
+          $form_fields['wc_ceske_sluzby_nastaveni_pokladna_doprava_title'] = array(
+            'title' => 'České služby',
+            'type' => 'title',
+          );
+        }
+        if ( in_array( 'poplatek_platba', $moznosti_nastaveni ) ) {
+          $form_fields['ceske_sluzby_poplatek_platba'] = array(
+            'title' => 'Poplatek za platbu',
+            'type' => 'text',
+            'description' => 'Doplňte cenu poplatku za použitou platební metodu. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_doprava_poplatek_platba' ),
+            'default' => ''
+          );
+        }
         if ( in_array( 'zaokrouhlovani', $moznosti_nastaveni ) ) {
           $form_fields['ceske_sluzby_zaokrouhleni'] = array(
             'title' => 'Zaokrouhlování',
             'type' => 'select',
             'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ),
-            'default' => 'no',
+            'default' => '',
             'description' => 'Automatické zaokrouhlení celkové částky objednávky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_dalsi_nastaveni_zaokrouhleni' ),
           );
         }
@@ -283,7 +433,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
             'type' => 'select',
             'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
             'css' => 'width: 300px',
-            'default' => 'no',
+            'default' => '',
             'description' => 'Formát elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_format' ),
           );
         }
@@ -293,7 +443,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
             'type' => 'select',
             'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
             'css' => 'width: 300px',
-            'default' => 'no',
+            'default' => '',
             'description' => 'Podmínka pro automatické odeslání elektronické účtenky. ' . self::zobrazit_zvolene_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
           );
         }
@@ -304,6 +454,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
 
   public static function ceske_sluzby_nastaveni_pokladna_doprava() {
     $available_shipping = WC()->shipping->load_shipping_methods();
+    $available_gateways = self::ceske_sluzby_ziskat_aktivovane_platebni_metody();
     foreach ( $available_shipping as $shipping ) {
       if ( isset( $shipping->supports ) && is_array( $shipping->supports ) && ! empty( $shipping->supports ) ) {
         if ( in_array( 'shipping-zones', $shipping->supports ) && in_array( 'instance-settings-modal', $shipping->supports ) ) {
@@ -378,21 +529,34 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'API klíč: Ověřeno zákazníky',
           'type' => 'text',
-          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>.',
+          'desc' => 'API klíč pro službu Ověřeno zákazníky naleznete <a href="https://sluzby.' . HEUREKA_URL . '/n/sluzby/certifikat-spokojenosti/">zde</a>.',
           'id' => 'wc_ceske_sluzby_heureka_overeno-api',
           'css' => 'width: 300px'
         ),
         array(
+          'title' => 'Souhlas s odesíláním dat',
+          'type' => 'select',
+          'desc_tip' => 'Možnosti souhlasu zákazníků pro službu Ověřeno zákazníky.',
+          'id' => 'wc_ceske_sluzby_heureka_overeno-souhlas',
+          'class' => 'wc-enhanced-select',
+          'options' => array(
+            '' => 'Neaktivní',
+            'souhlas_optout' => 'Neodmítnout souhlas',
+            'nesouhlas_optout' => 'Nepotvrdit nesouhlas'
+          ),
+          'css' => 'width: 300px',
+        ),
+        array(
           'title' => 'API klíč: Měření konverzí',
           'type' => 'text',
-          'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="http://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>. Heureka může ještě nějaký čas hlásit, že nebyla služba zprovozněna (dokud neproběhne nějaká objednávka zákazníka z Heureky).',
+          'desc' => 'API klíč pro službu Měření konverzí naleznete <a href="https://sluzby.' . HEUREKA_URL . '/obchody/mereni-konverzi/">zde</a>. Heureka může ještě nějaký čas hlásit, že nebyla služba zprovozněna (dokud neproběhne nějaká objednávka zákazníka z Heureky).',
           'id'   => 'wc_ceske_sluzby_heureka_konverze-api',
           'css'   => 'width: 300px'
         ),
         array(
           'title' => 'Aktivovat certifikát',
           'type' => 'checkbox',
-          'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="http://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
+          'desc' => 'Nastavení pro zobrazení certifikátu spokojenosti bude po aktivaci dostupné <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=ceske-sluzby&section=certifikat-spokojenosti">zde</a>. Obchod musí certifikát nejdříve získat, což snadno ověříte <a href="https://sluzby.' . HEUREKA_URL . '/sluzby/certifikat-spokojenosti/">zde</a>',
           'id' => 'wc_ceske_sluzby_heureka_certifikat_spokojenosti-aktivace'
         ),
         array(
@@ -412,6 +576,23 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_heureka_title'
+        ),
+        array(
+          'title' => 'Zboží.cz',
+          'type' => 'title',
+          'desc' => '',
+          'id' => 'wc_ceske_sluzby_zbozi_title'
+        ),
+        array(
+          'title' => 'ID obchodu',
+          'type' => 'text',
+          'desc' => 'Identifikační číslo obchodu pro měření konverzí naleznete <a href="https://admin.zbozi.cz/premiseListScreen">zde</a>.',
+          'id'   => 'wc_ceske_sluzby_zbozi_konverze_id-obchodu',                                                             
+          'css'   => 'width: 300px'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_zbozi_title'
         ),
         array(
           'title' => 'Sklik.cz',
@@ -444,7 +625,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Identifikační klíč',
           'type' => 'text',
-          'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="http://www.srovname.cz/muj-obchod">zde</a>.',
+          'desc' => 'Identifikační klíč pro měření konverzí naleznete <a href="https://www.srovname.cz/muj-obchod">zde</a>.',
           'id' => 'wc_ceske_sluzby_srovname_konverze-objednavky'
         ),
         array(
@@ -462,6 +643,25 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'type' => 'checkbox',
           'desc' => 'Aktivovat možnost zadávání informací pro sledování zásilek u každé objednávky. Speciální notifikační email můžete nastavit <a href="' . admin_url(). 'admin.php?page=wc-settings&tab=email&section=wc_email_ceske_sluzby_sledovani_zasilek">zde</a>.',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_sledovani-zasilek'
+        ),
+        array(
+          'title' => 'Status "Odesláno"',
+          'type' => 'checkbox',
+          'desc' => 'Aktivace nového stavu objednávky s názvem "Odesláno", který bude automaticky použit při vyplnění údajů určených ke sledování zásilky.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_status-odeslano'
+        ),
+        array(
+          'title' => 'Potvrzovat platbu předem',
+          'type' => 'checkbox',
+          'desc' => 'Změna základního stavu objednávky umožní nejdříve zkontrolovat objednávku než budou odeslány údaje o bankovním účtu pro platbu předem.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_zmena-platby-predem'
+        ),
+        array(
+          'title' => 'Formát čísla objednávky',
+          'type' => 'text',
+          'desc' => 'Možnost nastavení vlastního číslování objednávek. Zatím je podporován jediný formát, a to <code>{DATE:Ymd}{SEQUENCE:d|2}</code>',
+          'id' => 'wc_ceske_sluzby_format_cisla_objednavky',
+          'css' => 'width: 300px'
         ),
         array(
           'title' => 'Dodací doba',
@@ -482,12 +682,6 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_dobirka-zmena'
         ),
         array(
-          'title' => 'Pouze doprava zdarma',
-          'type' => 'checkbox',
-          'desc' => 'Omezit nabídku dopravy, pokud je dostupná zdarma.',
-          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
-        ),
-        array(
           'title' => 'Zakrouhlování',
           'type' => 'select',
           'desc_tip' => 'Možnosti zaokrouhlení celkové částky objednávky.',
@@ -497,8 +691,68 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 300px',
         ),
         array(
+          'title' => 'Nepřesné zaokrouhlení',
+          'type' => 'checkbox',
+          'desc' => 'Pokud se v košíku a objednávkách objevují nepřesně vypočtené daně a součty, tak můžete zkusit aktivovat tuto experimentální opravnou funkci.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_nepresne-zaokrouhleni'
+        ),
+        array(
           'type' => 'sectionend',
           'id' => 'wc_ceske_sluzby_dalsi_nastaveni_title'
+        )
+      );
+    }
+
+    if ( 'doprava' == $current_section ) {
+      $settings = array(
+        array(
+          'title' => 'Doprava a pokladna',
+          'type' => 'title',
+          'desc' => 'Nastavení doplňkových možností pro dopravu a pokladnu.',
+          'id' => 'wc_ceske_sluzby_doprava_title'
+        ),
+        array(
+          'title' => 'Zásilkovna',
+          'type' => 'checkbox',
+          'desc' => 'Po aktivaci bude dostupné nastavení v menu Doprava - Zásilkovna a možnost přidávání této dopravní možnosti.',
+          'id' => 'wc_ceske_sluzby_doprava_zasilkovna'
+        ),
+        array(
+          'title' => 'Poplatek za platbu (Kč)',
+          'type' => 'text',
+          'desc' => 'Doplňkový poplatek k objednávce je možné upřesnit podle konkrétní platební metody či v kombinaci se způsobem dopravy.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Název poplatku za platbu',
+          'type' => 'text',
+          'desc' => 'Název poplatku za způsob platby.',
+          'id' => 'wc_ceske_sluzby_doprava_poplatek_platba_nazev',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Ceny dopravy podle daně',
+          'type' => 'checkbox',
+          'desc' => 'Pokud v eshopu zadáváte ceny s daní, tak je bude možné používat i při základním nastavení dopravy.',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-zpusob-dane'
+        ),
+        array(
+          'title' => 'Text pro dopravu zdarma',
+          'type' => 'text',
+          'desc' => 'V případě dopravy zdarma se nezobrazí žádná cena ani informace. Můžete zadat <code>{VALUE}</code> pro zobrazení nulové ceny nebo libovolný text (např. <code>ZDARMA</code>).',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-text-dopravy-zdarma',
+          'css' => 'width: 300px'
+        ),
+        array(
+          'title' => 'Pouze doprava zdarma',
+          'type' => 'checkbox',
+          'desc' => 'Pokud je dostupná doprava zdarma, tak zobrazit pouze tuto možnost (+ nabídku vyzvednutí na pobočce).',
+          'id' => 'wc_ceske_sluzby_dalsi_nastaveni_doprava-pouze-zdarma'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_doprava_title'
         )
       );
     }
@@ -508,7 +762,10 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'XML feed',
           'type' => 'title',
-          'desc' => 'Zde budou postupně přidávána další nastavení.',
+          'desc' => 'Pro každý XML feed existuje příslušná URL adresa podle jeho názvu: <code>' . site_url() . '/?feed=NAZEV</code>, kde <code>NAZEV</code> může nabývat hodnoty <code>heureka</code>, <code>zbozi</code>, <code>google</code> či <code>glami</code>.
+                     Pro větší eshopy je vhodné aktivovat a používat feed v podobě <code>.xml</code> souboru: <code>' . site_url() . '/wp-content/NAZEV.xml</code>.
+                     Pokud chcete otestovat jen část produktů, tak můžete použít parametr <code>limit</code>, např. <code>' . site_url() . '/?feed=heureka&limit=10</code> zobrazí 10 nejnovějších produktů v podobě XML feedu pro Heureka.cz.
+                     Otestovat můžete i jednotlivé produkty (konkrétní odkaz je dostupný vždy z administrace u každého produktu), stačí použít parametr <code>pid</code>, např. <code>' . site_url() . '/?feed=zbozi&pid=123</code> zobrazí produkt s ID = 123 v podobě feedu pro Zboží.cz.',
           'id' => 'wc_ceske_sluzby_xml_feed_title'
         ),
         array(
@@ -524,7 +781,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Heureka.cz (.sk)',
           'type' => 'title',
-          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=heureka">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/heureka.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="https://sluzby.' . HEUREKA_URL . '/napoveda/xml-feed/">zde</a>.',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
         ),
         array(
@@ -559,6 +816,13 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'css' => 'width: 250px',
         ),
         array(
+          'title' => 'Podpora dárků',
+          'type' => 'text',
+          'desc' => 'Zadat můžete název příslušné taxonomie (např. na základě používaného pluginu), vlastnosti (jednoduchá textová nebo v podobě taxonomie), uživatelského pole nebo libovolný text pro element <code>GIFT</code>. Další podrobnosti (a dostupné taxonomie) naleznete dole u nastavení dodatečného označení produktů.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_podpora_darku',
+          'css' => 'width: 250px',
+        ),
+        array(
           'title' => 'Stav produktů',
           'type' => 'select',
           'desc_tip' => 'Zvolte stav produktů, který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu).',
@@ -571,27 +835,52 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           ),
         ),
         array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+        ),
+        array(
+          'title' => 'Nastavení názvů a parametrů',
+          'type' => 'title',
+          'desc' => 'Následující nastavení bude použito pro celý eshop a všechny feedy (jednotlivé názvy pak můžete měnit na úrovni kategorie či produktu).
+                     Pro <strong>názvy produktů</strong> je ve výchozím nastavení automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}</code>, což je název doplněný o přiřazené (viditelné) vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie.
+                     Pro <strong>názvy variant</strong> je ve výchozím nastavení automaticky použita hodnota <code>{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}</code>, což je název doplněný o přiřazené vlastnosti variant, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie.
+                     Pro názvy i parametry je možné použít další dostupné hodnoty, např. <code>{MANUFACTURER}</code>, konkrétní vlastnosti, např. <code>{pa_barva}</code>, položky taxonomií i včetně jejich metadat, např. <code>{product_cat:meta}</code> nebo uživatelská pole. Pro označení hodnoty se používají složené závorky a pokud je vynecháte, tak to bude považováno za jednoduchý text.
+                     Pro <strong>změnu parametrů</strong> musí být na každém řádku nejdříve uvedeno znaménko (<code>+</code> pro přidání, <code>-</code> pro odebrání), následované názvem a hodnotou parametru, vše oddělené pomocí znaků <code>|</code>.
+                     Příklad: <code>+|Barva|{pa_barva}</code>.
+                     Do XML feedu bude automaticky doplněn parametr <code>PARAM</code> s názvem Barva, který bude u jednotlivých produktů nabývat hodnoty na základě přiřazené vlastnosti v podobě taxonomie <code>pa_barva</code>.
+                     Pokud jste ale nějaký parametr Barva už ve feedu měli a chcete se ho zbavit, tak stačí použít na samostatném řádku zápis <code>-|Barva</code>.
+                     Parametry je možné i přejmenovat, a to vynecháním úvodního znaménka, např. <code>color|Barva</code>.',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_nastaveni_title'
+        ),
+        array(
           'title' => 'Název produktů',
           'type' => 'text',
-          'desc' => 'Zvolte obecný název produktů (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} | {KATEGORIE} | {NAZEV} {VLASTAXVID}</code>, což je název doplněný o přiřazené (viditelné) vlastnosti v podobě taxonomií, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů, např. <code>{MANUFACTURER}</code>, nebo konkrétních vlastností, např. <code>{pa_barva}</code>.',
+          'desc_tip' => 'Zvolte obecný název produktů (PRODUCTNAME).',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_produktu',
           'css' => 'width: 400px',
         ),
         array(
           'title' => 'Název variant',
           'type' => 'text',
-          'desc' => 'Zvolte obecný název variant (<code>PRODUCTNAME</code>), který bude hromadně použit pro celý eshop (můžete měnit na úrovni kategorie či produktu). Ve výchozím nastavení je automaticky použita hodnota <code>{PRODUCTNAME} {VLASVAR} | {KATEGORIE} | {NAZEV} {VLASVAR}</code>, což je název doplněný o přiřazené vlastnosti variant, pokud není vyplněna hodnota <code>PRODUCTNAME</code> na úrovni produktu či kategorie. Dále je možné použít hodnoty některých elementů, např. <code>{MANUFACTURER}</code>, nebo konkrétních vlastností, např. <code>{pa_barva}</code>.',
+          'desc_tip' => 'Zvolte obecný název variant (PRODUCTNAME).',
           'id' => 'wc_ceske_sluzby_xml_feed_heureka_nazev_variant',
           'css' => 'width: 400px',
         ),
         array(
+          'title' => 'Definice parametrů',
+          'type' => 'textarea',
+          'desc_tip' => 'Upřesněte nastavení parametrů',
+          'css' => 'width: 40%; height: 85px;',
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_params'
+        ),
+        array(
           'type' => 'sectionend',
-          'id' => 'wc_ceske_sluzby_xml_feed_heureka_title'
+          'id' => 'wc_ceske_sluzby_xml_feed_heureka_nastaveni_title'
         ),
         array(
           'title' => 'Zbozi.cz',
           'type' => 'title',
-          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=zbozi">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/zbozi.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/">zde</a>. Základní nastavení je stejné jako pro Heureka.cz.',
           'id' => 'wc_ceske_sluzby_xml_feed_zbozi_title'
         ),
         array(
@@ -670,6 +959,23 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_xml_feed_pricemania_title'
         ),
         array(
+          'title' => 'Glami.cz (.sk)',
+          'type' => 'title',
+          'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=glami">zde</a>. Pro větší eshopy je ale vhodná spíše varianta v podobě <a href="' . WP_CONTENT_URL . '/glami.xml">souboru</a>, který je aktualizován automaticky jednou denně a v případě velkého množství produktů postupně po částech (1000 produktů). Podrobný manuál naleznete <a href="https://www.' . GLAMI_URL . '/info/feed/" target="_blank">zde</a>.
+                     Automaticky je použito nastavení z ostatních feedů.',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami_title'
+        ),
+        array(
+          'title' => 'Aktivovat feed',
+          'type' => 'checkbox',
+          'desc' => 'Povolí možnost postupného generování .xml souboru pro Glami.cz a zobrazí příslušná nastavení v administraci.',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami-aktivace'
+        ),
+        array(
+          'type' => 'sectionend',
+          'id' => 'wc_ceske_sluzby_xml_feed_glami_title'
+        ),
+        array(
           'title' => 'Google.cz (.sk)',
           'type' => 'title',
           'desc' => 'Průběžně generovaný feed je dostupný <a href="' . site_url() . '/?feed=google">zde</a>. Podrobný manuál naleznete <a href="https://support.google.com/merchants/answer/7052112">zde</a>.
@@ -683,7 +989,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Dodatečné označení produktů',
           'type' => 'title',
-          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="http://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
+          'desc' => 'Produkty je možné rozdělit do speciálních skupin, např. podle prodejnosti, marže, atd (manuál pro <a href="https://napoveda.seznam.cz/cz/zbozi/specifikace-xml-pro-obchody/specifikace-xml-feedu/#CUSTOM_LABEL">Zbozi.cz</a> a <a href="https://support.google.com/merchants/answer/188494?hl=cs#customlabel">Google</a>).
                      Dostupné taxonomie: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'obecne', false ) . '
                      Dostupné vlastnosti v podobě taxonomií: ' . ceske_sluzby_zobrazit_dostupne_taxonomie( 'vlastnosti', false ) . '
                      Podporovány jsou také názvy jednoduchých textových vlastností nebo uživatelských polí.',
@@ -752,8 +1058,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
         array(
           'title' => 'Hodnoty pro dodací dobu',
           'type' => 'textarea',
-          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.',
-          'default' => sprintf( '1|Skladem zítra%1$s3|Dostupné do 3 dnů%1$s7|Na objednávku do týdne', PHP_EOL ),
+          'desc' => 'Na každém řádku musí být uvedena číselná hodnota (počet dnů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu. Příklad:<br>
+                     <code>1|Skladem zítra</code><br>
+                     <code>3|Dostupné do 3 dnů</code><br>
+                     <code>7|Na objednávku do týdne</code><br>
+                     Můžete změnit také základní texty uváděné u produktů skladem (<code>0</code>), na objednávku (<code>98</code>) nebo není skladem (<code>99</code>).',
+          'default' => '',
           'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_hodnoty'
         ),
@@ -790,9 +1100,12 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'title' => 'Intervaly počtu produktů',
           'type' => 'textarea',
           'desc' => 'Na každém řádku musí být uvedena číselná hodnota (dolní hranice počtu produktů) oddělená pomocí znaku <code>|</code> od zobrazovaného textu.
-                     Použít můžete také hodnotu <code>{VALUE}</code>, která zobrazí přesný počet produktů skladem.
+                     Použít můžete také hodnotu <code>{VALUE}</code>, která zobrazí přesný počet produktů skladem. Příklad:<br>
+                     <code>0|Skladem: {VALUE}</code><br>
+                     <code>5|Skladem 5+</code><br>
+                     <code>10|Skladem 10+</code><br>
                      Automaticky je také generována CSS třída ve formátu <code>skladem-{VALUE}</code>.',
-          'default' => sprintf( '0|Skladem: {VALUE}%1$s5|Skladem 5+%1$s10|Skladem 10+', PHP_EOL ),
+          'default' => '',
           'css' => 'width: 40%; height: 85px;',
           'id' => 'wc_ceske_sluzby_dodaci_doba_intervaly'
         ),
@@ -889,7 +1202,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_eet_format',
           'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_format' ),
           'css' => 'width: 300px',
-          'default' => 'no',
+          'default' => '',
           'description' => 'Formát elektronické účtenky.',
         ),
         array(
@@ -898,7 +1211,7 @@ class WC_Settings_Tab_Ceske_Sluzby_Admin {
           'id' => 'wc_ceske_sluzby_eet_podminka',
           'options' => self::moznosti_nastaveni( 'wc_ceske_sluzby_eet_podminka' ),
           'css' => 'width: 300px',
-          'default' => 'no',
+          'default' => '',
           'description' => 'Podmínka pro automatické odeslání elektronické účtenky.',
         ),
         array(

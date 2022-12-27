@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo "= " . $email_heading . " =\n\n";
 
-$objednavka = $order;
-$id_zasilky = get_post_meta( $objednavka->post->ID, '_ceske_sluzby_sledovani_zasilek_id_zasilky', true );
-$dopravce = get_post_meta( $objednavka->post->ID, '_ceske_sluzby_sledovani_zasilek_dopravce', true );
+$order_id = is_callable( array( $order, 'get_id' ) ) ? $order->get_id() : $order->id;
+$id_zasilky = get_post_meta( $order_id, '_ceske_sluzby_sledovani_zasilek_id_zasilky', true );
+$dopravce = get_post_meta( $order_id, '_ceske_sluzby_sledovani_zasilek_dopravce', true );
 $dostupni_dopravci = ceske_sluzby_sledovani_zasilek_dostupni_dopravci();
 if ( ! empty( $id_zasilky ) && ! empty( $dopravce ) ) {
   $odkaz = str_replace( '%ID%', $id_zasilky , $dostupni_dopravci[$dopravce]['url'] );
